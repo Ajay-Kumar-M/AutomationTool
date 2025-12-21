@@ -18,7 +18,7 @@ public class SeleniumDriver implements Driver {
 
     @Override
     public void init(String browser) {
-        if (browser.equalsIgnoreCase("chrome")) {
+        if ((browser.equalsIgnoreCase("chrome"))||(browser.equalsIgnoreCase("chromium"))) {
             driver = new ChromeDriver();
         } else if (browser.equalsIgnoreCase("firefox")) {
             driver = new FirefoxDriver();
@@ -26,6 +26,8 @@ public class SeleniumDriver implements Driver {
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
         driver.manage().window().maximize();
     }
+
+    public WebDriver getDriver() { return driver; }
 
     @Override
         public void execute(Action action) {

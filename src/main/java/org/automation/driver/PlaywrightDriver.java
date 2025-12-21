@@ -29,6 +29,8 @@ public class PlaywrightDriver implements Driver {
         page = context.newPage();
     }
 
+    public Page getPage() { return page; }
+
     @Override
     public void execute(Action action) {
         switch (action.action_type()) {

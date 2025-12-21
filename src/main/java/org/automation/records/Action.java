@@ -7,7 +7,8 @@ public record Action(
         String locator,
         String[] arguments,
         String testcase_id,
-        String expected_result, // e.g., "text:Welcome", "url:https://dashboard", "visible:#logout"
+        String expected_result_Type, // e.g., "text", "url", "visible"
+        String expected_result, // e.g., "Welcome", "https://dashboard", "#logout"
         Map<String,String> additional_data
 ){}
 

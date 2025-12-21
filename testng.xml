@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="All Test Suite" parallel="tests" thread-count="3">
+    <!--test thread-count="5" name="ChromeTest">
+    <parameter name="browser" value="Chrome"></parameter>
+    <classes>
+        <class name="POM.WelcomePageTest"/>
+    </classes>
+</test-->
+    <test thread-count = "5" name="Test">
+        <classes>
+<!--            <class name="grid.TestOne" />-->
+<!--            <class name="grid.TestTwo"/>-->
+        </classes>
+    </test>
+</suite>
+
+        <!--
+        <test thread-count="5" name="ChromeTest">
+                <parameter name="browser" value="Chrome"></parameter>
+                <classes>
+                    <class name="crossbrw.BrowserTest"/>
+                </classes>
+            </test>
+        <test thread-count="5" name="SafariTest">
+        <parameter name="browser" value="Safari"></parameter>
+        <classes>
+            <class name="crossbrw.BrowserTest"/>
+        </classes>
+        </test>
+        -->
+        <!--
+            <test verbose="2" preserve-order="true" name="TestNGTest.java">
+                <classes>
+                    <class name="seleniumtest.SessionHandling"></class>
+                </classes>
+            </test>
+
+
+-->

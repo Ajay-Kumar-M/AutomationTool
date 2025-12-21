@@ -1,0 +1,26 @@
+[
+  {
+    "action_type": "gotoUrl",
+    "locator": null,
+    "arguments": ["https://example.com/login"],
+    "testcase_id": "TC001",
+    "expected_result": "Login page loaded",
+    "additional_data": {"timeout": "30"}
+  },
+  {
+    "action_type": "type",
+    "locator": "#username",
+    "arguments": ["admin"],
+    "testcase_id": "TC001",
+    "expected_result": "Username entered"
+  },
+  {
+    "action_type": "type",
+    "locator": "#password",
+    "arguments": ["secret123"]
+  },
+  {
+    "action_type": "click",
+    "locator": "button[type=submit]"
+  }
+]

@@ -2,13 +2,13 @@ package org.automation.driver;
 
 import com.microsoft.playwright.*;
 import org.automation.records.Action;
-import org.openqa.selenium.By;
 
 public class PlaywrightDriver implements Driver {
     private Browser browser;
     private BrowserContext context;
     private Page page;
     private String browserType = "chromium";
+    private Playwright playwright;
 
 //    public PlaywrightDriver() {
 //        Playwright playwright = Playwright.create();
@@ -18,7 +18,7 @@ public class PlaywrightDriver implements Driver {
 
     @Override
     public void init(String browserName) {
-        Playwright playwright = Playwright.create();
+        playwright = Playwright.create();
         if (browserName.equalsIgnoreCase("chrome") || browserName.equalsIgnoreCase("chromium")) {
             browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
                     .setHeadless(false)
@@ -27,12 +27,12 @@ public class PlaywrightDriver implements Driver {
         } else if (browserName.equalsIgnoreCase("firefox")) {
             browser = playwright.firefox().launch(new BrowserType.LaunchOptions()
                     .setHeadless(false)
-                    .setSlowMo(100) // 1 second delay after every action
+                    .setSlowMo(100) // 100 MS delay after every action
             );
         } else if (browserName.equalsIgnoreCase("webkit")) {
             browser = playwright.webkit().launch(new BrowserType.LaunchOptions()
                     .setHeadless(false)
-                    .setSlowMo(100) // 1 second delay after every action
+                    .setSlowMo(100) // 100 MS delay after every action
             );
         }
         context = browser.newContext();
@@ -73,8 +73,8 @@ public class PlaywrightDriver implements Driver {
 
     void wait(Action action){
         try {
+            page.waitForTimeout(Double.parseDouble(getArg(action, 0)));
             Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
-            //page.waitForTimeout(Double.parseDouble(getArg(action, 0)));
         }
         catch (Exception e) { throw new RuntimeException(e); }
     }
@@ -101,8 +101,10 @@ public class PlaywrightDriver implements Driver {
     }
 
     public void close() {
+        if (page != null) page.close();
         if (context != null) context.close();
         if (browser != null) browser.close();
+        if (playwright != null) playwright.close();
     }
 
     private String parseLocator(String locator) {

@@ -30,82 +30,90 @@ public class SeleniumDriver implements Driver {
     public WebDriver getDriver() { return driver; }
 
     @Override
-        public void execute(Action action) {
-            switch (action.action_type()) {
-                case "gotoUrl" -> gotoUrl(action);
-                case "type" -> type(action);
-                case "click" -> click(action);
-                case "clear" -> clear(action);
-                case "wait" -> waitForSeconds(action);
-                // Add more as needed
-                default -> throw new IllegalArgumentException("Unknown action: " + action.action_type());
-            }
-        }
-
-        private void gotoUrl(Action action) {
-            String url = getArg(action, 0);
-            driver.get(url);
-        }
-
-        private void type(Action action) {
-            By locator = parseLocator(action.locator());
-            String text = getArg(action, 0);
-            driver.findElement(locator).clear();
-            driver.findElement(locator).sendKeys(text);
-        }
-
-        private void click(Action action) {
-            By by = parseLocator(action.locator());
-            driver.findElement(by).click();
-        }
-
-        private void clear(Action action) {
-            By by = parseLocator(action.locator());
-            driver.findElement(by).clear();
-        }
-
-        private void waitForSeconds(Action action) {
-            try {
-                Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private String getArg(Action action, int index) {
-            if (action.arguments() == null || action.arguments().length <= index) {
-                throw new IllegalArgumentException("Missing argument " + index + " for " + action.action_type());
-            }
-            return action.arguments()[index];
-        }
-
-        public String getText(String locator) {
-            By by = parseLocator(locator);
-            return driver.findElement(by).getText();
-        }
-
-        public boolean isElementPresent(String locator) {
-            try {
-                By by = parseLocator(locator);
-                driver.findElement(by);
-                return true;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-
-        private By parseLocator(String locator) {
-            if (locator.startsWith("xpath:")) {
-                return By.xpath(locator.replace("xpath:", ""));
-            } else if (locator.startsWith("css:")) {
-                return By.cssSelector(locator.replace("css:", ""));
-            } else if (locator.startsWith("id:")) {
-                return By.id(locator.replace("id:", ""));
-            }
-            return By.xpath(locator);
-        }
-
-        public void close() {
-            if (driver != null) driver.quit();
+    public void execute(Action action) {
+        switch (action.action_type()) {
+            case "gotoUrl" -> gotoUrl(action);
+            case "type" -> type(action);
+            case "click" -> click(action);
+            case "clear" -> clear(action);
+            case "wait" -> waitForSeconds(action);
+            // Add more as needed
+            default -> throw new IllegalArgumentException("Unknown action: " + action.action_type());
         }
     }
+
+    private void gotoUrl(Action action) {
+        String url = getArg(action, 0);
+        driver.get(url);
+    }
+
+    private void type(Action action) {
+        By locator = parseLocator(action.locator());
+        String text = getArg(action, 0);
+        driver.findElement(locator).clear();
+        driver.findElement(locator).sendKeys(text);
+    }
+
+    private void click(Action action) {
+        By by = parseLocator(action.locator());
+        driver.findElement(by).click();
+    }
+
+    private void clear(Action action) {
+        By by = parseLocator(action.locator());
+        driver.findElement(by).clear();
+    }
+
+    private void waitForSeconds(Action action) {
+        try {
+            Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String getArg(Action action, int index) {
+        if (action.arguments() == null || action.arguments().length <= index) {
+            throw new IllegalArgumentException("Missing argument " + index + " for " + action.action_type());
+        }
+        return action.arguments()[index];
+    }
+
+    public String getText(String locator) {
+        By by = parseLocator(locator);
+        return driver.findElement(by).getText();
+    }
+
+    public boolean isElementPresent(String locator) {
+        try {
+            By by = parseLocator(locator);
+            driver.findElement(by);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private By parseLocator(String locator) {
+        if ((locator.startsWith("xpath:"))||(locator.startsWith("/"))||(locator.startsWith("//"))) {
+            return By.xpath(locator.replace("xpath:", ""));
+        } else if ((locator.startsWith("css:"))||(locator.startsWith("#"))||(locator.startsWith("."))) {
+            return By.cssSelector(locator.replace("css:", ""));
+        } else if (locator.startsWith("id:")) {
+            return By.id(locator.replace("id:", ""));
+        } else if (locator.startsWith("name:")) {
+            return By.name(locator.replace("name:", ""));
+        } else if (locator.startsWith("className:")) {
+            return By.className(locator.replace("className:", ""));
+        } else if (locator.startsWith("tagName:")) {
+            return By.tagName(locator.replace("tagName:", ""));
+        } else if (locator.startsWith("linkText:")) {
+            return By.linkText(locator.replace("linkText:", ""));
+        }
+        return By.cssSelector(locator);
+    }
+
+    public void close() {
+        if (driver != null) driver.quit();
+    }
+}

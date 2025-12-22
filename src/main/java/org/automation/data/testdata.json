@@ -2,7 +2,7 @@
   {
     "action_type": "gotoUrl",
     "locator": null,
-    "arguments": ["https://example.com/login"],
+    "arguments": ["https://www.selenium.dev/selenium/web/fedcm/signin.html"],
     "testcase_id": "TC001",
     "expected_result": "Login page loaded",
     "additional_data": {"timeout": "30"}
@@ -17,10 +17,18 @@
   {
     "action_type": "type",
     "locator": "#password",
-    "arguments": ["secret123"]
+    "arguments": ["secret123"],
+    "testcase_id": "TC001"
   },
   {
     "action_type": "click",
-    "locator": "button[type=submit]"
+    "locator": "button[type=submit]",
+    "testcase_id": "TC001"
+  },
+  {
+    "action_type": "wait",
+    "locator": null,
+    "testcase_id": "TC001",
+    "arguments": ["10"]
   }
 ]

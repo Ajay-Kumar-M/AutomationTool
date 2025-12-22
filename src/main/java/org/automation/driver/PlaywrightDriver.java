@@ -2,6 +2,7 @@ package org.automation.driver;
 
 import com.microsoft.playwright.*;
 import org.automation.records.Action;
+import org.openqa.selenium.By;
 
 public class PlaywrightDriver implements Driver {
     private Browser browser;
@@ -19,11 +20,20 @@ public class PlaywrightDriver implements Driver {
     public void init(String browserName) {
         Playwright playwright = Playwright.create();
         if (browserName.equalsIgnoreCase("chrome") || browserName.equalsIgnoreCase("chromium")) {
-            browser = playwright.chromium().launch();
+            browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+                    .setHeadless(false)
+                    .setSlowMo(100) // 100 MS delay after every action
+            );
         } else if (browserName.equalsIgnoreCase("firefox")) {
-            browser = playwright.firefox().launch();
+            browser = playwright.firefox().launch(new BrowserType.LaunchOptions()
+                    .setHeadless(false)
+                    .setSlowMo(100) // 1 second delay after every action
+            );
         } else if (browserName.equalsIgnoreCase("webkit")) {
-            browser = playwright.webkit().launch();
+            browser = playwright.webkit().launch(new BrowserType.LaunchOptions()
+                    .setHeadless(false)
+                    .setSlowMo(100) // 1 second delay after every action
+            );
         }
         context = browser.newContext();
         page = context.newPage();
@@ -62,7 +72,10 @@ public class PlaywrightDriver implements Driver {
     }
 
     void wait(Action action){
-        try { Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000); }
+        try {
+            Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
+            //page.waitForTimeout(Double.parseDouble(getArg(action, 0)));
+        }
         catch (Exception e) { throw new RuntimeException(e); }
     }
 
@@ -99,6 +112,14 @@ public class PlaywrightDriver implements Driver {
             return locator.replace("css:", "");
         } else if (locator.startsWith("id:")) {
             return "#" + locator.replace("id:", "");
+        } else if (locator.startsWith("name:")) {
+            return locator.replace("name:", "");
+        } else if (locator.startsWith("className:")) {
+            return "." + locator.replace("className:", "");
+        } else if (locator.startsWith("tagName:")) {
+            return locator.replace("tagName:", "");
+        } else if (locator.startsWith("linkText:")) {
+            return locator.replace("linkText:", "");
         }
         return locator;
     }

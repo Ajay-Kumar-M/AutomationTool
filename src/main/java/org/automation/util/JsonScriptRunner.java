@@ -3,6 +3,8 @@ package org.automation.util;
 import org.automation.driver.BrowserConfig;
 import org.automation.driver.Driver;
 import org.automation.records.Action;
+import org.automation.records.ExpectedResultData;
+import org.automation.records.RecordQueueManager;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -40,6 +42,7 @@ public class JsonScriptRunner {
 
     public static void main(String[] args) throws Exception {
         Driver browser = BrowserConfig.getBrowserActions();
+        RecordQueueManager queueManager = RecordQueueManager.getInstance();
 
         JsonScriptRunner runner = new JsonScriptRunner(browser);
         runner.runFromJson("src/main/java/org/automation/data/TC002.json");

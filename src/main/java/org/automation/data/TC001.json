@@ -29,6 +29,6 @@
     "action_type": "wait",
     "locator": null,
     "testcase_id": "TC001",
-    "arguments": ["10"]
+    "arguments": ["5"]
   }
 ]

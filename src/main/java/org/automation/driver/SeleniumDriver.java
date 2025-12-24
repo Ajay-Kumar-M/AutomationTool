@@ -4,12 +4,19 @@ import org.automation.records.Action;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
+
+import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class SeleniumDriver implements Driver {
     private WebDriver driver;
     private long implicitWait = 10;
+    private long explicitWait = 5;
 
 //    public SeleniumDriver() {
 //        driver = new ChromeDriver();
@@ -36,35 +43,40 @@ public class SeleniumDriver implements Driver {
             case "type" -> type(action);
             case "click" -> click(action);
             case "clear" -> clear(action);
-            case "wait" -> waitForSeconds(action);
-            // Add more as needed
+            case "wait" -> wait(action);
+            case "assertVisible" -> assertVisible(action);
             default -> throw new IllegalArgumentException("Unknown action: " + action.action_type());
         }
     }
 
-    private void gotoUrl(Action action) {
+    @Override
+    public String getText(Action action) {
+        return "";
+    }
+
+    public void gotoUrl(Action action) {
         String url = getArg(action, 0);
         driver.get(url);
     }
 
-    private void type(Action action) {
+    public void type(Action action) {
         By locator = parseLocator(action.locator());
         String text = getArg(action, 0);
         driver.findElement(locator).clear();
         driver.findElement(locator).sendKeys(text);
     }
 
-    private void click(Action action) {
+    public void click(Action action) {
         By by = parseLocator(action.locator());
         driver.findElement(by).click();
     }
 
-    private void clear(Action action) {
+    public void clear(Action action) {
         By by = parseLocator(action.locator());
         driver.findElement(by).clear();
     }
 
-    private void waitForSeconds(Action action) {
+    public void wait(Action action) {
         try {
             Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
         } catch (Exception e) {
@@ -72,7 +84,7 @@ public class SeleniumDriver implements Driver {
         }
     }
 
-    private String getArg(Action action, int index) {
+    String getArg(Action action, int index) {
         if (action.arguments() == null || action.arguments().length <= index) {
             throw new IllegalArgumentException("Missing argument " + index + " for " + action.action_type());
         }
@@ -111,6 +123,19 @@ public class SeleniumDriver implements Driver {
             return By.linkText(locator.replace("linkText:", ""));
         }
         return By.cssSelector(locator);
+    }
+
+    public void assertVisible(Action action) {
+        try {
+            By locator = parseLocator(action.locator());
+//            WebElement element = driver.findElement(locator);
+            WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                    .until(ExpectedConditions.presenceOfElementLocated(locator));
+            assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
+        } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
+            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            throw new RuntimeException("Element with xpath '" + action.locator() + "' was not visible within " + explicitWait + " seconds", e);
+        }
     }
 
     public void close() {

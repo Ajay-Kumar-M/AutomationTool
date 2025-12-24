@@ -8,5 +8,6 @@ public interface Driver {
 //    void type(String locator, String text);
 //    void click(String locator);
     void execute(Action action);
+    String getText(Action action);
     void close();
 }

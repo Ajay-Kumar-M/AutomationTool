@@ -1,0 +1,21 @@
+[
+  {
+    "action_type": "gotoUrl",
+    "locator": null,
+    "arguments": ["https://www.selenium.dev/selenium/web/hidden.html"],
+    "testcase_id": "TC002",
+    "expected_result": "Login page loaded",
+    "additional_data": {"timeout": "30"}
+  },
+  {
+    "action_type": "assertVisible",
+    "locator": "//div[@id='singleHidden']",
+    "testcase_id": "TC002"
+  },
+  {
+    "action_type": "wait",
+    "locator": null,
+    "testcase_id": "TC002",
+    "arguments": ["5"]
+  }
+]

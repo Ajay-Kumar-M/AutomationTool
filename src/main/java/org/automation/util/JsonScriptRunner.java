@@ -6,6 +6,7 @@ import org.automation.records.Action;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.*;
 import java.util.List;
 
@@ -24,7 +25,15 @@ public class JsonScriptRunner {
 
         for (Action action : actions) {
             System.out.println("Executing: " + action.action_type() + " | TestCase: " + action.testcase_id());
-            driver.execute(action);
+            try {
+//                driver.execute(action);
+                driver.getClass().getMethod(action.action_type(), Action.class).invoke(driver,action);
+            } catch (InvocationTargetException e) {
+                Throwable original = e.getCause();
+                original.printStackTrace();
+                System.out.println("\nPrinting message " + original.getMessage());
+                // handle logging / recovery / reporting
+            }
             // Optional: validate expected_result, take screenshot, etc.
         }
     }
@@ -33,7 +42,7 @@ public class JsonScriptRunner {
         Driver browser = BrowserConfig.getBrowserActions();
 
         JsonScriptRunner runner = new JsonScriptRunner(browser);
-        runner.runFromJson("src/main/java/org/automation/data/testdata.json");
+        runner.runFromJson("src/main/java/org/automation/data/TC002.json");
 
         browser.close();
     }

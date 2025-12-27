@@ -3,13 +3,13 @@ package org.automation.records;
 import java.util.Map;
 
 public record Action(
-        String action_type,
+        String actionType,
         String locator,
         String[] arguments,
-        String testcase_id,
-        String expected_result_Type, // e.g., "text", "url", "visible"
-        String expected_result, // e.g., "Welcome", "https://dashboard", "#logout"
-        Map<String,String> additional_data
+        String testcaseId,
+        String expectedResultType, // e.g., "text", "url", "visible"
+        String expectedResult, // e.g., "Welcome", "https://dashboard", "#logout"
+        Map<String,String> additionalData
 ){}
 
 /*

@@ -48,36 +48,36 @@ public class PlaywrightDriver implements Driver {
 
     @Override
     public void execute(Action action) {
-        switch (action.action_type()) {
+        switch (action.actionType()) {
             case "gotoUrl" -> gotoUrl(action);
             case "type" -> type(action);
             case "click" -> click(action);
             case "clear" -> clear(action);
             case "wait" -> wait(action);
             case "assertVisible" -> assertVisible(action);
-            default -> throw new IllegalArgumentException("Unknown action: " + action.action_type());
+            default -> throw new IllegalArgumentException("Unknown action: " + action.actionType());
         }
     }
 
-    void gotoUrl(Action action){
+    public void gotoUrl(Action action){
         page.navigate(getArg(action, 0));
     }
 
-    void type(Action action){
+    public void type(Action action){
         String selector = parseLocator(action.locator());
         page.fill(selector, getArg(action, 0));
     }
 
-    void click(Action action){
+    public void click(Action action){
         String selector = parseLocator(action.locator());
         page.click(selector);
     }
 
-    void clear(Action action){
+    public void clear(Action action){
         page.fill(action.locator(), "");
     }
 
-    void wait(Action action){
+    public void wait(Action action){
         try {
             page.waitForTimeout(Double.parseDouble(getArg(action, 0)));
             Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);

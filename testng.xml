@@ -9,7 +9,7 @@
 </test-->
     <test thread-count = "5" name="Test">
         <classes>
-<!--            <class name="grid.TestOne" />-->
+            <class name="TestLogin" />
 <!--            <class name="grid.TestTwo"/>-->
         </classes>
     </test>

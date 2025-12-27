@@ -1,34 +1,34 @@
 [
   {
-    "action_type": "gotoUrl",
+    "actionType": "gotoUrl",
     "locator": null,
     "arguments": ["https://www.selenium.dev/selenium/web/fedcm/signin.html"],
-    "testcase_id": "TC001",
-    "expected_result": "Login page loaded",
-    "additional_data": {"timeout": "30"}
+    "testcaseId": "TC001",
+    "expectedResult": "Login page loaded",
+    "additionalData": {"timeout": "30"}
   },
   {
-    "action_type": "type",
+    "actionType": "type",
     "locator": "#username",
     "arguments": ["admin"],
-    "testcase_id": "TC001",
-    "expected_result": "Username entered"
+    "testcaseId": "TC001",
+    "expectedResult": "Username entered"
   },
   {
-    "action_type": "type",
+    "actionType": "type",
     "locator": "#password",
     "arguments": ["secret123"],
-    "testcase_id": "TC001"
+    "testcaseId": "TC001"
   },
   {
-    "action_type": "click",
+    "actionType": "click",
     "locator": "button[type=submit]",
-    "testcase_id": "TC001"
+    "testcaseId": "TC001"
   },
   {
-    "action_type": "wait",
+    "actionType": "wait",
     "locator": null,
-    "testcase_id": "TC001",
+    "testcaseId": "TC001",
     "arguments": ["5"]
   }
 ]

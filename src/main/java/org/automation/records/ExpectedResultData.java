@@ -4,6 +4,9 @@ import java.util.Map;
 
 public record ExpectedResultData(
         String testcaseId,
-        String resultMessage, // e.g., "Welcome", "https://dashboard", "#logout"
+        String actionType,
+        String locator,
+        String status,
+        String resultMessage,
         String[] additionalData
 ){}

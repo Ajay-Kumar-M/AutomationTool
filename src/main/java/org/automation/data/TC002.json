@@ -1,21 +1,21 @@
 [
   {
-    "action_type": "gotoUrl",
+    "actionType": "gotoUrl",
     "locator": null,
     "arguments": ["https://www.selenium.dev/selenium/web/hidden.html"],
-    "testcase_id": "TC002",
-    "expected_result": "Login page loaded",
-    "additional_data": {"timeout": "30"}
+    "testcaseId": "TC002",
+    "expectedResult": "Login page loaded",
+    "additionalData": {"timeout": "30"}
   },
   {
-    "action_type": "assertVisible",
+    "actionType": "assertVisible",
     "locator": "//div[@id='singleHidden']",
-    "testcase_id": "TC002"
+    "testcaseId": "TC002"
   },
   {
-    "action_type": "wait",
+    "actionType": "wait",
     "locator": null,
-    "testcase_id": "TC002",
+    "testcaseId": "TC002",
     "arguments": ["5"]
   }
 ]

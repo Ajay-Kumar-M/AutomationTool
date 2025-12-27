@@ -1,6 +1,7 @@
 package org.automation.driver;
 
 import org.automation.records.Action;
+import org.automation.util.ScreenshotManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -38,14 +39,14 @@ public class SeleniumDriver implements Driver {
 
     @Override
     public void execute(Action action) {
-        switch (action.action_type()) {
+        switch (action.actionType()) {
             case "gotoUrl" -> gotoUrl(action);
             case "type" -> type(action);
             case "click" -> click(action);
             case "clear" -> clear(action);
             case "wait" -> wait(action);
             case "assertVisible" -> assertVisible(action);
-            default -> throw new IllegalArgumentException("Unknown action: " + action.action_type());
+            default -> throw new IllegalArgumentException("Unknown action: " + action.actionType());
         }
     }
 
@@ -57,6 +58,8 @@ public class SeleniumDriver implements Driver {
     public void gotoUrl(Action action) {
         String url = getArg(action, 0);
         driver.get(url);
+        ScreenshotManager.takeScreenshot(driver, "gotoUrl", action.testcaseId());
+
     }
 
     public void type(Action action) {
@@ -64,21 +67,25 @@ public class SeleniumDriver implements Driver {
         String text = getArg(action, 0);
         driver.findElement(locator).clear();
         driver.findElement(locator).sendKeys(text);
+        ScreenshotManager.takeScreenshot(driver, "type", action.testcaseId());
     }
 
     public void click(Action action) {
         By by = parseLocator(action.locator());
         driver.findElement(by).click();
+        ScreenshotManager.takeScreenshot(driver, "click", action.testcaseId());
     }
 
     public void clear(Action action) {
         By by = parseLocator(action.locator());
         driver.findElement(by).clear();
+        ScreenshotManager.takeScreenshot(driver, "clear", action.testcaseId());
     }
 
     public void wait(Action action) {
         try {
             Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
+            ScreenshotManager.takeScreenshot(driver, "wait", action.testcaseId());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -86,7 +93,7 @@ public class SeleniumDriver implements Driver {
 
     String getArg(Action action, int index) {
         if (action.arguments() == null || action.arguments().length <= index) {
-            throw new IllegalArgumentException("Missing argument " + index + " for " + action.action_type());
+            throw new IllegalArgumentException("Missing argument " + index + " for " + action.actionType());
         }
         return action.arguments()[index];
     }
@@ -132,6 +139,7 @@ public class SeleniumDriver implements Driver {
             WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
                     .until(ExpectedConditions.presenceOfElementLocated(locator));
             assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
+            ScreenshotManager.takeScreenshot(driver, "assertVisible", action.testcaseId());
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
             System.out.println("\ncatch called " + e + ". message " + e.getMessage());
             throw new RuntimeException("Element with xpath '" + action.locator() + "' was not visible within " + explicitWait + " seconds", e);

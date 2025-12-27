@@ -47,7 +47,7 @@ import org.automation.records.ExpectedResultData;
 public class RecordQueueManager {
     private static final Logger logger = LoggerFactory.getLogger(RecordQueueManager.class);
     private static final int SCHEDULED_FLUSH_INTERVAL_MINUTES = 3;
-    private static final String DEFAULT_OUTPUT_DIR = "./result";
+    private static final String DEFAULT_OUTPUT_DIR = "result";
     private static final String FILE_EXTENSION = ".json";
 
     private static RecordQueueManager instance;
@@ -146,9 +146,9 @@ public class RecordQueueManager {
         if (isShutdown) {
             throw new IllegalStateException("RecordQueueManager is shut down");
         }
-        if (recordIdExtractor == null) {
-            throw new IllegalStateException("RecordIdExtractor must be set before adding records");
-        }
+//        if (recordIdExtractor == null) {
+//            throw new IllegalStateException("RecordIdExtractor must be set before adding records");
+//        }
         queue.offer(record);
         logger.debug("Record added to queue. Queue size: {}", queue.size());
     }
@@ -186,9 +186,9 @@ public class RecordQueueManager {
             isShutdown = true;
 
             // Final flush before shutdown
-            if (!queue.isEmpty()) {
-                performFlush();
-            }
+//            if (!queue.isEmpty()) {
+//                performFlush();
+//            }
 
             // Shutdown file write executor (wait for pending writes)
             fileWriteExecutor.shutdown();
@@ -259,9 +259,8 @@ public class RecordQueueManager {
 //            }
 
             // Submit async file write task
-            fileWriteExecutor.submit(() -> writeRecordsToFile());
+            fileWriteExecutor.submit(this::writeRecordsToFile);
             logger.info("Submitted {} records to async file writer", queue.size());
-            queue.clear();
 
         } catch (Exception e) {
             logger.error("Error during queue flush", e);
@@ -323,7 +322,8 @@ public class RecordQueueManager {
                 return;
             }
 
-            String filename = recordId + FILE_EXTENSION;
+            Files.createDirectories(Paths.get(DEFAULT_OUTPUT_DIR+"/"+recordId));
+            String filename = recordId + "/" + recordId + "Result" + FILE_EXTENSION;
             Path filePath = outputPath.resolve(filename);
             String jsonContent = objectMapper.writeValueAsString(queue);
             System.out.println(jsonContent);
@@ -335,6 +335,7 @@ public class RecordQueueManager {
                     StandardOpenOption.APPEND
             );
             logger.info("Successfully wrote {} total records to file: {}", queue.size(), filename);
+            queue.clear();
         } catch (Exception e) {
             logger.error("Error writing records to file", e);
         }

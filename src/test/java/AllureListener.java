@@ -1,16 +1,24 @@
 import com.microsoft.playwright.Page;
+import io.qameta.allure.Attachment;
+import org.automation.driver.Driver;
 import org.automation.util.ScreenshotManager;
-import io.qameta.allure.Allure;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+
+import java.util.Map;
 
 /**
  * TestNG Listener for automatic screenshot capture on test failures
  * and detailed Allure reporting
  */
 public class AllureListener implements ITestListener {
+
+    @Attachment(value = "Execution Report", type = "text/plain")
+    public static String attachExecutionReport(String report) {
+        return report;
+    }
 
     @Override
     public void onTestStart(ITestResult result) {
@@ -22,76 +30,48 @@ public class AllureListener implements ITestListener {
 
     @Override
     public void onTestSuccess(ITestResult result) {
-        System.out.println("✓ TEST PASSED: " + result.getMethod().getMethodName());
-        ITestContext context = result.getTestContext();
-        // ✓ Retrieve testcaseID and driver from context
-        String testcaseID = (String) context.getAttribute("testcaseID");
-        Boolean isWebdriver = (Boolean) context.getAttribute("isWebdriver");
-        System.out.println("✓ TESTCaseID: " + testcaseID);
-        if (isWebdriver) {
-            WebDriver webDriver = (WebDriver) context.getAttribute("webdriver");
-            System.out.println("webdriver: " + webDriver);
-            String screenshotPath = ScreenshotManager.takeScreenshot(
-                    webDriver,
-                    "TestPassed_" + result.getMethod().getMethodName(),
-                    testcaseID
+        try {
+            System.out.println("✓ TEST PASSED: " + result.getMethod().getMethodName());
+            ITestContext context = result.getTestContext();
+            Map<String, Object> state = (Map<String, Object>) context.getAttribute("executionState");
+            long duration = System.currentTimeMillis() - (long) state.get("startTime");
+            String report = String.format(
+                    "Test Passed\nDuration: %dms",
+                    duration
             );
-        } else {
-            Page pageDriver = (Page) context.getAttribute("pagedriver");
-            System.out.println("pageDriver: " + pageDriver);
-            String screenshotPath = ScreenshotManager.takeScreenshot(
-                    pageDriver,
-                    "TestPassed_" + result.getMethod().getMethodName(),
-                    testcaseID
-            );
+            attachExecutionReport(report);
+//            String testCaseID = Driver.getTestCaseID();
+            String testcaseID = (String) context.getAttribute("testcaseID");
+            System.out.println("✓ TESTCaseID: " + testcaseID);
+            System.out.println("Screenshot saved to: " + ScreenshotManager.getScreenshotDirectory());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
         }
-        System.out.println("Screenshot saved to: " + ScreenshotManager.getScreenshotDirectory());
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
-        System.out.println("✗ TEST FAILED: " + result.getMethod().getMethodName());
-        ITestContext context = result.getTestContext();
-        // ✓ Retrieve testcaseID and driver from context
-        String testcaseID = (String) context.getAttribute("testcaseID");
-        Boolean isWebdriver = (Boolean) context.getAttribute("isWebdriver");
-        System.out.println("✗ TESTCaseID: " + testcaseID);
-        if (isWebdriver) {
-            WebDriver webDriver = (WebDriver) context.getAttribute("webdriver");
-            System.out.println("webdriver: " + webDriver);
-            String screenshotPath = ScreenshotManager.takeScreenshot(
-                    webDriver,
-                    "TestFailed_" + result.getMethod().getMethodName(),
-                    testcaseID
+        try {
+            System.out.println("✗ TEST FAILED: " + result.getMethod().getMethodName());
+            ITestContext context = result.getTestContext();
+            Map<String, Object> state = (Map<String, Object>) context.getAttribute("executionState");
+            long duration = System.currentTimeMillis() - (long) state.get("startTime");
+            String report = String.format(
+                    "Test Failed\nReason: %s\nDuration: %dms",
+                    result.getThrowable().getMessage(),
+                    duration
             );
-
-            // Add failure details to Allure
-            if (result.getThrowable() != null) {
-                Allure.addAttachment(
-                        "Failure Reason",
-                        "text/plain",
-                        result.getThrowable().getMessage()
-                );
-            }
-        } else {
-            Page pageDriver = (Page) context.getAttribute("pagedriver");
-            System.out.println("pageDriver: " + pageDriver);
-            String screenshotPath = ScreenshotManager.takeScreenshot(
-                    pageDriver,
-                    "TestFailed_" + result.getMethod().getMethodName(),
-                    testcaseID
-            );
-
-            // Add failure details to Allure
-            if (result.getThrowable() != null) {
-                Allure.addAttachment(
-                        "Failure Reason",
-                        "text/plain",
-                        result.getThrowable().getMessage()
-                );
-            }
+            attachExecutionReport(report);
+            String testCaseID = Driver.getTestCaseID();
+            // ✓ Retrieve testcaseID and driver from context
+            String testcaseID = (String) context.getAttribute("testcaseID");
+//            Boolean isWebdriver = (Boolean) context.getAttribute("isWebdriver");
+            System.out.println("✗ TESTCaseID: " + testcaseID);
+            System.out.println("Screenshot saved to: " + ScreenshotManager.getScreenshotDirectory());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        System.out.println("Screenshot saved to: " + ScreenshotManager.getScreenshotDirectory());
     }
 
     @Override
@@ -173,3 +153,62 @@ public class AllureListener implements ITestListener {
         return null;
     }
 }
+
+/*
+        if (isWebdriver) {
+            WebDriver webDriver = (WebDriver) context.getAttribute("webdriver");
+            System.out.println("webdriver: " + webDriver);
+//            String screenshotPath = ScreenshotManager.takeScreenshot(
+//                    webDriver,
+//                    "TestPassed_" + result.getMethod().getMethodName(),
+//                    testcaseID
+//            );
+        } else {
+            Page pageDriver = (Page) context.getAttribute("pagedriver");
+            System.out.println("pageDriver: " + pageDriver);
+            String screenshotPath = ScreenshotManager.takeScreenshot(
+                    pageDriver,
+                    "TestPassed_" + result.getMethod().getMethodName(),
+                    testcaseID
+            );
+        }
+
+
+
+        if (isWebdriver) {
+            WebDriver webDriver = (WebDriver) context.getAttribute("webdriver");
+            System.out.println("webdriver: " + webDriver);
+            String screenshotPath = ScreenshotManager.takeScreenshot(
+                    webDriver,
+                    "TestFailed_" + result.getMethod().getMethodName(),
+                    testcaseID
+            );
+
+            // Add failure details to Allure
+            if (result.getThrowable() != null) {
+                Allure.addAttachment(
+                        "Failure Reason",
+                        "text/plain",
+                        result.getThrowable().getMessage()
+                );
+            }
+        } else {
+            Page pageDriver = (Page) context.getAttribute("pagedriver");
+            System.out.println("pageDriver: " + pageDriver);
+            String screenshotPath = ScreenshotManager.takeScreenshot(
+                    pageDriver,
+                    "TestFailed_" + result.getMethod().getMethodName(),
+                    testcaseID
+            );
+
+            // Add failure details to Allure
+            if (result.getThrowable() != null) {
+                Allure.addAttachment(
+                        "Failure Reason",
+                        "text/plain",
+                        result.getThrowable().getMessage()
+                );
+            }
+        }
+
+ */

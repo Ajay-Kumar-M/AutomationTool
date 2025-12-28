@@ -46,12 +46,9 @@ public class JsonScriptRunner {
     public void run(Driver browser, String filePath) throws Exception {
         this.driver = browser;
         runFromJson(filePath);
-
-        // Automatic flush at 5-min intervals OR
         queueManager.flushNow(); // Manual trigger
         // App shutdown
 //        queueManager.shutdown();
-
     }
 
     public static void main(String[] args) throws Exception {

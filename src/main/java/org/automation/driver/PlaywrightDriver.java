@@ -2,7 +2,9 @@ package org.automation.driver;
 
 import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
+import io.qameta.allure.Step;
 import org.automation.records.Action;
+import org.automation.util.ScreenshotManager;
 
 import java.util.regex.Pattern;
 
@@ -59,8 +61,10 @@ public class PlaywrightDriver implements Driver {
         }
     }
 
+    @Step("Navigate to URL")
     public void gotoUrl(Action action){
         page.navigate(getArg(action, 0));
+        ScreenshotManager.takeScreenshot(page,action.actionType(),action.testcaseId());
     }
 
     public void type(Action action){

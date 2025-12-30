@@ -1,6 +1,5 @@
 package org.automation.driver;
 
-import io.qameta.allure.Allure;
 import io.qameta.allure.Step;
 import org.automation.records.Action;
 import org.automation.util.ScreenshotManager;
@@ -12,7 +11,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -65,7 +63,7 @@ public class SeleniumDriver implements Driver {
         ScreenshotManager.takeScreenshot(driver, "gotoUrl", action.testcaseId());
     }
 
-    @Step("Type")
+    @Step("Type in element")
     public void type(Action action) {
         By locator = parseLocator(action.locator());
         String text = getArg(action, 0);
@@ -74,21 +72,21 @@ public class SeleniumDriver implements Driver {
         ScreenshotManager.takeScreenshot(driver, "type", action.testcaseId());
     }
 
-    @Step("Click")
+    @Step("Click element")
     public void click(Action action) {
         By by = parseLocator(action.locator());
         driver.findElement(by).click();
         ScreenshotManager.takeScreenshot(driver, "click", action.testcaseId());
     }
 
-    @Step("Clear")
+    @Step("Clear element")
     public void clear(Action action) {
         By by = parseLocator(action.locator());
         driver.findElement(by).clear();
         ScreenshotManager.takeScreenshot(driver, "clear", action.testcaseId());
     }
 
-    @Step("Wait")
+    @Step("Wait for Sec")
     public void wait(Action action) {
         try {
             Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);

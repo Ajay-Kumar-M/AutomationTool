@@ -1,11 +1,11 @@
 import io.qameta.allure.*;
+import net.sf.jasperreports.engine.JRException;
 import org.automation.driver.BrowserConfig;
 import org.automation.driver.Driver;
-import org.automation.driver.PlaywrightDriver;
-import org.automation.driver.SeleniumDriver;
 import org.automation.records.Action;
 import org.automation.util.JsonScriptRunner;
 import org.automation.util.ScreenshotManager;
+import org.automation.util.TestReportGenerator;
 import org.testng.ITestContext;
 import org.testng.annotations.*;
 import tools.jackson.core.type.TypeReference;
@@ -70,28 +70,33 @@ public class TestLogin {
         JsonScriptRunner runner = new JsonScriptRunner();
         runner.run(browser, actions);
         if (Driver.isWebDriver()) {
-            ScreenshotManager.takeScreenshot(
-                    Driver.getWebDriverFromThreadLocal(),
-                    "TestCompleted_" + testCaseId,
-                    testCaseId
-            );
+            ScreenshotManager.takeScreenshot(Driver.getWebDriverFromThreadLocal(), "TestCompleted_" + testCaseId, testCaseId);
         } else {
-            ScreenshotManager.takeScreenshot(
-                    Driver.getPageFromThreadLocal(),
-                    "TestCompleted_" + testCaseId,
-                    testCaseId
-            );
+            ScreenshotManager.takeScreenshot(Driver.getPageFromThreadLocal(), "TestCompleted_" + testCaseId, testCaseId);
         }
     }
 
     @AfterMethod
-    public void tearDown(ITestContext context) {
+    public void close(){
         Driver browser = Driver.getFromThreadLocal();
         if (browser != null) {
             browser.close();
         }
-        //clean threadlocal
         Driver.cleanupThreadLocal();
+    }
+
+    @AfterSuite
+    public void tearDown() {
+        try {
+            new File("result").mkdirs();
+            TestReportGenerator generator = new TestReportGenerator();
+            generator.generatePdfReport();
+//            generator.generateHtmlReport();
+            System.out.println("\n✓ All reports generated successfully!");
+            System.out.println("Check the 'output' directory for generated reports.");
+        } catch (JRException e) {
+            System.out.println("Caught exception JRException : "+e.getMessage());
+        }
     }
 }
 

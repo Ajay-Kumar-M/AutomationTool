@@ -7,6 +7,7 @@ import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -92,16 +93,12 @@ public class AllureListener implements ITestListener {
 
     @Override
     public void onFinish(ITestContext context) {
-        System.out.println("◀ TEST SUITE FINISHED: " +
-                context.getName());
-        System.out.println("Total Tests: " +
-                context.getAllTestMethods().length);
-        System.out.println("Passed: " +
-                context.getPassedTests().size());
-        System.out.println("Failed: " +
-                context.getFailedTests().size());
-        System.out.println("Skipped: " +
-                context.getSkippedTests().size() + "\n");
+        System.out.println("◀ TEST SUITE FINISHED: " + context.getName());
+        System.out.println("Total Tests: " + context.getAllTestMethods().length);
+        System.out.println("Passed: " + context.getPassedTests().size());
+        System.out.println("Failed: " + context.getFailedTests().size());
+        System.out.println("Skipped: " + context.getSkippedTests().size() + "\n");
+        generateAllureReport();
     }
 
     /**
@@ -147,6 +144,34 @@ public class AllureListener implements ITestListener {
                     e.getMessage());
         }
         return null;
+    }
+
+    private void generateAllureReport() {
+        try {
+            // Generate SINGLE-FILE report (this is what you need!)
+            System.out.println("Generating single-file Allure report...");
+            ProcessBuilder singleFileReport = new ProcessBuilder(
+                    "allure", "generate",
+                    "allure-results",
+                    "--single-file",
+                    "--clean",
+                    "-o", "result/allure-report-single"
+            );
+
+            Process process2 = singleFileReport.start();
+            int exitCode2 = process2.waitFor();
+
+            if (exitCode2 == 0) {
+                System.out.println("✓ Single-file report generated successfully!");
+                System.out.println("📄 Report location: result/allure-report-single/index.html");
+            } else {
+                System.out.println("✗ Failed to generate single-file report");
+            }
+
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error generating Allure report: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
 
@@ -207,4 +232,24 @@ public class AllureListener implements ITestListener {
             }
         }
 
+ */
+
+/*
+// Generate multi-page report
+            System.out.println("Generating multi-page Allure report...");
+            ProcessBuilder generateReport = new ProcessBuilder(
+                    "allure", "generate",
+                    "target/allure-results",
+                    "--clean",
+                    "-o", "target/allure-report"
+            );
+
+            Process process1 = generateReport.start();
+            int exitCode1 = process1.waitFor();
+
+            if (exitCode1 == 0) {
+                System.out.println("✓ Multi-page report generated successfully!");
+            } else {
+                System.out.println("✗ Failed to generate multi-page report");
+            }
  */

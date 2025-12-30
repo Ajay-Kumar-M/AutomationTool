@@ -1,0 +1,148 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="TestResult" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="a057e08c-2e12-4f59-a7fc-b4697a96a17c">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter"/>
+	<style name="Table_TH" mode="Opaque" backcolor="#F0F8FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_CH" mode="Opaque" backcolor="#BFE1FF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<style name="Table_TD" mode="Opaque" backcolor="#FFFFFF">
+		<box>
+			<pen lineWidth="0.5" lineColor="#000000"/>
+			<topPen lineWidth="0.5" lineColor="#000000"/>
+			<leftPen lineWidth="0.5" lineColor="#000000"/>
+			<bottomPen lineWidth="0.5" lineColor="#000000"/>
+			<rightPen lineWidth="0.5" lineColor="#000000"/>
+		</box>
+	</style>
+	<dataset name="CSVDataSet1" uuid="649d27fa-d8af-4824-ae02-825414b10f1f">
+		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter"/>
+		<query language="csv"><![CDATA[]]></query>
+		<field name="TestCaseID" class="java.lang.String"/>
+		<field name="Description" class="java.lang.String"/>
+		<field name="Status" class="java.lang.String"/>
+		<field name="Message" class="java.lang.String"/>
+	</dataset>
+	<query language="CSV"><![CDATA[]]></query>
+	<field name="TestCaseID" class="java.lang.String"/>
+	<field name="Description" class="java.lang.String"/>
+	<field name="Status" class="java.lang.String"/>
+	<field name="Message" class="java.lang.String"/>
+	<background splitType="Stretch"/>
+	<title height="79" splitType="Stretch"/>
+	<pageHeader height="35" splitType="Stretch">
+		<element kind="staticText" uuid="28f99c10-5435-4758-8f7f-87ebc317f8d4" x="227" y="2" width="100" height="30" hTextAlign="Center">
+			<text><![CDATA[Generated report]]></text>
+		</element>
+	</pageHeader>
+	<columnHeader height="61" splitType="Stretch">
+		<element kind="staticText" uuid="a303c67a-b5df-46ac-bb79-0c55cb02ac29" x="0" y="20" width="110" height="30" forecolor="#030303" hTextAlign="Center">
+			<text><![CDATA[TestCaseID]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a7e7ec3e-4ddb-41b4-a1db-a249f76d4e4f"/>
+			<box padding="3">
+				<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="147dcbab-d1b3-4c62-aa23-4f73aafc8aaf" x="120" y="20" width="120" height="30" forecolor="#030303" hTextAlign="Center">
+			<text><![CDATA[Description]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f174f0f1-56d4-4398-bf70-ae07fdf6a50d"/>
+			<box padding="3">
+				<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="9ca71a93-16bf-433a-b92b-6d576e82e0b7" x="250" y="20" width="90" height="30" forecolor="#030303" hTextAlign="Center">
+			<text><![CDATA[Status]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="490c86ae-5e97-4bc8-a724-f42a5f5d26c7"/>
+			<box padding="3">
+				<pen lineColor="#030303"/>
+				<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			</box>
+		</element>
+		<element kind="staticText" uuid="fcbbb06c-98b5-45e0-9a5f-bd4010693d83" x="347" y="20" width="205" height="30" forecolor="#030303" hTextAlign="Center">
+			<text><![CDATA[Message]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ebe74b4d-15a8-4659-8570-bea955c89420"/>
+			<box padding="3">
+				<pen lineColor="#030303"/>
+				<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+			</box>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="50" splitType="Stretch">
+			<element kind="textField" uuid="1450b6ca-f799-498c-9876-db298c537bc0" x="0" y="0" width="110" height="40">
+				<expression><![CDATA[$F{TestCaseID}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a7e7ec3e-4ddb-41b4-a1db-a249f76d4e4f"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="f9e01c3f-a2c3-443f-8e02-630b210ffd76" x="120" y="0" width="120" height="40">
+				<expression><![CDATA[$F{Description}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f174f0f1-56d4-4398-bf70-ae07fdf6a50d"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="3874436a-f916-4e1c-9034-e6576865fb30" x="250" y="0" width="90" height="40">
+				<expression><![CDATA[$F{Status}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="490c86ae-5e97-4bc8-a724-f42a5f5d26c7"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<element kind="textField" uuid="9c0580fb-c629-4127-9fba-28a80a94680c" x="347" y="0" width="207" height="40">
+				<expression><![CDATA[$F{Message}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ebe74b4d-15a8-4659-8570-bea955c89420"/>
+				<box padding="3">
+					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<leftPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<bottomPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
+				</box>
+			</element>
+			<property name="com.jaspersoft.studio.unit.height" value="20px"/>
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+		</band>
+	</detail>
+	<columnFooter height="20" splitType="Stretch"/>
+	<pageFooter height="71" splitType="Stretch">
+		<element kind="textField" uuid="b7e9e51f-66ab-4200-bbab-7fda7c2b30b9" x="230" y="30" width="100" height="30">
+			<expression><![CDATA[$V{PAGE_NUMBER}]]></expression>
+		</element>
+	</pageFooter>
+	<summary height="42" splitType="Stretch"/>
+</jasperReport>

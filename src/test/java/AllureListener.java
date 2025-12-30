@@ -35,10 +35,7 @@ public class AllureListener implements ITestListener {
             ITestContext context = result.getTestContext();
             Map<String, Object> state = (Map<String, Object>) context.getAttribute("executionState");
             long duration = System.currentTimeMillis() - (long) state.get("startTime");
-            String report = String.format(
-                    "Test Passed\nDuration: %dms",
-                    duration
-            );
+            String report = String.format("Test Passed\nDuration: %dms", duration);
             attachExecutionReport(report);
 //            String testCaseID = Driver.getTestCaseID();
             String testcaseID = (String) context.getAttribute("testcaseID");
@@ -57,8 +54,7 @@ public class AllureListener implements ITestListener {
             ITestContext context = result.getTestContext();
             Map<String, Object> state = (Map<String, Object>) context.getAttribute("executionState");
             long duration = System.currentTimeMillis() - (long) state.get("startTime");
-            String report = String.format(
-                    "Test Failed\nReason: %s\nDuration: %dms",
+            String report = String.format("Test Failed\nReason: %s\nDuration: %dms",
                     result.getThrowable().getMessage(),
                     duration
             );

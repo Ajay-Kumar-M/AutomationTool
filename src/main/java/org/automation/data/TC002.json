@@ -5,7 +5,11 @@
     "arguments": ["https://www.selenium.dev/selenium/web/hidden.html"],
     "testcaseId": "TC002",
     "expectedResult": "Login page loaded",
-    "additionalData": {"timeout": "30"}
+    "additionalData": {"timeout": "30"},
+    "epic": "Product check",
+    "feature": "Dashboard",
+    "story": "Dashboard visible",
+    "description": "Validate if dashboard is visible"
   },
   {
     "actionType": "assertVisible",

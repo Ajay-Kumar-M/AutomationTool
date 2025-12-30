@@ -5,7 +5,11 @@
     "arguments": ["https://www.selenium.dev/selenium/web/fedcm/signin.html"],
     "testcaseId": "TC001",
     "expectedResult": "Login page loaded",
-    "additionalData": {"timeout": "30"}
+    "additionalData": {"timeout": "30"},
+    "epic": "Product check",
+    "feature": "Login",
+    "story": "Validate Login",
+    "description": "Validate Login with invalid credentials"
   },
   {
     "actionType": "type",

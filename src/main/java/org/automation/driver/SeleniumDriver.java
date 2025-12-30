@@ -1,5 +1,7 @@
 package org.automation.driver;
 
+import io.qameta.allure.Allure;
+import io.qameta.allure.Step;
 import org.automation.records.Action;
 import org.automation.util.ScreenshotManager;
 import org.openqa.selenium.*;
@@ -55,13 +57,15 @@ public class SeleniumDriver implements Driver {
         return "";
     }
 
+    @Step("Navigate to URL")
     public void gotoUrl(Action action) {
+//        Allure.step("Navigate to URL: " + getArg(action, 0));
         String url = getArg(action, 0);
         driver.get(url);
         ScreenshotManager.takeScreenshot(driver, "gotoUrl", action.testcaseId());
-
     }
 
+    @Step("Type")
     public void type(Action action) {
         By locator = parseLocator(action.locator());
         String text = getArg(action, 0);
@@ -70,18 +74,21 @@ public class SeleniumDriver implements Driver {
         ScreenshotManager.takeScreenshot(driver, "type", action.testcaseId());
     }
 
+    @Step("Click")
     public void click(Action action) {
         By by = parseLocator(action.locator());
         driver.findElement(by).click();
         ScreenshotManager.takeScreenshot(driver, "click", action.testcaseId());
     }
 
+    @Step("Clear")
     public void clear(Action action) {
         By by = parseLocator(action.locator());
         driver.findElement(by).clear();
         ScreenshotManager.takeScreenshot(driver, "clear", action.testcaseId());
     }
 
+    @Step("Wait")
     public void wait(Action action) {
         try {
             Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
@@ -132,17 +139,18 @@ public class SeleniumDriver implements Driver {
         return By.cssSelector(locator);
     }
 
+    @Step("Assert Element is Visible")
     public void assertVisible(Action action) {
         try {
             By locator = parseLocator(action.locator());
 //            WebElement element = driver.findElement(locator);
             WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
                     .until(ExpectedConditions.presenceOfElementLocated(locator));
-            assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
             ScreenshotManager.takeScreenshot(driver, "assertVisible", action.testcaseId());
+            assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
             System.out.println("\ncatch called " + e + ". message " + e.getMessage());
-            throw new RuntimeException("Element with xpath '" + action.locator() + "' was not visible within " + explicitWait + " seconds", e);
+            throw new AssertionError("Element with xpath '" + action.locator() + "' was not visible within " + explicitWait + " seconds", e);
         }
     }
 

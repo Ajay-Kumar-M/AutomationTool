@@ -20,16 +20,10 @@ public class JsonScriptRunner {
 //        this.driver = driver;
 //    }
 
-    public void runFromJson(String filePath) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonContent = Files.readString(Paths.get(filePath));
-
-        List<Action> actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
-
+    public void runFromJson(List<Action> actions) throws Exception {
         for (Action action : actions) {
             System.out.println("Executing: " + action.actionType() + " | TestCase: " + action.testcaseId());
             try {
-//                driver.execute(action);
                 driver.getClass().getMethod(action.actionType(), Action.class).invoke(driver,action);
                 queueManager.addRecord(new ExpectedResultData(action.testcaseId(),action.actionType(),action.locator(),"Success","",new String[0]));
             } catch (InvocationTargetException e) {
@@ -38,14 +32,34 @@ public class JsonScriptRunner {
                 System.out.println("\nPrinting message " + original.getMessage());
                 // handle logging / recovery / reporting
                 queueManager.addRecord(new ExpectedResultData(action.testcaseId(),action.actionType(),action.locator(),"Failure",original.getMessage(),new String[0]));
+                // Rethrow the original exception to fail the test
+                if (original instanceof AssertionError) {
+                    throw (AssertionError) original;
+                } else if (original instanceof Error) {
+                    throw (Error) original;
+                } else {
+                    throw new RuntimeException("Test action failed: " + original.getMessage(), original);
+                }
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                // Handle reflection-specific exceptions
+                e.printStackTrace();
+                queueManager.addRecord(new ExpectedResultData(
+                        action.testcaseId(),
+                        action.actionType(),
+                        action.locator(),
+                        "Failure",
+                        e.getMessage(),
+                        new String[0]
+                ));
+                throw new RuntimeException("Reflection error: " + e.getMessage(), e);
             }
             // Optional: validate expected_result, take screenshot, etc.
         }
     }
 
-    public void run(Driver browser, String filePath) throws Exception {
+    public void run(Driver browser, List<Action> actions) throws Exception {
         this.driver = browser;
-        runFromJson(filePath);
+        runFromJson(actions);
         queueManager.flushNow(); // Manual trigger
         // App shutdown
 //        queueManager.shutdown();
@@ -55,7 +69,7 @@ public class JsonScriptRunner {
         Driver browser = BrowserConfig.getBrowserActions();
 //        driver = browser;
         JsonScriptRunner runner = new JsonScriptRunner();
-        runner.runFromJson("src/main/java/org/automation/data/TC002.json");
+//        runner.runFromJson("src/main/java/org/automation/data/TC002.json");
 
         // Automatic flush at 5-min intervals OR
         queueManager.flushNow(); // Manual trigger
@@ -64,3 +78,55 @@ public class JsonScriptRunner {
         browser.close();
     }
 }
+
+/*
+
+//        ObjectMapper mapper = new ObjectMapper();
+//        String jsonContent = Files.readString(Paths.get(filePath));
+//        List<Action> actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
+ */
+
+/*
+import org.testng.Assert;
+
+try {
+    driver.getClass().getMethod(action.actionType(), Action.class).invoke(driver, action);
+    queueManager.addRecord(new ExpectedResultData(
+        action.testcaseId(),
+        action.actionType(),
+        action.locator(),
+        "Success",
+        "",
+        new String[0]
+    ));
+} catch (InvocationTargetException e) {
+    Throwable original = e.getCause();
+    original.printStackTrace();
+    System.out.println("\nPrinting message: " + original.getMessage());
+
+    // Log the failure
+    queueManager.addRecord(new ExpectedResultData(
+        action.testcaseId(),
+        action.actionType(),
+        action.locator(),
+        "Failure",
+        original.getMessage(),
+        new String[0]
+    ));
+
+    // Fail the test explicitly
+    Assert.fail("Test action '" + action.actionType() + "' failed: " + original.getMessage(), original);
+} catch (Exception e) {
+    e.printStackTrace();
+    queueManager.addRecord(new ExpectedResultData(
+        action.testcaseId(),
+        action.actionType(),
+        action.locator(),
+        "Failure",
+        e.getMessage(),
+        new String[0]
+    ));
+    Assert.fail("Unexpected error during test execution: " + e.getMessage(), e);
+}
+
+ */

@@ -9,7 +9,11 @@ public record Action(
         String testcaseId,
         String expectedResultType, // e.g., "text", "url", "visible"
         String expectedResult, // e.g., "Welcome", "https://dashboard", "#logout"
-        Map<String,String> additionalData
+        Map<String,String> additionalData,
+        String epic,
+        String feature,
+        String story,
+        String description
 ){}
 
 /*

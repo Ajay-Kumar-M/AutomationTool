@@ -3,18 +3,23 @@ import org.automation.driver.BrowserConfig;
 import org.automation.driver.Driver;
 import org.automation.driver.PlaywrightDriver;
 import org.automation.driver.SeleniumDriver;
+import org.automation.records.Action;
 import org.automation.util.JsonScriptRunner;
 import org.automation.util.ScreenshotManager;
 import org.testng.ITestContext;
 import org.testng.annotations.*;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Listeners({AllureListener.class})
 public class TestLogin {
-    JsonScriptRunner runner = new JsonScriptRunner();
 
     @BeforeMethod
     public void setUp(ITestContext context) {  // ✓ Add parameter
@@ -27,7 +32,7 @@ public class TestLogin {
         browser.storeInThreadLocal();
     }
 
-    @DataProvider(name = "jsonTestCases", parallel = true)
+    @DataProvider(name = "jsonTestCases", parallel = false)
     public Object[][] jsonTestCases() {
         File folder = new File("src/main/java/org/automation/data");
         File[] files = folder.listFiles((dir, name) -> name.endsWith(".json"));
@@ -42,21 +47,28 @@ public class TestLogin {
 
     @Test(
             priority = 1,
-            dataProvider = "jsonTestCases",
-            description = "To verify login"
+            dataProvider = "jsonTestCases"
     )
-    @Description("To verify login")
-    @Epic("EP001")
-    @Feature("Feature1: Login check")
-    @Story("Story: login verification")
-    @Step("Verify login")
     @Severity(SeverityLevel.CRITICAL)
     public void loginTest(String testCaseId, String jsonPath, ITestContext context) throws Exception {
         Driver.setTestCaseID(testCaseId);
         context.setAttribute("testcaseID", testCaseId);
         System.out.println("Running "+testCaseId+" in path->"+jsonPath);
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonContent = Files.readString(Paths.get(jsonPath));
+        List<Action> actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
+        if(actions.getFirst().epic() != null){
+            Allure.label("epic", actions.getFirst().epic());
+            Allure.label("feature", actions.getFirst().feature());
+            Allure.label("story", actions.getFirst().story());
+            Allure.getLifecycle().updateTestCase(testCase -> {
+                testCase.setDescription(actions.getFirst().description());
+                testCase.setTestCaseId(testCaseId);
+            });
+        }
         Driver browser = Driver.getFromThreadLocal();
-        runner.run(browser, jsonPath);
+        JsonScriptRunner runner = new JsonScriptRunner();
+        runner.run(browser, actions);
         if (Driver.isWebDriver()) {
             ScreenshotManager.takeScreenshot(
                     Driver.getWebDriverFromThreadLocal(),
@@ -83,6 +95,12 @@ public class TestLogin {
     }
 }
 
+/*
+//    @Description("To verify login")
+//    @Epic("EP001")
+//    @Feature("Feature1: Login check")
+//    @Story("Story: login verification")
+ */
 /*
 
 //        context.setAttribute("testcaseID", "TC001");

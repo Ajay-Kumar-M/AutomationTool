@@ -2,6 +2,7 @@ import com.microsoft.playwright.Page;
 import io.qameta.allure.Attachment;
 import org.automation.driver.Driver;
 import org.automation.util.ScreenshotManager;
+import org.automation.util.SendEmailExample;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
@@ -99,6 +100,7 @@ public class AllureListener implements ITestListener {
         System.out.println("Failed: " + context.getFailedTests().size());
         System.out.println("Skipped: " + context.getSkippedTests().size() + "\n");
         generateAllureReport();
+        SendEmailExample.sendMail("");
     }
 
     /**

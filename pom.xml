@@ -146,5 +146,17 @@
             <artifactId>jasperreports-pdf</artifactId>
             <version>7.0.3</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/net.sf.jasperreports/jasperreports-charts -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports-charts</artifactId>
+            <version>7.0.3</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.angus/angus-mail -->
+        <dependency>
+            <groupId>org.eclipse.angus</groupId>
+            <artifactId>angus-mail</artifactId>
+            <version>2.0.5</version>
+        </dependency>
     </dependencies>
 </project>

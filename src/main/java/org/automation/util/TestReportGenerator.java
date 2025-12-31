@@ -4,6 +4,7 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRCsvDataSource;
 
 import java.io.*;
+import java.util.HashMap;
 
 /**
  * Complete example of generating JasperReports from CSV data
@@ -77,7 +78,7 @@ public class TestReportGenerator {
         System.out.println("Step 4: Filling report with data...");
         JasperPrint jasperPrint = JasperFillManager.fillReport(
                 jasperReport,
-                new java.util.HashMap<>(),
+                new HashMap<>(),
                 csvDataSource
         );
         System.out.println("✓ Report filled successfully");
@@ -89,7 +90,53 @@ public class TestReportGenerator {
      * Load and configure CSV data source
      */
     private JRCsvDataSource loadCsvDataSource() throws JRException {
+        JRCsvDataSource csvDataSource = null;
+        String csvFilePath = "result/automationResult.csv";
         try {
+            File csvFile = new File(csvFilePath);
+            if (!csvFile.exists()) {
+                throw new JRException("CSV file not found: " + csvFile.getAbsolutePath());
+            }
+            InputStream csvStream = new FileInputStream(csvFile);
+            if (csvStream == null) {
+                throw new JRException("CSV file not found: " + CSV_DATA_FILE);
+            }
+            // Create CSV data source
+            csvDataSource = new JRCsvDataSource(csvStream, "UTF-8");
+            // Configure CSV parsing
+            csvDataSource.setUseFirstRowAsHeader(true);  // First row contains column names
+            csvDataSource.setRecordDelimiter("\n");      // Line delimiter
+            csvDataSource.setFieldDelimiter(',');     // Field delimiter
+            return csvDataSource;
+        } catch (Exception e) {
+            System.out.println("Unable to load csv "+e.getMessage());
+            System.out.println(e.toString());
+            e.printStackTrace();
+        }
+        return csvDataSource;
+    }
+
+    /**
+     * Main entry point
+     */
+    public static void main(String[] args) {
+        // Ensure output directory exists
+        new File(OUTPUT_DIR).mkdirs();
+        try {
+            TestReportGenerator generator = new TestReportGenerator();
+            // Generate all report formats
+            generator.generatePdfReport();
+//            generator.generateHtmlReport();
+            System.out.println("\n✓ All reports generated successfully!");
+            System.out.println("Check the 'output' directory for generated reports.");
+        } catch (JRException e) {
+            System.err.println("✗ Error generating report: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
+
+/*
 //            File input = new File("result/automationResult.csv");
 //            File output = new File("result/automationResultUpdated.csv");
 //            try (BufferedReader reader = new BufferedReader(new FileReader(input));
@@ -100,62 +147,7 @@ public class TestReportGenerator {
 //                    writer.newLine();
 //                }
 //            }
-            String csvFilePath = "result/automationResult.csv";
-            File csvFile = new File(csvFilePath);
-            if (!csvFile.exists()) {
-                throw new JRException("CSV file not found: " + csvFile.getAbsolutePath());
-            }
-            InputStream csvStream = new FileInputStream(csvFile);
-            if (csvStream == null) {
-                throw new JRException("CSV file not found: " + CSV_DATA_FILE);
-            }
-            JRCsvDataSource csvDataSource;
-            try {
-                // Create CSV data source
-                csvDataSource = new JRCsvDataSource(csvStream, "UTF-8");
-            } catch (Exception e) {
-                System.out.println("Unable to load csv "+e.getMessage());
-                System.out.println(e.toString());
-                e.printStackTrace();
-                return null;
-            }
-            // Configure CSV parsing
-            csvDataSource.setUseFirstRowAsHeader(true);  // First row contains column names
-            csvDataSource.setRecordDelimiter("\n");      // Line delimiter
-            csvDataSource.setFieldDelimiter(',');     // Field delimiter
-            return csvDataSource;
-        } catch (Exception e) {
-            System.out.println("Unable to load csv "+e.getMessage());
-            System.out.println(e.toString());
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * Main entry point
-     */
-    public static void main(String[] args) {
-        // Ensure output directory exists
-        new File(OUTPUT_DIR).mkdirs();
-
-        try {
-            TestReportGenerator generator = new TestReportGenerator();
-
-            // Generate all report formats
-            generator.generatePdfReport();
-//            generator.generateHtmlReport();
-
-            System.out.println("\n✓ All reports generated successfully!");
-            System.out.println("Check the 'output' directory for generated reports.");
-
-        } catch (JRException e) {
-            System.err.println("✗ Error generating report: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-}
-
+ */
 /*
 //        Path path = Paths.get(REPORT_TEMPLATE);
 //        if (Files.isReadable(path)) {

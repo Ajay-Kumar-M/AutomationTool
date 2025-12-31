@@ -79,12 +79,13 @@ public class JsonScriptRunner {
             jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC002.json"));
             actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
             runner.run(browser, actions);
-            new File("result").mkdirs();
 
+            new File("result").mkdirs();
             TestReportGenerator generator = new TestReportGenerator();
             // Generate all report formats
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
+            SendEmailExample.sendMail("");
             System.out.println("\n✓ All reports generated successfully!");
             System.out.println("Check the 'output' directory for generated reports.");
         } catch (JRException | AssertionError e) {

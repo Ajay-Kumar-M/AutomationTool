@@ -41,15 +41,48 @@
 	<field name="Description" class="java.lang.String"/>
 	<field name="Status" class="java.lang.String"/>
 	<field name="Message" class="java.lang.String"/>
+	<variable name="TotalSuccess" calculation="Sum" class="java.lang.Integer">
+		<expression><![CDATA[$F{Status}.equals("Success") ? 1 : 0]]></expression>
+	</variable>
+	<variable name="TotalFailure" calculation="Sum" class="java.lang.Integer">
+		<expression><![CDATA[$F{Status}.equals("Failure") ? 1 : 0]]></expression>
+	</variable>
+	<group name="StatusGroup">
+		<expression><![CDATA[$F{Status}]]></expression>
+		<groupHeader>
+			<band>
+				<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band>
+				<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			</band>
+		</groupFooter>
+	</group>
+	<group name="SuccessGroup">
+		<expression><![CDATA[$F{Status}.equals("Success") ? "Success" : "NoMatch"]]></expression>
+		<groupHeader>
+			<band>
+				<property name="com.jaspersoft.studio.unit.height" value="px"/>
+			</band>
+		</groupHeader>
+		<groupFooter>
+			<band/>
+		</groupFooter>
+	</group>
+	<group name="FailureGroup"/>
 	<background splitType="Stretch"/>
-	<title height="79" splitType="Stretch"/>
+	<title height="10" splitType="Stretch">
+		<property name="com.jaspersoft.studio.unit.height" value="px"/>
+	</title>
 	<pageHeader height="35" splitType="Stretch">
-		<element kind="staticText" uuid="28f99c10-5435-4758-8f7f-87ebc317f8d4" x="227" y="2" width="100" height="30" hTextAlign="Center">
+		<element kind="staticText" uuid="28f99c10-5435-4758-8f7f-87ebc317f8d4" x="180" y="2" width="200" height="30" fontName="Academy Engraved LET" fontSize="16.0" bold="true" hTextAlign="Center">
 			<text><![CDATA[Generated report]]></text>
 		</element>
 	</pageHeader>
 	<columnHeader height="61" splitType="Stretch">
-		<element kind="staticText" uuid="a303c67a-b5df-46ac-bb79-0c55cb02ac29" x="0" y="20" width="110" height="30" forecolor="#030303" hTextAlign="Center">
+		<element kind="staticText" uuid="a303c67a-b5df-46ac-bb79-0c55cb02ac29" x="0" y="20" width="110" height="30" forecolor="#030303" bold="true" underline="false" hTextAlign="Center">
 			<text><![CDATA[TestCaseID]]></text>
 			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a7e7ec3e-4ddb-41b4-a1db-a249f76d4e4f"/>
 			<box padding="3">
@@ -59,7 +92,7 @@
 				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 			</box>
 		</element>
-		<element kind="staticText" uuid="147dcbab-d1b3-4c62-aa23-4f73aafc8aaf" x="120" y="20" width="120" height="30" forecolor="#030303" hTextAlign="Center">
+		<element kind="staticText" uuid="147dcbab-d1b3-4c62-aa23-4f73aafc8aaf" x="110" y="20" width="140" height="30" forecolor="#030303" bold="true" underline="false" hTextAlign="Center">
 			<text><![CDATA[Description]]></text>
 			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f174f0f1-56d4-4398-bf70-ae07fdf6a50d"/>
 			<box padding="3">
@@ -69,7 +102,7 @@
 				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 			</box>
 		</element>
-		<element kind="staticText" uuid="9ca71a93-16bf-433a-b92b-6d576e82e0b7" x="250" y="20" width="90" height="30" forecolor="#030303" hTextAlign="Center">
+		<element kind="staticText" uuid="9ca71a93-16bf-433a-b92b-6d576e82e0b7" x="250" y="20" width="90" height="30" forecolor="#030303" bold="true" underline="false" hTextAlign="Center">
 			<text><![CDATA[Status]]></text>
 			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="490c86ae-5e97-4bc8-a724-f42a5f5d26c7"/>
 			<box padding="3">
@@ -80,7 +113,7 @@
 				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 			</box>
 		</element>
-		<element kind="staticText" uuid="fcbbb06c-98b5-45e0-9a5f-bd4010693d83" x="347" y="20" width="205" height="30" forecolor="#030303" hTextAlign="Center">
+		<element kind="staticText" uuid="fcbbb06c-98b5-45e0-9a5f-bd4010693d83" x="340" y="20" width="214" height="30" forecolor="#030303" bold="true" underline="false" hTextAlign="Center">
 			<text><![CDATA[Message]]></text>
 			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ebe74b4d-15a8-4659-8570-bea955c89420"/>
 			<box padding="3">
@@ -93,8 +126,8 @@
 		</element>
 	</columnHeader>
 	<detail>
-		<band height="50" splitType="Stretch">
-			<element kind="textField" uuid="1450b6ca-f799-498c-9876-db298c537bc0" x="0" y="0" width="110" height="40">
+		<band height="40" splitType="Stretch">
+			<element kind="textField" uuid="1450b6ca-f799-498c-9876-db298c537bc0" x="0" y="0" width="110" height="40" fontSize="8.0">
 				<expression><![CDATA[$F{TestCaseID}]]></expression>
 				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a7e7ec3e-4ddb-41b4-a1db-a249f76d4e4f"/>
 				<box padding="3">
@@ -104,7 +137,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 			</element>
-			<element kind="textField" uuid="f9e01c3f-a2c3-443f-8e02-630b210ffd76" x="120" y="0" width="120" height="40">
+			<element kind="textField" uuid="f9e01c3f-a2c3-443f-8e02-630b210ffd76" x="110" y="0" width="140" height="40" fontSize="8.0">
 				<expression><![CDATA[$F{Description}]]></expression>
 				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f174f0f1-56d4-4398-bf70-ae07fdf6a50d"/>
 				<box padding="3">
@@ -114,7 +147,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 			</element>
-			<element kind="textField" uuid="3874436a-f916-4e1c-9034-e6576865fb30" x="250" y="0" width="90" height="40">
+			<element kind="textField" uuid="3874436a-f916-4e1c-9034-e6576865fb30" x="250" y="0" width="90" height="40" fontSize="8.0">
 				<expression><![CDATA[$F{Status}]]></expression>
 				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="490c86ae-5e97-4bc8-a724-f42a5f5d26c7"/>
 				<box padding="3">
@@ -124,7 +157,7 @@
 					<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 				</box>
 			</element>
-			<element kind="textField" uuid="9c0580fb-c629-4127-9fba-28a80a94680c" x="347" y="0" width="207" height="40">
+			<element kind="textField" uuid="9c0580fb-c629-4127-9fba-28a80a94680c" x="340" y="0" width="214" height="40" fontSize="8.0">
 				<expression><![CDATA[$F{Message}]]></expression>
 				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ebe74b4d-15a8-4659-8570-bea955c89420"/>
 				<box padding="3">
@@ -138,11 +171,33 @@
 			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
 		</band>
 	</detail>
-	<columnFooter height="20" splitType="Stretch"/>
-	<pageFooter height="71" splitType="Stretch">
-		<element kind="textField" uuid="b7e9e51f-66ab-4200-bbab-7fda7c2b30b9" x="230" y="30" width="100" height="30">
+	<pageFooter height="50" splitType="Stretch">
+		<element kind="textField" uuid="b7e9e51f-66ab-4200-bbab-7fda7c2b30b9" x="230" y="18" width="100" height="30" hTextAlign="Center" vTextAlign="Bottom">
 			<expression><![CDATA[$V{PAGE_NUMBER}]]></expression>
 		</element>
 	</pageFooter>
-	<summary height="42" splitType="Stretch"/>
+	<summary height="250" splitType="Stretch">
+		<element kind="chart" chartType="bar" uuid="2ae9f1a8-e941-4e8e-866e-c3c22087a3a6" x="80" y="39" width="400" height="200" evaluationTime="Report" linkType="None" linkTarget="Self">
+			<dataset kind="category">
+				<series>
+					<seriesExpression><![CDATA["Success"]]></seriesExpression>
+					<categoryExpression><![CDATA["Success"]]></categoryExpression>
+					<valueExpression><![CDATA[$V{TotalSuccess}]]></valueExpression>
+				</series>
+				<series>
+					<seriesExpression><![CDATA["Failure"]]></seriesExpression>
+					<categoryExpression><![CDATA["Failure"]]></categoryExpression>
+					<valueExpression><![CDATA[$V{TotalFailure}]]></valueExpression>
+				</series>
+			</dataset>
+			<plot categoryAxisLabelColor="#000000" categoryAxisTickLabelColor="#000000" categoryAxisLineColor="#000000" valueAxisLabelColor="#000000" valueAxisTickLabelColor="#000000" valueAxisLineColor="#000000">
+				<itemLabel/>
+				<seriesColor order="0" color="#33FF00"/>
+				<seriesColor order="1" color="#FF0000"/>
+			</plot>
+		</element>
+		<element kind="staticText" uuid="3defe57b-423a-44d1-b86d-f1e30fa4f6c1" x="230" y="10" width="100" height="30" bold="true" hTextAlign="Center" vTextAlign="Middle">
+			<text><![CDATA[Result Overview]]></text>
+		</element>
+	</summary>
 </jasperReport>

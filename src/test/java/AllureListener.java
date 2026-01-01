@@ -2,13 +2,11 @@ import com.microsoft.playwright.Page;
 import io.qameta.allure.Attachment;
 import org.automation.driver.Driver;
 import org.automation.util.ScreenshotManager;
-import org.automation.util.SendEmailExample;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -99,8 +97,6 @@ public class AllureListener implements ITestListener {
         System.out.println("Passed: " + context.getPassedTests().size());
         System.out.println("Failed: " + context.getFailedTests().size());
         System.out.println("Skipped: " + context.getSkippedTests().size() + "\n");
-        generateAllureReport();
-        SendEmailExample.sendMail("");
     }
 
     /**
@@ -146,34 +142,6 @@ public class AllureListener implements ITestListener {
                     e.getMessage());
         }
         return null;
-    }
-
-    private void generateAllureReport() {
-        try {
-            // Generate SINGLE-FILE report (this is what you need!)
-            System.out.println("Generating single-file Allure report...");
-            ProcessBuilder singleFileReport = new ProcessBuilder(
-                    "allure", "generate",
-                    "allure-results",
-                    "--single-file",
-                    "--clean",
-                    "-o", "result/allure-report-single"
-            );
-
-            Process process2 = singleFileReport.start();
-            int exitCode2 = process2.waitFor();
-
-            if (exitCode2 == 0) {
-                System.out.println("✓ Single-file report generated successfully!");
-                System.out.println("📄 Report location: result/allure-report-single/index.html");
-            } else {
-                System.out.println("✗ Failed to generate single-file report");
-            }
-
-        } catch (IOException | InterruptedException e) {
-            System.err.println("Error generating Allure report: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 }
 

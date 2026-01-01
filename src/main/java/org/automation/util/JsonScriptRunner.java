@@ -82,12 +82,11 @@ public class JsonScriptRunner {
 
             new File("result").mkdirs();
             TestReportGenerator generator = new TestReportGenerator();
-            // Generate all report formats
+            // Generate all jasper report formats
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
             SendEmailExample.sendMail("");
             System.out.println("\n✓ All reports generated successfully!");
-            System.out.println("Check the 'output' directory for generated reports.");
         } catch (JRException | AssertionError e) {
             System.out.println("Caught exception JRException | AssertionError : "+e.getMessage());
         } catch (Exception e) {

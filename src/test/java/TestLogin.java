@@ -5,6 +5,7 @@ import org.automation.driver.Driver;
 import org.automation.records.Action;
 import org.automation.util.JsonScriptRunner;
 import org.automation.util.ScreenshotManager;
+import org.automation.util.SendEmailExample;
 import org.automation.util.TestReportGenerator;
 import org.testng.ITestContext;
 import org.testng.annotations.*;
@@ -12,6 +13,7 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
@@ -35,14 +37,17 @@ public class TestLogin {
     @DataProvider(name = "jsonTestCases", parallel = false)
     public Object[][] jsonTestCases() {
         File folder = new File("src/main/java/org/automation/data");
-        File[] files = folder.listFiles((dir, name) -> name.endsWith(".json"));
-        Object[][] data = new Object[files.length][2];
-        for (int i = 0; i < files.length; i++) {
-            String testCaseId = files[i].getName().replace(".json", "");
-            data[i][0] = testCaseId;
-            data[i][1] = files[i].getPath();
+        File[] files = folder.listFiles((_, name) -> name.endsWith(".json"));
+        if(files!=null){
+            Object[][] data = new Object[files.length][2];
+            for (int i = 0; i < files.length; i++) {
+                String testCaseId = files[i].getName().replace(".json", "");
+                data[i][0] = testCaseId;
+                data[i][1] = files[i].getPath();
+            }
+            return data;
         }
-        return data;
+        return new Object[0][0];
     }
 
     @Test(
@@ -56,7 +61,7 @@ public class TestLogin {
         System.out.println("Running "+testCaseId+" in path->"+jsonPath);
         ObjectMapper mapper = new ObjectMapper();
         String jsonContent = Files.readString(Paths.get(jsonPath));
-        List<Action> actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
+        List<Action> actions = mapper.readValue(jsonContent, new TypeReference<>() {});
         if(actions.getFirst().epic() != null){
             Allure.label("epic", actions.getFirst().epic());
             Allure.label("feature", actions.getFirst().feature());
@@ -88,14 +93,41 @@ public class TestLogin {
     @AfterSuite
     public void tearDown() {
         try {
+            System.out.println("\n✓ Tear down triggered!");
             new File("result").mkdirs();
             TestReportGenerator generator = new TestReportGenerator();
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
+            generateAllureReport();
+            SendEmailExample.sendMail("");
             System.out.println("\n✓ All reports generated successfully!");
-            System.out.println("Check the 'output' directory for generated reports.");
         } catch (JRException e) {
             System.out.println("Caught exception JRException : "+e.getMessage());
+        }
+    }
+
+    private void generateAllureReport() {
+        try {
+            // Generate SINGLE-FILE report (this is what you need!)
+            System.out.println("Generating single-file Allure report...");
+            ProcessBuilder singleFileReport = new ProcessBuilder(
+                    "allure", "generate",
+                    "allure-results",
+                    "--single-file",
+                    "--clean",
+                    "-o", "result/allure-report-single"
+            );
+            Process process2 = singleFileReport.start();
+            int exitCode2 = process2.waitFor();
+            if (exitCode2 == 0) {
+                System.out.println("✓ Single-file report generated successfully!");
+                System.out.println("📄 Report location: result/allure-report-single/index.html");
+            } else {
+                System.out.println("✗ Failed to generate single-file report");
+            }
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error generating Allure report: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
@@ -146,8 +178,7 @@ public class TestLogin {
             driver.findElement(By.id("submit")).click();
             steps.add("Submit clicked");
         } catch (Exception e) {
-            // Record failure state
-            state.put("errorPoint", e.getClass().getSimpleName());
+            // Record failure state            .put("errorPoint", e.getClass().getSimpleName());
             state.put("failureDetails", e.getMessage());
             throw e;
         }
@@ -177,4 +208,25 @@ public void onTestFailure(ITestResult result) {
     Allure.addAttachment("Execution Report", "text/plain", report);
 }
 
+ */
+
+
+/*
+// Generate multi-page report
+            System.out.println("Generating multi-page Allure report...");
+            ProcessBuilder generateReport = new ProcessBuilder(
+                    "allure", "generate",
+                    "target/allure-results",
+                    "--clean",
+                    "-o", "target/allure-report"
+            );
+
+            Process process1 = generateReport.start();
+            int exitCode1 = process1.waitFor();
+
+            if (exitCode1 == 0) {
+                System.out.println("✓ Multi-page report generated successfully!");
+            } else {
+                System.out.println("✗ Failed to generate multi-page report");
+            }
  */

@@ -35,7 +35,7 @@ public class JsonScriptRunner {
                 original.printStackTrace();
                 System.out.println("\nPrinting message " + original.getMessage());
                 // handle logging / recovery / reporting
-                storeResult(actions.getFirst(),"Failure",original.getMessage());
+                storeResultCSV(actions.getFirst(),"Failure",original.getMessage());
                 queueManager.addRecord(new ExpectedResultData(action.testcaseId(),action.actionType(),action.locator(),"Failure",original.getMessage(),new String[0]));
                 // Rethrow the original exception to fail the test
                 if (original instanceof AssertionError) {
@@ -46,23 +46,21 @@ public class JsonScriptRunner {
                     throw new RuntimeException("Test action failed: " + original.getMessage(), original);
                 }
             } catch (NoSuchMethodException | IllegalAccessException e) {
-                // Handle reflection-specific exceptions
                 e.printStackTrace();
-                storeResult(actions.getFirst(),"Failure",e.getMessage());
+                storeResultCSV(actions.getFirst(),"Failure",e.getMessage());
                 queueManager.addRecord(new ExpectedResultData(action.testcaseId(), action.actionType(), action.locator(), "Failure", e.getMessage(), new String[0]
                 ));
                 throw new RuntimeException("Reflection error: " + e.getMessage(), e);
             }
             // Optional: validate expected_result, take screenshot, etc.
         }
-        storeResult(actions.getFirst(),"Success","TestCase Executed Successfully");
+        storeResultCSV(actions.getFirst(),"Success","TestCase Executed Successfully");
     }
 
     public void run(Driver browser, List<Action> actions) throws Exception {
         this.driver = browser;
         runFromJson(actions);
         queueManager.flushNow();
-         // Manual trigger
         // App shutdown
 //        queueManager.shutdown();
     }
@@ -71,7 +69,6 @@ public class JsonScriptRunner {
         Driver browser = BrowserConfig.getBrowserActions();
         ObjectMapper mapper = new ObjectMapper();
         JsonScriptRunner runner = new JsonScriptRunner();
-
         try {
             String jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC001.json"));
             List<Action> actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
@@ -99,16 +96,14 @@ public class JsonScriptRunner {
         browser.close();
     }
 
-    private void storeResult(Action action,String status, String message){
+    private void storeResultCSV(Action action, String status, String message){
         File file = new File("result/automationResult.csv");
         boolean fileExists = file.exists();
-
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             if (!fileExists) {
                 writer.write("TestCaseID,Description,Status,Message");
                 writer.newLine();
             }
-
             writer.write(action.testcaseId()+","+action.description()+","+status+","+message);
             writer.newLine();
         } catch (Exception e) {

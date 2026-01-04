@@ -4,7 +4,6 @@
     "locator": null,
     "arguments": ["https://www.selenium.dev/selenium/web/fedcm/signin.html"],
     "testcaseId": "TC001",
-    "expectedResult": "Login page loaded",
     "additionalData": {"timeout": "30"},
     "epic": "Product check",
     "feature": "Login",
@@ -15,8 +14,7 @@
     "actionType": "type",
     "locator": "#username",
     "arguments": ["admin"],
-    "testcaseId": "TC001",
-    "expectedResult": "Username entered"
+    "testcaseId": "TC001"
   },
   {
     "actionType": "type",
@@ -33,6 +31,6 @@
     "actionType": "wait",
     "locator": null,
     "testcaseId": "TC001",
-    "arguments": ["5"]
+    "arguments": ["3"]
   }
 ]

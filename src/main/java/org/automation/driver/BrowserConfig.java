@@ -18,9 +18,11 @@ public class BrowserConfig {
     public static Driver getBrowserActions() {
         String tool = config.getProperty("browser.tool", "selenium");
         String browserName = config.getProperty("browser.name", "chrome");
-
+        Boolean isDocker = Boolean.valueOf(config.getProperty("docker.enable", "false"));
+        String dockerUrl = config.getProperty("docker.url", "");
+        String containerName = config.getProperty("docker.containerName", "");
         Driver actions = DriverFactory.createBrowserActions(tool);
-        actions.init(browserName);
+        actions.init(browserName,isDocker,dockerUrl,containerName);
         return actions;
     }
 }

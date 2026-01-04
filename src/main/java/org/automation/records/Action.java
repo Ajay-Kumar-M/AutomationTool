@@ -7,8 +7,8 @@ public record Action(
         String locator,
         String[] arguments,
         String testcaseId,
-        String expectedResultType, // e.g., "text", "url", "visible"
-        String expectedResult, // e.g., "Welcome", "https://dashboard", "#logout"
+//        String expectedResultType, // e.g., "text", "url", "visible"
+//        String expectedResult, // e.g., "Welcome", "https://dashboard", "#logout"
         Map<String,String> additionalData,
         String epic,
         String feature,

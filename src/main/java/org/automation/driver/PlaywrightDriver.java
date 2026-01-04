@@ -4,6 +4,7 @@ import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import org.automation.records.Action;
+import org.automation.util.DockerContainerCheck;
 import org.automation.util.ScreenshotManager;
 
 import java.util.regex.Pattern;
@@ -24,23 +25,35 @@ public class PlaywrightDriver implements Driver {
 //    }
 
     @Override
-    public void init(String browserName) {
+    public void init(String browserName, Boolean isDocker, String dockerUrl, String containerName) {
         playwright = Playwright.create();
-        if (browserName.equalsIgnoreCase("chrome") || browserName.equalsIgnoreCase("chromium")) {
-            browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
-                    .setHeadless(false)
-                    .setSlowMo(100) // 100 MS delay after every action
-            );
-        } else if (browserName.equalsIgnoreCase("firefox")) {
-            browser = playwright.firefox().launch(new BrowserType.LaunchOptions()
-                    .setHeadless(false)
-                    .setSlowMo(100) // 100 MS delay after every action
-            );
-        } else if (browserName.equalsIgnoreCase("webkit")) {
-            browser = playwright.webkit().launch(new BrowserType.LaunchOptions()
-                    .setHeadless(false)
-                    .setSlowMo(100) // 100 MS delay after every action
-            );
+        if(isDocker){
+            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(containerName));
+            if (browserName.equalsIgnoreCase("chrome") || browserName.equalsIgnoreCase("chromium")) {
+                System.out.println("Using docker-"+dockerUrl);
+                browser = playwright.chromium().connect(dockerUrl);
+            } else if (browserName.equalsIgnoreCase("firefox")) {
+                browser = playwright.firefox().connect(dockerUrl);
+            } else if (browserName.equalsIgnoreCase("webkit")) {
+                browser = playwright.webkit().connect(dockerUrl);
+            }
+        } else {
+            if (browserName.equalsIgnoreCase("chrome") || browserName.equalsIgnoreCase("chromium")) {
+                browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
+                        .setHeadless(false)
+                        .setSlowMo(100) // 100 MS delay after every action
+                );
+            } else if (browserName.equalsIgnoreCase("firefox")) {
+                browser = playwright.firefox().launch(new BrowserType.LaunchOptions()
+                        .setHeadless(false)
+                        .setSlowMo(100) // 100 MS delay after every action
+                );
+            } else if (browserName.equalsIgnoreCase("webkit")) {
+                browser = playwright.webkit().launch(new BrowserType.LaunchOptions()
+                        .setHeadless(false)
+                        .setSlowMo(100) // 100 MS delay after every action
+                );
+            }
         }
         context = browser.newContext();
         page = context.newPage();
@@ -67,31 +80,41 @@ public class PlaywrightDriver implements Driver {
         ScreenshotManager.takeScreenshot(page,action.actionType(),action.testcaseId());
     }
 
+    @Step("Type text to element")
     public void type(Action action){
         String selector = parseLocator(action.locator());
         page.fill(selector, getArg(action, 0));
+        ScreenshotManager.takeScreenshot(page,action.actionType(),action.testcaseId());
     }
 
+    @Step("Click element")
     public void click(Action action){
         String selector = parseLocator(action.locator());
         page.click(selector);
+        ScreenshotManager.takeScreenshot(page,action.actionType(),action.testcaseId());
     }
 
+    @Step("Clear text in element")
     public void clear(Action action){
         page.fill(action.locator(), "");
+        ScreenshotManager.takeScreenshot(page,action.actionType(),action.testcaseId());
     }
 
+    @Step("Wait for seconds")
     public void wait(Action action){
         try {
             page.waitForTimeout(Double.parseDouble(getArg(action, 0)));
             Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
+            ScreenshotManager.takeScreenshot(page,action.actionType(),action.testcaseId());
         }
         catch (Exception e) { throw new RuntimeException(e); }
     }
 
+    @Step("Get text from element")
     @Override
     public String getText(Action action) {
         String selector = parseLocator(action.locator());
+        ScreenshotManager.takeScreenshot(page,action.actionType(),action.testcaseId());
         return page.textContent(selector);
     }
 
@@ -136,8 +159,10 @@ public class PlaywrightDriver implements Driver {
 
     // --- VISIBILITY & DOM STATE ---
     /** Assert element is visible on page */
+    @Step("Assert element is visible")
     public void assertVisible(Action action) {
         String selector = parseLocator(action.locator());
+        ScreenshotManager.takeScreenshot(page,action.actionType(),action.testcaseId());
         assertThat(page.locator(selector)).isVisible();
     }
 

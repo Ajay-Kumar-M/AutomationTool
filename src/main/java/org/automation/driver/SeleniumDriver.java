@@ -2,13 +2,19 @@ package org.automation.driver;
 
 import io.qameta.allure.Step;
 import org.automation.records.Action;
+import org.automation.util.DockerContainerCheck;
 import org.automation.util.ScreenshotManager;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,14 +31,36 @@ public class SeleniumDriver implements Driver {
 //    }
 
     @Override
-    public void init(String browser) {
-        if ((browser.equalsIgnoreCase("chrome"))||(browser.equalsIgnoreCase("chromium"))) {
-            driver = new ChromeDriver();
-        } else if (browser.equalsIgnoreCase("firefox")) {
-            driver = new FirefoxDriver();
+    public void init(String browser, Boolean isDocker, String dockerUrl, String containerName) {
+        if(isDocker){
+            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(containerName));
+            if ((browser.equalsIgnoreCase("chrome"))||(browser.equalsIgnoreCase("chromium"))) {
+                ChromeOptions options = new ChromeOptions();
+                try {
+                    driver = new RemoteWebDriver(URI.create(dockerUrl).toURL(), options);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (browser.equalsIgnoreCase("firefox")) {
+                FirefoxOptions options = new FirefoxOptions();
+                try {
+                    driver = new RemoteWebDriver(URI.create(dockerUrl).toURL(), options);
+                } catch (MalformedURLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
+        } else {
+            if ((browser.equalsIgnoreCase("chrome"))||(browser.equalsIgnoreCase("chromium"))) {
+                ChromeOptions options = new ChromeOptions();
+                options.addArguments("--start-maximized");
+                driver = new ChromeDriver(options);
+            } else if (browser.equalsIgnoreCase("firefox")) {
+                driver = new FirefoxDriver();
+            }
+            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
+            driver.manage().window().maximize();
         }
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
-        driver.manage().window().maximize();
     }
 
     public WebDriver getDriver() { return driver; }
@@ -86,7 +114,7 @@ public class SeleniumDriver implements Driver {
         ScreenshotManager.takeScreenshot(driver, "clear", action.testcaseId());
     }
 
-    @Step("Wait for Sec")
+    @Step("Wait for Seconds")
     public void wait(Action action) {
         try {
             Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
@@ -103,6 +131,7 @@ public class SeleniumDriver implements Driver {
         return action.arguments()[index];
     }
 
+    @Step("Get element text")
     public String getText(String locator) {
         By by = parseLocator(locator);
         return driver.findElement(by).getText();

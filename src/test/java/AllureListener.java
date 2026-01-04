@@ -58,7 +58,9 @@ public class AllureListener implements ITestListener {
                     result.getThrowable().getMessage(),
                     duration
             );
+            System.out.println("Before attach");
             attachExecutionReport(report);
+            System.out.println("after attach");
             String testCaseID = Driver.getTestCaseID();
             // ✓ Retrieve testcaseID and driver from context
             String testcaseID = (String) context.getAttribute("testcaseID");

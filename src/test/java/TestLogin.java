@@ -24,7 +24,7 @@ import java.util.Map;
 public class TestLogin {
 
     @BeforeMethod
-    public void setUp(ITestContext context) {  // ✓ Add parameter
+    public void setUp(ITestContext context) {
         Map<String, Object> executionState = new LinkedHashMap<>();
         executionState.put("startTime", System.currentTimeMillis());
         context.setAttribute("executionState", executionState);
@@ -138,6 +138,7 @@ public class TestLogin {
 //    @Feature("Feature1: Login check")
 //    @Story("Story: login verification")
  */
+
 /*
 
 //        context.setAttribute("testcaseID", "TC001");

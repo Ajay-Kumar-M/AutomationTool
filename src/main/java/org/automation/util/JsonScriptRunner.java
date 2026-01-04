@@ -33,9 +33,10 @@ public class JsonScriptRunner {
             } catch (InvocationTargetException | AssertionError e) {
                 Throwable original = e.getCause();
                 original.printStackTrace();
-                System.out.println("\nPrinting message " + original.getMessage());
+                System.out.println("\nPrinting message -" + original.getMessage());
+                System.out.println("\nPrinting message string -" + original);
                 // handle logging / recovery / reporting
-                storeResultCSV(actions.getFirst(),"Failure",original.getMessage());
+                storeResultCSV(actions.getFirst(),"Failure",original.getMessage().split("\\R", 2)[0]);
                 queueManager.addRecord(new ExpectedResultData(action.testcaseId(),action.actionType(),action.locator(),"Failure",original.getMessage(),new String[0]));
                 // Rethrow the original exception to fail the test
                 if (original instanceof AssertionError) {
@@ -104,7 +105,7 @@ public class JsonScriptRunner {
                 writer.write("TestCaseID,Description,Status,Message");
                 writer.newLine();
             }
-            writer.write(action.testcaseId()+","+action.description()+","+status+","+message);
+            writer.write(action.testcaseId()+","+action.description()+","+status+","+message.replace("\"","'"));
             writer.newLine();
         } catch (Exception e) {
             throw new RuntimeException(e);

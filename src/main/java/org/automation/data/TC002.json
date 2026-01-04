@@ -4,7 +4,6 @@
     "locator": null,
     "arguments": ["https://www.selenium.dev/selenium/web/hidden.html"],
     "testcaseId": "TC002",
-    "expectedResult": "Login page loaded",
     "additionalData": {"timeout": "30"},
     "epic": "Product check",
     "feature": "Dashboard",
@@ -20,6 +19,6 @@
     "actionType": "wait",
     "locator": null,
     "testcaseId": "TC002",
-    "arguments": ["5"]
+    "arguments": ["3"]
   }
 ]

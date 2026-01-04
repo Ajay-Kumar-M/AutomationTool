@@ -14,7 +14,6 @@
     <test thread-count = "5" name="TestNG Name">
         <classes>
             <class name="TestLogin" />
-<!--            <class name="grid.TestTwo"/>-->
         </classes>
     </test>
 </suite>

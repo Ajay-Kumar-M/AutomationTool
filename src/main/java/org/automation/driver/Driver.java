@@ -6,7 +6,7 @@ import org.openqa.selenium.WebDriver;
 
 public interface Driver {
 
-    void init(String browser);
+    void init(String browser, Boolean isDocker, String dockerUrl, String containerName);
     void execute(Action action);
     String getText(Action action);
     void close();

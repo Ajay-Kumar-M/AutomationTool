@@ -4,6 +4,7 @@ import com.microsoft.playwright.*;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
 import org.automation.records.Action;
+import org.automation.records.DriverConfig;
 import org.automation.util.DockerContainerCheck;
 import org.automation.util.ScreenshotManager;
 
@@ -25,30 +26,30 @@ public class PlaywrightDriver implements Driver {
 //    }
 
     @Override
-    public void init(String browserName, Boolean isDocker, String dockerUrl, String containerName) {
+    public void init(DriverConfig driverConfig) {
         playwright = Playwright.create();
-        if(isDocker){
-            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(containerName));
-            if (browserName.equalsIgnoreCase("chrome") || browserName.equalsIgnoreCase("chromium")) {
-                System.out.println("Using docker-"+dockerUrl);
-                browser = playwright.chromium().connect(dockerUrl);
-            } else if (browserName.equalsIgnoreCase("firefox")) {
-                browser = playwright.firefox().connect(dockerUrl);
-            } else if (browserName.equalsIgnoreCase("webkit")) {
-                browser = playwright.webkit().connect(dockerUrl);
+        if(driverConfig.isDocker()){
+            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(driverConfig.dockerContainerName()));
+            if (driverConfig.browserType().equalsIgnoreCase("chrome") || driverConfig.browserType().equalsIgnoreCase("chromium")) {
+                System.out.println("Using docker-"+driverConfig.dockerUrl());
+                browser = playwright.chromium().connect(driverConfig.dockerUrl());
+            } else if (driverConfig.browserType().equalsIgnoreCase("firefox")) {
+                browser = playwright.firefox().connect(driverConfig.dockerUrl());
+            } else if (driverConfig.browserType().equalsIgnoreCase("webkit")) {
+                browser = playwright.webkit().connect(driverConfig.dockerUrl());
             }
         } else {
-            if (browserName.equalsIgnoreCase("chrome") || browserName.equalsIgnoreCase("chromium")) {
+            if (driverConfig.browserType().equalsIgnoreCase("chrome") || driverConfig.browserType().equalsIgnoreCase("chromium")) {
                 browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
                         .setHeadless(false)
                         .setSlowMo(100) // 100 MS delay after every action
                 );
-            } else if (browserName.equalsIgnoreCase("firefox")) {
+            } else if (driverConfig.browserType().equalsIgnoreCase("firefox")) {
                 browser = playwright.firefox().launch(new BrowserType.LaunchOptions()
                         .setHeadless(false)
                         .setSlowMo(100) // 100 MS delay after every action
                 );
-            } else if (browserName.equalsIgnoreCase("webkit")) {
+            } else if (driverConfig.browserType().equalsIgnoreCase("webkit")) {
                 browser = playwright.webkit().launch(new BrowserType.LaunchOptions()
                         .setHeadless(false)
                         .setSlowMo(100) // 100 MS delay after every action

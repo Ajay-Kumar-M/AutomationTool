@@ -1,7 +1,7 @@
 package org.automation.util;
 
 import net.sf.jasperreports.engine.JRException;
-import org.automation.executor.BrowserConfig;
+import org.automation.executor.DriverConfig;
 import org.automation.executor.Driver;
 import org.automation.records.Action;
 import org.automation.records.ExpectedResultData;
@@ -67,7 +67,7 @@ public class JsonScriptRunner {
     }
 
     public static void main(String[] args) throws Exception {
-        Driver browser = BrowserConfig.getBrowserActions();
+        Driver browser = DriverConfig.getBrowserActions();
         ObjectMapper mapper = new ObjectMapper();
         JsonScriptRunner runner = new JsonScriptRunner();
         try {
@@ -83,7 +83,7 @@ public class JsonScriptRunner {
             // Generate all jasper report formats
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
-            SendEmailExample.sendMail("");
+            SendReportEmail.sendMail("");
             System.out.println("\n✓ All reports generated successfully!");
         } catch (JRException | AssertionError e) {
             System.out.println("Caught exception JRException | AssertionError : "+e.getMessage());

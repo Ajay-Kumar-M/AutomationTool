@@ -2,6 +2,7 @@ package org.automation.executor;
 
 import io.qameta.allure.Step;
 import org.automation.records.Action;
+import org.automation.records.DriverConfig;
 import org.automation.util.DockerContainerCheck;
 import org.automation.util.ScreenshotManager;
 import org.openqa.selenium.*;
@@ -31,31 +32,31 @@ public class SeleniumDriver implements Driver {
 //    }
 
     @Override
-    public void init(String browser, Boolean isDocker, String dockerUrl, String containerName) {
-        if(isDocker){
-            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(containerName));
-            if ((browser.equalsIgnoreCase("chrome"))||(browser.equalsIgnoreCase("chromium"))) {
+    public void init(DriverConfig driverConfig) {
+        if(driverConfig.isDocker()){
+            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(driverConfig.dockerContainerName()));
+            if ((driverConfig.browserType().equalsIgnoreCase("chrome"))||(driverConfig.browserType().equalsIgnoreCase("chromium"))) {
                 ChromeOptions options = new ChromeOptions();
                 try {
-                    driver = new RemoteWebDriver(URI.create(dockerUrl).toURL(), options);
+                    driver = new RemoteWebDriver(URI.create(driverConfig.dockerUrl()).toURL(), options);
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }
-            } else if (browser.equalsIgnoreCase("firefox")) {
+            } else if (driverConfig.browserType().equalsIgnoreCase("firefox")) {
                 FirefoxOptions options = new FirefoxOptions();
                 try {
-                    driver = new RemoteWebDriver(URI.create(dockerUrl).toURL(), options);
+                    driver = new RemoteWebDriver(URI.create(driverConfig.dockerUrl()).toURL(), options);
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }
             }
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
         } else {
-            if ((browser.equalsIgnoreCase("chrome"))||(browser.equalsIgnoreCase("chromium"))) {
+            if ((driverConfig.browserType().equalsIgnoreCase("chrome"))||(driverConfig.browserType().equalsIgnoreCase("chromium"))) {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--start-maximized");
                 driver = new ChromeDriver(options);
-            } else if (browser.equalsIgnoreCase("firefox")) {
+            } else if (driverConfig.browserType().equalsIgnoreCase("firefox")) {
                 driver = new FirefoxDriver();
             }
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));

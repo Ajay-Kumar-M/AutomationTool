@@ -123,16 +123,21 @@ notify.on.success=false
 | **Live Logs** | Real-time execution monitoring |
 
 ## 🤝 **Extending Your Framework**
-
+### **Driver Config** (`config/driver.properties`)
+```properties
+drivers.TYPE=PACKAGE_NAME
+```
 ```java
+import org.automation.records.DriverConfig;
+
 // Custom framework integration
 public class CustomFrameworkExecutor implements Driver {
     @Override
-    public void init() {
+    public void init(DriverConfig driverConfig) {
         // Your driver initialization logic here
     }
 
-    public void gotoUrl(Action action){
+    public void gotoUrl(Action action) {
         // Your custom logic here
     }
 }
@@ -145,7 +150,7 @@ public class CustomFrameworkExecutor implements Driver {
 ```bash
 docker-compose up -d
 ```
-### **Docker Config** (`config/browser.properties`)
+### **Docker Config** (`config/driver.properties`)
 ```properties
 docker.enable=false
 docker.url=ws://0.0.0.0:3000/

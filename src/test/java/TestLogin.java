@@ -1,11 +1,11 @@
 import io.qameta.allure.*;
 import net.sf.jasperreports.engine.JRException;
-import org.automation.executor.BrowserConfig;
+import org.automation.executor.DriverConfig;
 import org.automation.executor.Driver;
 import org.automation.records.Action;
 import org.automation.util.JsonScriptRunner;
 import org.automation.util.ScreenshotManager;
-import org.automation.util.SendEmailExample;
+import org.automation.util.SendReportEmail;
 import org.automation.util.TestReportGenerator;
 import org.testng.ITestContext;
 import org.testng.annotations.*;
@@ -30,7 +30,7 @@ public class TestLogin {
         context.setAttribute("executionState", executionState);
         String threadName = Thread.currentThread().getName();
         System.out.println("[TEST] Setting up for thread: " + threadName);
-        Driver browser = BrowserConfig.getBrowserActions();
+        Driver browser = DriverConfig.getBrowserActions();
         browser.storeInThreadLocal();
     }
 
@@ -99,7 +99,7 @@ public class TestLogin {
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
             generateAllureReport();
-            SendEmailExample.sendMail("");
+            SendReportEmail.sendMail("");
             System.out.println("\n✓ All reports generated successfully!");
         } catch (JRException e) {
             System.out.println("Caught exception JRException : "+e.getMessage());

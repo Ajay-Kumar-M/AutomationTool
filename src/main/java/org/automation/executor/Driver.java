@@ -2,11 +2,12 @@ package org.automation.executor;
 
 import com.microsoft.playwright.Page;
 import org.automation.records.Action;
+import org.automation.records.DriverConfig;
 import org.openqa.selenium.WebDriver;
 
 public interface Driver {
 
-    void init(String browser, Boolean isDocker, String dockerUrl, String containerName);
+    void init(DriverConfig driverConfig);
     void execute(Action action);
     String getText(Action action);
     void close();

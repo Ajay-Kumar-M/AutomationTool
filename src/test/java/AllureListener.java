@@ -1,6 +1,6 @@
 import com.microsoft.playwright.Page;
 import io.qameta.allure.Attachment;
-import org.automation.driver.Driver;
+import org.automation.executor.Driver;
 import org.automation.util.ScreenshotManager;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestContext;

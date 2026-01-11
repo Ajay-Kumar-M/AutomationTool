@@ -1,9 +1,9 @@
 package org.automation.util;
 
 import com.microsoft.playwright.Page;
-import org.automation.driver.PlaywrightDriver;
-import org.automation.driver.SeleniumDriver;
-import org.automation.driver.TestContext;
+import org.automation.executor.PlaywrightDriver;
+import org.automation.executor.SeleniumDriver;
+import org.automation.executor.TestContext;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 

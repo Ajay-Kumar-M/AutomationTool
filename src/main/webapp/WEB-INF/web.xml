@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.1"
+         xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+         http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+
+    <display-name>Your Application Name</display-name>
+    <description>Your application description</description>
+
+    <!-- Servlets will be defined here later -->
+<!--    <servlet>-->
+<!--        <servlet-name>runConfig</servlet-name>-->
+<!--        <servlet-class>org.automation.servlet.RunServlet</servlet-class>-->
+<!--        <init-param>-->
+<!--            <param-name>AppName</param-name>-->
+<!--            <param-value>AutomationServlet</param-value>-->
+<!--        </init-param>-->
+<!--    </servlet>-->
+<!--    <servlet-mapping>-->
+<!--        <servlet-name>runConfig</servlet-name>-->
+<!--        <url-pattern>/run</url-pattern>-->
+<!--    </servlet-mapping>-->
+
+    <context-param>
+        <param-name>AppName</param-name>
+        <param-value>AutomationTool</param-value>
+    </context-param>
+
+    <session-config>
+        <cookie-config>
+            <http-only>true</http-only>
+        </cookie-config>
+    </session-config>
+
+
+    <!-- Welcome to file list -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+</web-app>

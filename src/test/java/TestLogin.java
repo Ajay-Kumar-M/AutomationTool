@@ -1,7 +1,7 @@
 import io.qameta.allure.*;
 import net.sf.jasperreports.engine.JRException;
-import org.automation.driver.BrowserConfig;
-import org.automation.driver.Driver;
+import org.automation.executor.BrowserConfig;
+import org.automation.executor.Driver;
 import org.automation.records.Action;
 import org.automation.util.JsonScriptRunner;
 import org.automation.util.ScreenshotManager;

@@ -1,11 +1,8 @@
 package org.automation.others;
 
-import org.automation.driver.Driver;
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

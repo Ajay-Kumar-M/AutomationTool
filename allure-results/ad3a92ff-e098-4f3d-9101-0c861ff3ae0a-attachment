@@ -1,0 +1,8 @@
+Test Failed
+Reason: Locator expected to be visible
+Call log:
+  - Assert "isVisible" with timeout 5000ms
+  - waiting for locator("//div[@id='singleHidden']")
+    9 × locator resolved to <div hidden="" id="singleHidden">This will not be visible</div>
+      - unexpected value "hidden"
+Duration: 6338ms

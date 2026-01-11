@@ -1,0 +1,316 @@
+[ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ][ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ][ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ][ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ][ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ][ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ][ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ][ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ][ {
+  "testcaseId" : "TC001",
+  "actionType" : "gotoUrl",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#username",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "type",
+  "locator" : "#password",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+}, {
+  "testcaseId" : "TC001",
+  "actionType" : "wait",
+  "locator" : null,
+  "status" : "Success",
+  "resultMessage" : "",
+  "additionalData" : [ ]
+} ]

@@ -1,0 +1,36 @@
+[
+  {
+    "actionType": "gotoUrl",
+    "locator": null,
+    "arguments": ["https://www.selenium.dev/selenium/web/fedcm/signin.html"],
+    "testcaseId": "TC001",
+    "additionalData": {"timeout": "30"},
+    "epic": "Product check",
+    "feature": "Login",
+    "story": "Validate Login",
+    "description": "Validate Login with invalid credentials"
+  },
+  {
+    "actionType": "type",
+    "locator": "#username",
+    "arguments": ["admin"],
+    "testcaseId": "TC001"
+  },
+  {
+    "actionType": "type",
+    "locator": "#password",
+    "arguments": ["secret123"],
+    "testcaseId": "TC001"
+  },
+  {
+    "actionType": "click",
+    "locator": "button[type=submit]",
+    "testcaseId": "TC001"
+  },
+  {
+    "actionType": "wait",
+    "locator": null,
+    "testcaseId": "TC001",
+    "arguments": ["3"]
+  }
+]

@@ -44,7 +44,7 @@
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1400px;
             margin: 0 auto;
             background: var(--color-white);
             border-radius: var(--radius-md);
@@ -406,27 +406,21 @@
             flex: 1;
         }
 
-        .operation-wrapper {
-          display: flex;           /* Arrange children in a row */
-          align-items: center;     /* Vertically center them if needed */
-          gap: 0px;               /* Optional spacing between divs */
-        }
-
         .operation-item-action {
             font-weight: 600;
             color: var(--color-accent);
-            padding: 2px;
-            margin: 0 10px;
+            margin-bottom: 4px;
         }
 
         .operation-item-index {
             display: inline-block;
             background: var(--color-accent);
             color: var(--color-white);
-            padding: 8px;
+            padding: 2px 8px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
+            margin-right: 8px;
         }
 
         .operation-item-buttons {
@@ -801,7 +795,7 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons">
-                <button class="btn btn-secondary" id="clearBtn" onclick="clearSelection(true)" style="display: none;">
+                <button class="btn btn-secondary" id="clearBtn" onclick="clearSelection()" style="display: none;">
                     Clear Selection
                 </button>
                 <button class="btn btn-primary" id="runBtn" onclick="runTestCases()" style="display: none;">
@@ -852,7 +846,7 @@
                     </tr>
                 </tbody>
             </table>
-            <p class="tree-label">* Populate Epic, Feature, Story, Description only in the first Action of the Testcase.</p>
+
             <!-- Create Footer Buttons -->
             <div class="footer-buttons">
                 <button class="btn btn-success" onclick="createTestcase()">
@@ -906,7 +900,7 @@
                     </tr>
                 </tbody>
             </table>
-            <p class="tree-label">* Populate Epic, Feature, Story, Description only in the first Action of the Testcase.</p>
+
             <!-- Edit Footer Buttons -->
             <div class="footer-buttons">
                 <button class="btn btn-danger" onclick="clearEditorTab('edit')" style="display: none;" id="editCancelBtn">
@@ -1036,20 +1030,15 @@
 
         // ===== ADD OPERATION =====
         function addOperation(action, mode) {
-            console.log("add op action : "+action);
-            console.log("add op mode : "+mode);
             const operationsList = document.getElementById('operationsList' + (mode === 'create' ? 'Create' : 'Edit'));
-
+            
             // Clear placeholder if first item
             if (operationsList.textContent.includes('Drop actions here')) {
                 operationsList.innerHTML = '';
             }
-
+            
             const actionId = 'action_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            const operationIndex = Array.from(operationsList.children).length + 1;
-            console.log("actionId : "+actionId);
-            console.log("operationIndex : "+operationIndex);
-
+            
             // Initialize operation data
             operationsData[actionId] = {
                 actionType: action,
@@ -1062,7 +1051,7 @@
                 story: '',
                 description: ''
             };
-
+            
             // Create operation item
             const operationItem = document.createElement('div');
             operationItem.className = 'operation-item';
@@ -1072,81 +1061,81 @@
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('operationId', actionId);
             };
-
+            
             const operationContent = document.createElement('div');
             operationContent.className = 'operation-item-content';
-            operationContent.innerHTML = '<div class="operation-wrapper">' +
-                                        '<div class="operation-item-index">' + operationIndex + '</div>' +
-                                        '<div class="operation-item-action">' + action + '</div></div>';
+            operationContent.innerHTML = `
+                <div class="operation-item-index">${Array.from(operationsList.children).length + 1}</div>
+                <div class="operation-item-action">${action}</div>
+            `;
             operationContent.style.cursor = 'pointer';
             operationContent.onclick = () => editOperation(actionId, mode);
-
+            
             const operationButtons = document.createElement('div');
             operationButtons.className = 'operation-item-buttons';
-            operationButtons.innerHTML = '<button class="btn btn-secondary" style="padding: 4px 8px;" onclick="deleteOperation(\'' + actionId + '\', \'' + mode + '\')">🗑</button>';
-
+            operationButtons.innerHTML = `
+                <button class="btn btn-secondary" style="padding: 4px 8px;" onclick="deleteOperation('${actionId}', '${mode}')">🗑</button>
+            `;
+            
             operationItem.appendChild(operationContent);
             operationItem.appendChild(operationButtons);
             operationsList.appendChild(operationItem);
-
+            
             // Reindex operations
             reindexOperations(mode);
         }
 
         // ===== EDIT OPERATION =====
         function editOperation(actionId, mode) {
-            console.log("editOperation action id : "+actionId);
-            console.log("editOperation mode : "+mode);
             currentSelectedAction = actionId;
             const data = operationsData[actionId];
-            console.log("editOperation data : "+data);
-            console.log("editOperation data: " + JSON.stringify(data));
-            console.log("editOperation data actionType : "+data.actionType);
             const userdataForm = document.getElementById('userdataForm' + (mode === 'create' ? 'Create' : 'Edit'));
             
-            let formHTML = '<div class="userdata-form">' +
-                '<h4>Edit Action: ' + data.actionType + '</h4>' +
-                '<div class="form-group">' +
-                '<label>Action Type:</label>' +
-                '<input type="text" value="' + data.actionType + '" readonly style="background: #f5f5f5;" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Locator:</label>' +
-                '<input type="text" id="editLocator" value="' + (data.locator || '') + '" placeholder="e.g., #username, button[type=submit]" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Arguments (comma-separated):</label>' +
-                '<input type="text" id="editArguments" value="' + (Array.isArray(data.arguments) ? data.arguments.join(', ') : '') + '" placeholder="e.g., admin, secret123" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Test Case ID:</label>' +
-                '<input type="text" id="editTestcaseId" value="' + (data.testcaseId || '') + '" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Epic:</label>' +
-                '<input type="text" id="editEpic" value="' + (data.epic || '') + '" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Feature:</label>' +
-                '<input type="text" id="editFeature" value="' + (data.feature || '') + '" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Story:</label>' +
-                '<input type="text" id="editStory" value="' + (data.story || '') + '" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Description:</label>' +
-                '<textarea id="editDescription">' + (data.description || '') + '</textarea>' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Additional Data (JSON):</label>' +
-                '<textarea id="editAdditionalData">' + JSON.stringify(data.additionalData || {}, null, 2) + '</textarea>' +
-                '</div>' +
-                '<div class="form-buttons">' +
-                '<button class="btn btn-success" onclick="saveOperation(\'' + actionId + '\', \'' + mode + '\')">✓ Save</button>' +
-                '<button class="btn btn-secondary" onclick="cancelEditOperation(\'' + mode + '\')">✗ Cancel</button>' +
-                '</div>' +
-                '</div>';
+            const formHTML = `
+                <div class="userdata-form">
+                    <h4>Edit Action: ${data.actionType}</h4>
+                    <div class="form-group">
+                        <label>Action Type:</label>
+                        <input type="text" value="${data.actionType}" readonly style="background: #f5f5f5;" />
+                    </div>
+                    <div class="form-group">
+                        <label>Locator:</label>
+                        <input type="text" id="editLocator" value="${data.locator || ''}" placeholder="e.g., #username, button[type=submit]" />
+                    </div>
+                    <div class="form-group">
+                        <label>Arguments (comma-separated):</label>
+                        <input type="text" id="editArguments" value="${Array.isArray(data.arguments) ? data.arguments.join(', ') : ''}" placeholder="e.g., admin, secret123" />
+                    </div>
+                    <div class="form-group">
+                        <label>Test Case ID:</label>
+                        <input type="text" id="editTestcaseId" value="${data.testcaseId || ''}" />
+                    </div>
+                    <div class="form-group">
+                        <label>Epic:</label>
+                        <input type="text" id="editEpic" value="${data.epic || ''}" />
+                    </div>
+                    <div class="form-group">
+                        <label>Feature:</label>
+                        <input type="text" id="editFeature" value="${data.feature || ''}" />
+                    </div>
+                    <div class="form-group">
+                        <label>Story:</label>
+                        <input type="text" id="editStory" value="${data.story || ''}" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description:</label>
+                        <textarea id="editDescription">${data.description || ''}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Data (JSON):</label>
+                        <textarea id="editAdditionalData">${JSON.stringify(data.additionalData || {}, null, 2)}</textarea>
+                    </div>
+                    <div class="form-buttons">
+                        <button class="btn btn-success" onclick="saveOperation('${actionId}', '${mode}')">✓ Save</button>
+                        <button class="btn btn-secondary" onclick="cancelEditOperation('${mode}')">✗ Cancel</button>
+                    </div>
+                </div>
+            `;
             
             userdataForm.innerHTML = formHTML;
         }
@@ -1398,7 +1387,7 @@
             showStatus((mode === 'create' ? 'Create' : 'Edit') + ' cancelled', 'success');
         }
 
-        // ===== RUNNER TAB FUNCTIONS =====
+        // ===== RUNNER TAB FUNCTIONS (From previous implementation) =====
         async function fetchTestCases() {
             const folderName = document.getElementById('folderName').value.trim();
             
@@ -1560,15 +1549,13 @@
             }
         }
 
-        function clearSelection(showStatusFlag = false) {
+        function clearSelection() {
             document.querySelectorAll('.tree-node input[type="checkbox"]').forEach(checkbox => {
                 checkbox.checked = false;
             });
             selectedItems.clear();
             updateSelectionUI();
-            if(showStatusFlag){
-                showStatus('Selection cleared', 'success');
-            }
+            showStatus('Selection cleared', 'success');
         }
 
         async function runTestCases() {
@@ -1596,7 +1583,6 @@
 
                 if (result.success) {
                     showStatus('✓ Test cases executed successfully! ID: ' + result.executionId, 'success');
-                    clearSelection(false);
                 } else {
                     showStatus(result.message || 'Failed to execute test cases', 'error');
                 }

@@ -30,7 +30,7 @@ public class TestLogin {
         context.setAttribute("executionState", executionState);
         String threadName = Thread.currentThread().getName();
         System.out.println("[TEST] Setting up for thread: " + threadName);
-        Driver browser = DriverConfig.getBrowserActions();
+        Driver browser = DriverConfig.getConfigDriver();
         browser.storeInThreadLocal();
     }
 
@@ -99,7 +99,7 @@ public class TestLogin {
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
             generateAllureReport();
-            SendReportEmail.sendMail("");
+            SendReportEmail.sendMail();
             System.out.println("\n✓ All reports generated successfully!");
         } catch (JRException e) {
             System.out.println("Caught exception JRException : "+e.getMessage());

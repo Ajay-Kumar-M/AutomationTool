@@ -191,5 +191,13 @@
             <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
             <version>3.0.2</version>
         </dependency>
+        <!-- Source: https://mvnrepository.com/artifact/org.glassfish.web/jakarta.servlet.jsp.jstl -->
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>3.0.1</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 </project>

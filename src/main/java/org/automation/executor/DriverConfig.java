@@ -23,8 +23,8 @@ public class DriverConfig {
         }
     }
 
-    public static Driver getBrowserActions() {
-        Driver driver = DriverFactory.createBrowserActions(driverConfig);
+    public static Driver getConfigDriver() {
+        Driver driver = DriverFactory.createDriverInstance(driverConfig);
         driver.init(driverConfig);
         return driver;
     }

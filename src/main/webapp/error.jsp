@@ -28,8 +28,7 @@
     <div class="container">
         <header>
             <h1>🤖 AutomationTool Error</h1>
-            <p class="subtitle">Enterprise Test Automation Platform</p>
-            <span class="status-badge">✓ Running</span>
+            <p class="subtitle">Error occurred</p>
         </header>
 
         <div class="info-section">
@@ -38,23 +37,10 @@
                exception.getMessage()
             %>
             </br>
-            <form action="run" method="post">
-                 Enter folder name: <input typ="text" name="folderName"></br>
-                 <input type="Submit">
-            </form>
-            </br>
+            <%=
+               exception.printStackTrace()
+            %>
         </div>
-
-        <%@ page import="java.until.*" %>
-        <%!
-            String name = "AutomationTool";
-        %>
-        <%
-            String folderName = request.getParameter("folderName");
-            System.out.println("folder name-"+folderName);
-            out.println("Automation triggered in the folder - "+folderName);
-        %>
-        Tool name is : <%= name %>
     </div>
 </body>
 </html>

@@ -1,6 +1,5 @@
-package org.automation;
+package org.automation.servlet;
 
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebInitParam;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,9 +17,6 @@ public class RunServlet extends HttpServlet {
         PrintWriter out = response.getWriter();
         out.println("Automation triggered in the folder - "+folderName);
 
-        request.setAttribute("label",folderName);
-        RequestDispatcher rd = request.getRequestDispatcher("display.jsp");
-        rd.forward(request,response);
     }
 }
 
@@ -75,4 +71,16 @@ public class RunServlet extends HttpServlet {
     ServletContext servletContext = getServletContext();
         String paramvalue = servletContext.getInitParameter("AppName");
         System.out.println("Param value-"+paramvalue);
+ */
+/*
+display.jsp
+        request.setAttribute("label",folderName);
+        List<DriverConfig> dcs = Arrays.asList(
+                new DriverConfig("chrome1","wait","selenium",false,"url","container"),
+                new DriverConfig("chrome1","wait","selenium",false,"url","container")
+
+        );
+        request.setAttribute("dcs",dcs);
+        RequestDispatcher rd = request.getRequestDispatcher("display.jsp");
+        rd.forward(request,response);
  */

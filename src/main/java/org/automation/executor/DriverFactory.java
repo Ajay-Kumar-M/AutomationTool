@@ -28,7 +28,7 @@ public class DriverFactory {
         }
     }
 
-    public static Driver createBrowserActions(DriverConfig driverConfig) {
+    public static Driver createDriverInstance(DriverConfig driverConfig) {
         String className = driverClassMap.get(driverConfig.driverType().toLowerCase());
 
         if (className == null) {
@@ -48,7 +48,7 @@ public class DriverFactory {
 }
 
 /*
-    public static Driver createBrowserActions(DriverConfig driverConfig) {
+    public static Driver createDriverInstance(DriverConfig driverConfig) {
         if (tool.equalsIgnoreCase("selenium")) {
             return new SeleniumDriver();
         } else if (tool.equalsIgnoreCase("playwright")) {

@@ -7,4 +7,8 @@ public record DriverConfig(
         Boolean isDocker,
         String dockerUrl,
         String dockerContainerName
-){}
+){
+    public String getBrowserType() {
+        return browserType;
+    }
+}

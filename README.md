@@ -89,7 +89,7 @@ AutomationTool/
 │   ├── css/             # Styles
 │   └── js/              # Client-side logic
 ├── testcaseData/        # Sample test cases
-├── docker/              # Dockerfiles
+├── result/              # Test result reports
 └── config/              # Driver + Email + other configs
 ```
 

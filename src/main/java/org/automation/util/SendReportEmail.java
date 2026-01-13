@@ -4,35 +4,44 @@ import jakarta.mail.*;
 import jakarta.mail.internet.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
 public class SendReportEmail {
 
-    public static void sendMail(String attachmentPath) {
-        // Sender's email credentials (use environment variables or secure storage in production!)
-        final String username = "majayslm@gmail.com";  // Your full email address
-        final String password = "hayc gngb yfzm lcsi";    // Gmail App Password (not regular password)
+    private static final Properties config = new Properties();
 
-        // SMTP server properties (for Gmail; adjust for other providers)
+    static {
+        try {
+            config.load(new FileInputStream("config/driver.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendMail() {
+        // SMTP server properties
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.host", config.getProperty("smtp.host", ""));
+        props.put("mail.smtp.port", config.getProperty("smtp.port", ""));
 
         // Create session with authentication
         Session session = Session.getInstance(props, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password);
+                return new PasswordAuthentication(
+                        config.getProperty("smtp.username", ""),
+                        config.getProperty("smtp.password", ""));
             }
         });
 
         try {
             // Create the email message
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress(username));
+            message.setFrom(new InternetAddress(config.getProperty("smtp.username", "")));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("ajay.kumar0495@gmail.com"));
             message.setSubject("Automation Testcase Executed!");
             // Create multipart for body + attachments
@@ -69,6 +78,6 @@ public class SendReportEmail {
     }
 
     public static void main(String[] args){
-        sendMail("");
+        sendMail();
     }
 }

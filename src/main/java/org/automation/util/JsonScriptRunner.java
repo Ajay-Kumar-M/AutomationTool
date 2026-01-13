@@ -58,8 +58,8 @@ public class JsonScriptRunner {
         storeResultCSV(actions.getFirst(),"Success","TestCase Executed Successfully");
     }
 
-    public void run(Driver browser, List<Action> actions) throws Exception {
-        this.driver = browser;
+    public void run(Driver driver, List<Action> actions) throws Exception {
+        this.driver = driver;
         runFromJson(actions);
         queueManager.flushNow();
         // App shutdown
@@ -67,23 +67,23 @@ public class JsonScriptRunner {
     }
 
     public static void main(String[] args) throws Exception {
-        Driver browser = DriverConfig.getBrowserActions();
+        Driver driver1 = DriverConfig.getConfigDriver();
         ObjectMapper mapper = new ObjectMapper();
         JsonScriptRunner runner = new JsonScriptRunner();
         try {
             String jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC001.json"));
             List<Action> actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
-            runner.run(browser, actions);
+            runner.run(driver1, actions);
             jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC002.json"));
             actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
-            runner.run(browser, actions);
+            runner.run(driver1, actions);
 
             new File("result").mkdirs();
             TestReportGenerator generator = new TestReportGenerator();
             // Generate all jasper report formats
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
-            SendReportEmail.sendMail("");
+            SendReportEmail.sendMail();
             System.out.println("\n✓ All reports generated successfully!");
         } catch (JRException | AssertionError e) {
             System.out.println("Caught exception JRException | AssertionError : "+e.getMessage());
@@ -94,7 +94,7 @@ public class JsonScriptRunner {
 //        queueManager.flushNow(); // Manual trigger
         // App shutdown
         queueManager.shutdown();
-        browser.close();
+        driver1.close();
     }
 
     private void storeResultCSV(Action action, String status, String message){

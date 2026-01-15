@@ -6,6 +6,9 @@ import jakarta.mail.internet.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Properties;
 
 public class SendReportEmail {
@@ -13,10 +16,11 @@ public class SendReportEmail {
     private static final Properties config = new Properties();
 
     static {
-        try {
-            config.load(new FileInputStream("config/driver.properties"));
+        try (InputStream is = Files.newInputStream(
+                Paths.get("config/email.properties"))) {
+            config.load(is);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new ExceptionInInitializerError(e);
         }
     }
 
@@ -42,7 +46,7 @@ public class SendReportEmail {
             // Create the email message
             Message message = new MimeMessage(session);
             message.setFrom(new InternetAddress(config.getProperty("smtp.username", "")));
-            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse("ajay.kumar0495@gmail.com"));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(config.getProperty("smtp.to", "")));
             message.setSubject("Automation Testcase Executed!");
             // Create multipart for body + attachments
             MimeMultipart multipart = new MimeMultipart();

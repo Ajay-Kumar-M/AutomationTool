@@ -20,10 +20,6 @@ public class JsonScriptRunner {
     private Driver driver;
     static RecordQueueManager queueManager = RecordQueueManager.getInstance();
 
-//    public JsonScriptRunner(Driver driver) {
-//        this.driver = driver;
-//    }
-
     public void runFromJson(List<Action> actions) throws Exception {
         for (Action action : actions) {
             System.out.println("Executing: " + action.actionType() + " | TestCase: " + action.testcaseId());
@@ -113,6 +109,11 @@ public class JsonScriptRunner {
     }
 }
 
+/*
+//    public JsonScriptRunner(Driver driver) {
+//        this.driver = driver;
+//    }
+ */
 /*
 
 //        ObjectMapper mapper = new ObjectMapper();

@@ -10,12 +10,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import org.automation.executor.RunTestcase;
+import org.automation.executor.TaskManager;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
 
+import org.testng.TestNG;
+import org.testng.xml.XmlClass;
+import org.testng.xml.XmlSuite;
+import org.testng.xml.XmlTest;
+
 @WebServlet("/TestCaseExecutorServlet")
 public class TestCaseExecutorServlet extends HttpServlet {
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ObjectMapper responseMapper = new ObjectMapper();
         ObjectNode rootNode = responseMapper.createObjectNode();
@@ -42,10 +50,21 @@ public class TestCaseExecutorServlet extends HttpServlet {
                 System.out.println("file path - "+file);
             });
             String executionId = UUID.randomUUID().toString();
-
+            TaskManager taskManager = (TaskManager) getServletContext().getAttribute("taskManager");
+//            taskManager.submit(executionId, () -> runSelectedTestCases(executionId,resolvedFiles));
+            taskManager.submit(executionId, () -> {
+                try {
+                    runSelectedTestCases(executionId, resolvedFiles);
+                } catch (Throwable t) {
+                    System.err.println("Test execution failed for id " + executionId);
+                    t.printStackTrace();
+                    // optionally update some status in a shared map
+                }
+            });
             rootNode.put("success", true);
             rootNode.put("executionId", executionId);
             rootNode.put("filesCount", resolvedFiles.size());
+            rootNode.put("message", "Testcase execution with ID " + executionId + " has been scheduled !");
             String json = responseMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
             System.out.println(json);
             response.getWriter().write(json);
@@ -58,6 +77,35 @@ public class TestCaseExecutorServlet extends HttpServlet {
             String json = responseMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
             System.out.println(json);
             response.getWriter().write(json);
+        }
+    }
+
+    private void runSelectedTestCases(String id, List<String> jsonFilePaths) {
+        try {
+            System.out.println("runSelectedTestCases called id:" + id);
+            TestNG testng = new TestNG();
+//            testng.setTestClasses(new Class[]{RunTestcase.class});  // Fixed: use .class
+            // Create XML suite with parameters
+            XmlSuite suite = new XmlSuite();
+            suite.setName("TestSuite-" + id);
+            XmlTest test = new XmlTest(suite);
+            test.setName("Test-" + id);
+            // Pass file paths as parameter
+            Map<String, String> params = new HashMap<>();
+            params.put("testId", id);
+            params.put("jsonFilePaths", String.join(",", jsonFilePaths));  // "file1.json,file2.json"
+            test.setParameters(params);
+            test.setXmlClasses(Arrays.asList(new XmlClass(RunTestcase.class)));
+            suite.setTests(Arrays.asList(test));
+            testng.setXmlSuites(Arrays.asList(suite));
+            //testng.setVerbose(10); //testng logging
+            System.out.println("jsonFilePaths param: " + String.join(",", jsonFilePaths));
+            testng.run();
+            System.out.println("runSelectedTestCases finsh called ");
+        } catch (Exception e) {
+            System.out.println("exception occurred in runSelectedTestCases - "+e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -83,4 +131,36 @@ public class TestCaseExecutorServlet extends HttpServlet {
 //            jsonResponse.addProperty("success", true);
 //            jsonResponse.addProperty("executionId", executionId);
 //            jsonResponse.addProperty("filesCount", paths.size());
+ */
+
+/*
+
+        XmlSuite suite = new XmlSuite();
+        suite.setName(id+"_Suite");
+        // Optional: suite.setParallel(XmlSuite.ParallelMode.METHODS);
+        // suite.setThreadCount(3);
+
+        XmlTest test = new XmlTest(suite);
+        test.setName(id+"_Tests");
+
+        List<XmlClass> classes = new ArrayList<>();
+
+        XmlClass xmlClass = new XmlClass(RunTestcase.class);
+        // Optional: pass parameters if needed
+        // xmlClass.getLocalParameters().put("someKey", "value");
+
+        classes.add(xmlClass);
+        test.setXmlClasses(classes);
+        JsonFileListHolder.setFiles(jsonFilePaths);
+
+        List<XmlSuite> suites = new ArrayList<>();
+        suites.add(suite);
+
+        TestNG tng = new TestNG();
+        tng.setXmlSuites(suites);
+        // tng.setUseDefaultListeners(false); // if you want to disable default reporters
+        tng.run();
+
+        // Optional: clear after run
+        JsonFileListHolder.clear();
  */

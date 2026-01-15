@@ -1,36 +1,49 @@
-[
-  {
-    "actionType": "gotoUrl",
-    "locator": null,
-    "arguments": ["https://www.selenium.dev/selenium/web/fedcm/signin.html"],
-    "testcaseId": "TC001",
-    "additionalData": {"timeout": "30"},
-    "epic": "Product check",
-    "feature": "Login",
-    "story": "Validate Login",
-    "description": "Validate Login with invalid credentials"
+[ {
+  "actionType" : "gotoUrl",
+  "locator" : "",
+  "testcaseId" : "TC001",
+  "arguments" : [ "https://www.selenium.dev/selenium/web/fedcm/signin.html" ],
+  "additionalData" : {
+    "timeout" : "30"
   },
-  {
-    "actionType": "type",
-    "locator": "#username",
-    "arguments": ["admin"],
-    "testcaseId": "TC001"
-  },
-  {
-    "actionType": "type",
-    "locator": "#password",
-    "arguments": ["secret123"],
-    "testcaseId": "TC001"
-  },
-  {
-    "actionType": "click",
-    "locator": "button[type=submit]",
-    "testcaseId": "TC001"
-  },
-  {
-    "actionType": "wait",
-    "locator": null,
-    "testcaseId": "TC001",
-    "arguments": ["3"]
-  }
-]
+  "epic" : "Product check",
+  "feature" : "Login",
+  "story" : "Validate Login",
+  "description" : "Validate Login with invalid credentials"
+}, {
+  "actionType" : "type",
+  "locator" : "#username",
+  "testcaseId" : "TC001",
+  "arguments" : [ "admin" ],
+  "epic" : "",
+  "feature" : "",
+  "story" : "",
+  "description" : ""
+}, {
+  "actionType" : "type",
+  "locator" : "#password",
+  "testcaseId" : "TC001",
+  "arguments" : [ "secret123" ],
+  "epic" : "",
+  "feature" : "",
+  "story" : "",
+  "description" : ""
+}, {
+  "actionType" : "click",
+  "locator" : "button[type=submit]",
+  "testcaseId" : "TC001",
+  "arguments" : [ ],
+  "epic" : "",
+  "feature" : "",
+  "story" : "",
+  "description" : ""
+}, {
+  "actionType" : "wait",
+  "locator" : "",
+  "testcaseId" : "TC001",
+  "arguments" : [ "3" ],
+  "epic" : "",
+  "feature" : "",
+  "story" : "",
+  "description" : ""
+} ]

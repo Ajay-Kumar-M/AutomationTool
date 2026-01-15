@@ -2,9 +2,11 @@ package org.automation.util;
 
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRCsvDataSource;
+import net.sf.jasperreports.engine.util.JRLoader;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Complete example of generating JasperReports from CSV data
@@ -28,6 +30,7 @@ public class TestReportGenerator {
         JasperPrint jasperPrint = fillReportFromCsv();
         JasperExportManager.exportReportToPdfFile(jasperPrint, OUTPUT_PDF);
         System.out.println("✓ PDF Report saved to: " + OUTPUT_PDF);
+        terminateJasperThreads();
     }
 
     /**
@@ -58,32 +61,50 @@ public class TestReportGenerator {
     private JasperPrint fillReportFromCsv() throws JRException {
         System.out.println("Step 1: Loading JRXML template...");
         // Load the JRXML template from classpath
-        InputStream templateStream = getClass().getClassLoader().getResourceAsStream(REPORT_TEMPLATE);
+//        InputStream templateStream = getClass().getClassLoader().getResourceAsStream(REPORT_TEMPLATE);
+//
+//        if (templateStream == null) {
+//            throw new JRException("Template not found: " + REPORT_TEMPLATE);
+//        }
+//
+//        // Compile JRXML template
+//        System.out.println("Step 2: Compiling JRXML template...");
+//        JasperReport jasperReport = JasperCompileManager.compileReport(templateStream);
+//        System.out.println("✓ Template compiled successfully");
+//
+        try {
+            // Load CSV data
+            System.out.println("Step 3: Loading CSV data source...");
+            JRCsvDataSource csvDataSource = loadCsvDataSource();
+            System.out.println("✓ CSV data loaded");
 
-        if (templateStream == null) {
-            throw new JRException("Template not found: " + REPORT_TEMPLATE);
+//            InputStream jasperStream = getClass().getResourceAsStream("TestResult.jasper");
+            InputStream jasperStream = getClass().getClassLoader().getResourceAsStream("TestResult.jasper");
+
+            if (jasperStream == null) {
+                throw new RuntimeException("TestResult.jasper not found in classpath");
+            }
+
+            JasperReport jasperReport = (JasperReport) JRLoader.loadObject(jasperStream);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("CSV_FILE_PATH", "result/automationResult.csv");
+
+            // Fill report with data
+            System.out.println("Step 4: Filling report with data...");
+            JasperPrint jasperPrint = JasperFillManager.fillReport(
+                    jasperReport,
+                    params,
+                    csvDataSource
+            );
+            System.out.println("✓ Report filled successfully");
+
+            return jasperPrint;
+        } catch (Exception e) {
+            System.out.println("Exception occurred - "+e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-
-        // Compile JRXML template
-        System.out.println("Step 2: Compiling JRXML template...");
-        JasperReport jasperReport = JasperCompileManager.compileReport(templateStream);
-        System.out.println("✓ Template compiled successfully");
-
-        // Load CSV data
-        System.out.println("Step 3: Loading CSV data source...");
-        JRCsvDataSource csvDataSource = loadCsvDataSource();
-        System.out.println("✓ CSV data loaded");
-
-        // Fill report with data
-        System.out.println("Step 4: Filling report with data...");
-        JasperPrint jasperPrint = JasperFillManager.fillReport(
-                jasperReport,
-                new HashMap<>(),
-                csvDataSource
-        );
-        System.out.println("✓ Report filled successfully");
-
-        return jasperPrint;
     }
 
     /**
@@ -114,6 +135,23 @@ public class TestReportGenerator {
             e.printStackTrace();
         }
         return csvDataSource;
+    }
+
+    private void terminateJasperThreads() {
+        Thread[] threads = new Thread[Thread.activeCount()];
+        int count = Thread.enumerate(threads);
+
+        for (int i = 0; i < count; i++) {
+            Thread t = threads[i];
+            if (t != null && t.isAlive() &&
+                    (t.getName().contains("Jasper") ||
+                            t.getName().contains("AWT") ||
+                            t.getName().contains("Graphics"))) {
+                if (!t.isDaemon()) {
+                    t.setDaemon(true);  // Mark as daemon retroactively
+                }
+            }
+        }
     }
 
     /**

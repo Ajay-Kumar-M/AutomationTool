@@ -29,8 +29,10 @@
 		</box>
 	</style>
 	<dataset name="CSVDataSet1" uuid="649d27fa-d8af-4824-ae02-825414b10f1f">
-		<property name="com.jaspersoft.studio.data.defaultdataadapter" value="New Data Adapter"/>
-		<query language="csv"><![CDATA[]]></query>
+		<parameter name="CSV_FILE_PATH" class="java.lang.String">
+			<defaultValueExpression><![CDATA["/Users/ajay/Documents/Development/IntellijIDEProjects/AutomationTool/result/automationResult.csv"]]></defaultValueExpression>
+		</parameter>
+		<query language="csv"><![CDATA[$P{CSV_FILE_PATH}]]></query>
 		<field name="TestCaseID" class="java.lang.String"/>
 		<field name="Description" class="java.lang.String"/>
 		<field name="Status" class="java.lang.String"/>
@@ -82,7 +84,7 @@
 		</element>
 	</pageHeader>
 	<columnHeader height="61" splitType="Stretch">
-		<element kind="staticText" uuid="a303c67a-b5df-46ac-bb79-0c55cb02ac29" x="0" y="20" width="110" height="30" forecolor="#030303" bold="true" underline="false" hTextAlign="Center">
+		<element kind="staticText" uuid="a303c67a-b5df-46ac-bb79-0c55cb02ac29" x="0" y="20" width="110" height="30" forecolor="#030303" underline="false" bold="true" hTextAlign="Center">
 			<text><![CDATA[TestCaseID]]></text>
 			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="a7e7ec3e-4ddb-41b4-a1db-a249f76d4e4f"/>
 			<box padding="3">
@@ -92,7 +94,7 @@
 				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 			</box>
 		</element>
-		<element kind="staticText" uuid="147dcbab-d1b3-4c62-aa23-4f73aafc8aaf" x="110" y="20" width="140" height="30" forecolor="#030303" bold="true" underline="false" hTextAlign="Center">
+		<element kind="staticText" uuid="147dcbab-d1b3-4c62-aa23-4f73aafc8aaf" x="110" y="20" width="140" height="30" forecolor="#030303" underline="false" bold="true" hTextAlign="Center">
 			<text><![CDATA[Description]]></text>
 			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="f174f0f1-56d4-4398-bf70-ae07fdf6a50d"/>
 			<box padding="3">
@@ -102,7 +104,7 @@
 				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 			</box>
 		</element>
-		<element kind="staticText" uuid="9ca71a93-16bf-433a-b92b-6d576e82e0b7" x="250" y="20" width="90" height="30" forecolor="#030303" bold="true" underline="false" hTextAlign="Center">
+		<element kind="staticText" uuid="9ca71a93-16bf-433a-b92b-6d576e82e0b7" x="250" y="20" width="90" height="30" forecolor="#030303" underline="false" bold="true" hTextAlign="Center">
 			<text><![CDATA[Status]]></text>
 			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="490c86ae-5e97-4bc8-a724-f42a5f5d26c7"/>
 			<box padding="3">
@@ -113,7 +115,7 @@
 				<rightPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 			</box>
 		</element>
-		<element kind="staticText" uuid="fcbbb06c-98b5-45e0-9a5f-bd4010693d83" x="340" y="20" width="214" height="30" forecolor="#030303" bold="true" underline="false" hTextAlign="Center">
+		<element kind="staticText" uuid="fcbbb06c-98b5-45e0-9a5f-bd4010693d83" x="340" y="20" width="214" height="30" forecolor="#030303" underline="false" bold="true" hTextAlign="Center">
 			<text><![CDATA[Message]]></text>
 			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ebe74b4d-15a8-4659-8570-bea955c89420"/>
 			<box padding="3">

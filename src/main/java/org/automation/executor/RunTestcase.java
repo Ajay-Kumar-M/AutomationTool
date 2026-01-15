@@ -1,12 +1,10 @@
+package org.automation.executor;
+
 import io.qameta.allure.*;
 import net.sf.jasperreports.engine.JRException;
-import org.automation.executor.DriverConfig;
-import org.automation.executor.Driver;
+import org.automation.listener.AllureListener;
 import org.automation.records.Action;
-import org.automation.util.JsonScriptRunner;
-import org.automation.util.ScreenshotManager;
-import org.automation.util.SendReportEmail;
-import org.automation.util.TestReportGenerator;
+import org.automation.util.*;
 import org.testng.ITestContext;
 import org.testng.annotations.*;
 import tools.jackson.core.type.TypeReference;
@@ -16,52 +14,50 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.*;
 
 @Listeners({AllureListener.class})
-public class TestLogin {
+public class RunTestcase {
 
     @BeforeMethod
     public void setUp(ITestContext context) {
+        String testId = context.getCurrentXmlTest().getParameter("testId");
         Map<String, Object> executionState = new LinkedHashMap<>();
         executionState.put("startTime", System.currentTimeMillis());
         context.setAttribute("executionState", executionState);
         String threadName = Thread.currentThread().getName();
-        System.out.println("[TEST] Setting up for thread: " + threadName);
+        System.out.println("[TEST] Setting up for TestSuite ID: " + testId +" Thread name: " + threadName);
         Driver browser = DriverConfig.getConfigDriver();
         browser.storeInThreadLocal();
     }
 
-    @DataProvider(name = "jsonTestCases", parallel = false)
-    public Object[][] jsonTestCases() {
-        File folder = new File("src/main/java/org/automation/data");
-        File[] files = folder.listFiles((_, name) -> name.endsWith(".json"));
-        if(files!=null){
-            Object[][] data = new Object[files.length][2];
-            for (int i = 0; i < files.length; i++) {
-                String testCaseId = files[i].getName().replace(".json", "");
-                data[i][0] = testCaseId;
-                data[i][1] = files[i].getPath();
-            }
-            return data;
+    @DataProvider(name = "jsonFiles")
+    public static Object[][] getJsonFiles(ITestContext context) {
+        System.out.println("testng runtestcase dataprovider called ");
+        String filePathsStr = context.getCurrentXmlTest().getParameter("jsonFilePaths");
+        if (filePathsStr == null || filePathsStr.isEmpty()) {
+            System.out.println("No jsonFilePaths parameter found!");
+            return new Object[0][1];  // Return empty array
         }
-        return new Object[0][0];
+        List<String> jsonFilePaths = Arrays.asList(filePathsStr.split(","));
+        Object[][] data = new Object[jsonFilePaths.size()][1];
+        for (int i = 0; i < jsonFilePaths.size(); i++) {
+            data[i][0] = jsonFilePaths.get(i);
+        }
+        return data;
     }
 
-    @Test(
-            priority = 1,
-            dataProvider = "jsonTestCases"
-    )
+    @Test( priority = 1, dataProvider = "jsonFiles" )
     @Severity(SeverityLevel.CRITICAL)
-    public void loginTest(String testCaseId, String jsonPath, ITestContext context) throws Exception {
-        Driver.setTestCaseID(testCaseId);
-        context.setAttribute("testcaseID", testCaseId);
-        System.out.println("Running "+testCaseId+" in path->"+jsonPath);
+    public void loginTest(String jsonPath,ITestContext context) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         String jsonContent = Files.readString(Paths.get(jsonPath));
         List<Action> actions = mapper.readValue(jsonContent, new TypeReference<>() {});
+        String testCaseId = actions.getFirst().testcaseId();
+        Driver.setTestCaseID(testCaseId);
+        context.setAttribute("testcaseID", testCaseId);
+        System.out.println("Running "+testCaseId+" in path->"+jsonPath);
         if(actions.getFirst().epic() != null){
             Allure.label("epic", actions.getFirst().epic());
             Allure.label("feature", actions.getFirst().feature());
@@ -97,7 +93,6 @@ public class TestLogin {
             new File("result").mkdirs();
             TestReportGenerator generator = new TestReportGenerator();
             generator.generatePdfReport();
-//            generator.generateHtmlReport();
             generateAllureReport();
             SendReportEmail.sendMail();
             System.out.println("\n✓ All reports generated successfully!");
@@ -130,8 +125,76 @@ public class TestLogin {
             e.printStackTrace();
         }
     }
+
+    public void executeJasperTask(Runnable jasperTask) {
+        ExecutorService jasperExecutor = Executors.newSingleThreadExecutor();
+        try {
+            Future<?> future = jasperExecutor.submit(jasperTask);
+            future.get(30, TimeUnit.SECONDS);  // Timeout protection
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            jasperExecutor.shutdownNow();
+            System.err.println("Jasper task timed out");
+        } finally {
+            shutdownExecutorGracefully(jasperExecutor, 5, TimeUnit.SECONDS);
+        }
+    }
+
+    private void shutdownExecutorGracefully(ExecutorService executor, long timeout, TimeUnit timeUnit) {
+        executor.shutdown();  // Prevent new tasks, allow running tasks to complete
+
+        try {
+            // Wait for tasks to finish gracefully
+            if (!executor.awaitTermination(timeout, timeUnit)) {
+                // Force shutdown if graceful timeout exceeded
+                executor.shutdownNow();
+
+                // Final wait for interrupted tasks to respond
+                executor.awaitTermination(2, TimeUnit.SECONDS);
+            }
+        } catch (InterruptedException e) {
+            // Preserve interrupt status and force shutdown
+            Thread.currentThread().interrupt();
+            executor.shutdownNow();
+        }
+    }
+
 }
 
+
+/*
+
+    @DataProvider(name = "dynamicJsonFiles")
+    public Object[][] filesProvider() {
+        return testSuitefiles.stream()
+                .map(f -> new Object[]{f})
+                .toArray(Object[][]::new);
+    }
+
+    @DataProvider(name = "dynamicJsonFiles")
+    public Iterator<Object[]> dynamicJsonFiles() {
+        List<String> files = JsonFileListHolder.getFiles();
+        if (files == null) files = List.of();
+        return files.stream()
+                .map(path -> new Object[]{ new File(path).getName().replace(".json",""), path })
+                .iterator();
+    }
+
+    @DataProvider(name = "jsonTestCases", parallel = false)
+    public Object[][] jsonTestCases() {
+        File folder = new File("src/main/java/org/automation/data");
+        File[] files = folder.listFiles((_, name) -> name.endsWith(".json"));
+        if(files!=null){
+            Object[][] data = new Object[files.length][2];
+            for (int i = 0; i < files.length; i++) {
+                String testCaseId = files[i].getName().replace(".json", "");
+                data[i][0] = testCaseId;
+                data[i][1] = files[i].getPath();
+            }
+            return data;
+        }
+        return new Object[0][0];
+    }
+ */
 /*
 //    @Description("To verify login")
 //    @Epic("EP001")

@@ -798,6 +798,7 @@
             <div id="selectionCount" class="selected-count" style="display: none;">
                 <span id="selectedCountText">0 items selected</span>
             </div>
+            <p class="empty-userdata">* When selecting folders, the testcases present in its sub-tree are selected automatically.</p>
 
             <!-- Action Buttons -->
             <div class="action-buttons">
@@ -852,7 +853,7 @@
                     </tr>
                 </tbody>
             </table>
-            <p class="tree-label">* Populate Epic, Feature, Story, Description only in the first Action of the Testcase.</p>
+            <p class="empty-userdata">* Populate Epic, Feature, Story, Description only in the first Action of the Testcase.</p>
             <!-- Create Footer Buttons -->
             <div class="footer-buttons">
                 <button class="btn btn-success" onclick="createTestcase()">
@@ -906,7 +907,7 @@
                     </tr>
                 </tbody>
             </table>
-            <p class="tree-label">* Populate Epic, Feature, Story, Description only in the first Action of the Testcase.</p>
+            <p class="empty-userdata">* Populate Epic, Feature, Story, Description only in the first Action of the Testcase.</p>
             <!-- Edit Footer Buttons -->
             <div class="footer-buttons">
                 <button class="btn btn-danger" onclick="clearEditorTab('edit')" style="display: none;" id="editCancelBtn">
@@ -1036,8 +1037,7 @@
 
         // ===== ADD OPERATION =====
         function addOperation(action, mode) {
-            console.log("add op action : "+action);
-            console.log("add op mode : "+mode);
+            console.log("add op action : "+action+" - mode : "+mode);
             const operationsList = document.getElementById('operationsList' + (mode === 'create' ? 'Create' : 'Edit'));
 
             // Clear placeholder if first item
@@ -1047,10 +1047,6 @@
 
             const actionId = 'action_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             const operationIndex = Array.from(operationsList.children).length + 1;
-            console.log("actionId : "+actionId);
-            console.log("operationIndex : "+operationIndex);
-
-            // Initialize operation data
             operationsData[actionId] = {
                 actionType: action,
                 locator: '',
@@ -1063,7 +1059,7 @@
                 description: ''
             };
 
-            // Create operation item
+            // Create operation div item
             const operationItem = document.createElement('div');
             operationItem.className = 'operation-item';
             operationItem.id = 'op_' + actionId;
@@ -1072,7 +1068,6 @@
                 e.dataTransfer.effectAllowed = 'move';
                 e.dataTransfer.setData('operationId', actionId);
             };
-
             const operationContent = document.createElement('div');
             operationContent.className = 'operation-item-content';
             operationContent.innerHTML = '<div class="operation-wrapper">' +
@@ -1080,28 +1075,21 @@
                                         '<div class="operation-item-action">' + action + '</div></div>';
             operationContent.style.cursor = 'pointer';
             operationContent.onclick = () => editOperation(actionId, mode);
-
             const operationButtons = document.createElement('div');
             operationButtons.className = 'operation-item-buttons';
             operationButtons.innerHTML = '<button class="btn btn-secondary" style="padding: 4px 8px;" onclick="deleteOperation(\'' + actionId + '\', \'' + mode + '\')">🗑</button>';
-
             operationItem.appendChild(operationContent);
             operationItem.appendChild(operationButtons);
             operationsList.appendChild(operationItem);
 
-            // Reindex operations
             reindexOperations(mode);
         }
 
         // ===== EDIT OPERATION =====
         function editOperation(actionId, mode) {
-            console.log("editOperation action id : "+actionId);
-            console.log("editOperation mode : "+mode);
+            console.log("editOperation action id : "+actionId+" mode : "+mode);
             currentSelectedAction = actionId;
             const data = operationsData[actionId];
-            console.log("editOperation data : "+data);
-            console.log("editOperation data: " + JSON.stringify(data));
-            console.log("editOperation data actionType : "+data.actionType);
             const userdataForm = document.getElementById('userdataForm' + (mode === 'create' ? 'Create' : 'Edit'));
             
             let formHTML = '<div class="userdata-form">' +
@@ -1327,7 +1315,6 @@
                 if (result.success) {
                     editingFilePath = filePath;
                     operationsData = {};
-                    
                     // Load operations
                     result.data.forEach(action => {
                         const actionId = 'action_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -1342,9 +1329,8 @@
                             story: action.story || '',
                             description: action.description || ''
                         };
-                        addOperation(action.actionType, 'edit', actionId);
+                        editAddOperation(action.actionType, 'edit', actionId);
                     });
-                    
                     showStatus('Test case loaded successfully', 'success');
                     
                     // Show save/cancel buttons
@@ -1359,23 +1345,68 @@
             }
         }
 
+        // ===== EDIT ADD OPERATION =====
+        function editAddOperation(action, mode, actionId) {
+            console.log("edit function add op action : "+action+" - mode : "+mode);
+            const operationsList = document.getElementById('operationsList' + (mode === 'create' ? 'Create' : 'Edit'));
+
+            // Clear placeholder if first item
+            if (operationsList.textContent.includes('Drop actions here')) {
+                operationsList.innerHTML = '';
+            }
+
+            //const actionId = 'action_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            const operationIndex = Array.from(operationsList.children).length + 1;
+
+            // Create operation div item
+            const operationItem = document.createElement('div');
+            operationItem.className = 'operation-item';
+            operationItem.id = 'op_' + actionId;
+            operationItem.draggable = true;
+            operationItem.ondragstart = (e) => {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('operationId', actionId);
+            };
+            const operationContent = document.createElement('div');
+            operationContent.className = 'operation-item-content';
+            operationContent.innerHTML = '<div class="operation-wrapper">' +
+                                        '<div class="operation-item-index">' + operationIndex + '</div>' +
+                                        '<div class="operation-item-action">' + action + '</div></div>';
+            operationContent.style.cursor = 'pointer';
+            operationContent.onclick = () => editOperation(actionId, mode);
+            const operationButtons = document.createElement('div');
+            operationButtons.className = 'operation-item-buttons';
+            operationButtons.innerHTML = '<button class="btn btn-secondary" style="padding: 4px 8px;" onclick="deleteOperation(\'' + actionId + '\', \'' + mode + '\')">🗑</button>';
+            operationItem.appendChild(operationContent);
+            operationItem.appendChild(operationButtons);
+            operationsList.appendChild(operationItem);
+
+            reindexOperations(mode);
+        }
+
         // ===== SAVE TESTCASE FILE (EDIT) =====
         function saveTestcaseFile() {
             if (Object.keys(operationsData).length === 0) {
                 showStatus('Please add at least one operation', 'error');
                 return;
             }
-            
+            const normalizeString = value => value ?? "";
+            const normalizeArray = value => Array.isArray(value) ? value : [];
+            const normalizeObject = value => value && typeof value === "object" && !Array.isArray(value) ? value : {};
+            const addIfDefined = (key, value) => value !== undefined && value !== null ? { [key]: value } : {};
+            const addIfNonEmptyArray = (key, value) => Array.isArray(value) && value.length > 0 ? { [key]: value } : {};
+            const addIfNonEmptyObject = (key, value) => value && Object.keys(value).length > 0 ? { [key]: value } : {};
+
             const testcaseData = Object.values(operationsData).map(op => ({
                 actionType: op.actionType,
-                locator: op.locator || null,
-                arguments: op.arguments.length > 0 ? op.arguments : undefined,
-                testcaseId: op.testcaseId,
-                ...(op.additionalData && Object.keys(op.additionalData).length > 0 ? { additionalData: op.additionalData } : {}),
-                ...(op.epic ? { epic: op.epic } : {}),
-                ...(op.feature ? { feature: op.feature } : {}),
-                ...(op.story ? { story: op.story } : {}),
-                ...(op.description ? { description: op.description } : {})
+                locator: normalizeString(op.locator),
+                testcaseId: normalizeString(op.testcaseId),
+                arguments: normalizeArray(op.arguments),
+                ...addIfNonEmptyObject('additionalData', op.additionalData),
+                ...addIfDefined('epic', op.epic),
+                ...addIfDefined('feature', op.feature),
+                ...addIfDefined('story', op.story),
+                ...addIfDefined('description', op.description),
             }));
             
             saveTestcaseToServer('', '', testcaseData, 'edit');
@@ -1395,7 +1426,7 @@
                 document.getElementById('editFilePath').value = '';
             }
             
-            showStatus((mode === 'create' ? 'Create' : 'Edit') + ' cancelled', 'success');
+            // showStatus((mode === 'create' ? 'Create' : 'Edit') + ' cancelled', 'success');
         }
 
         // ===== RUNNER TAB FUNCTIONS =====
@@ -1595,7 +1626,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    showStatus('✓ Test cases executed successfully! ID: ' + result.executionId, 'success');
+                    showStatus('✓ Test cases Execution Started successfully! ID: ' + result.executionId, 'success');
                     clearSelection(false);
                 } else {
                     showStatus(result.message || 'Failed to execute test cases', 'error');

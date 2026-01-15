@@ -1,3 +1,5 @@
+package org.automation.listener;
+
 import com.microsoft.playwright.Page;
 import io.qameta.allure.Attachment;
 import org.automation.executor.Driver;
@@ -20,6 +22,11 @@ public class AllureListener implements ITestListener {
         return report;
     }
 
+    @Attachment(value = "Testcase ID", type = "text/plain")
+    public static String attachTestcaseId(String id) {
+        return id;
+    }
+
     @Override
     public void onTestStart(ITestResult result) {
         System.out.println("========================================");
@@ -39,6 +46,7 @@ public class AllureListener implements ITestListener {
             attachExecutionReport(report);
 //            String testCaseID = Driver.getTestCaseID();
             String testcaseID = (String) context.getAttribute("testcaseID");
+            attachTestcaseId("Testcase ID : "+testcaseID);
             System.out.println("✓ TESTCaseID: " + testcaseID);
             System.out.println("Screenshot saved to: " + ScreenshotManager.getScreenshotDirectory());
         } catch (Exception e) {
@@ -61,9 +69,10 @@ public class AllureListener implements ITestListener {
             System.out.println("Before attach");
             attachExecutionReport(report);
             System.out.println("after attach");
-            String testCaseID = Driver.getTestCaseID();
+            String testCaseDriverID = Driver.getTestCaseID();
             // ✓ Retrieve testcaseID and driver from context
             String testcaseID = (String) context.getAttribute("testcaseID");
+            attachTestcaseId("Testcase ID : "+testcaseID);
 //            Boolean isWebdriver = (Boolean) context.getAttribute("isWebdriver");
             System.out.println("✗ TESTCaseID: " + testcaseID);
             System.out.println("Screenshot saved to: " + ScreenshotManager.getScreenshotDirectory());

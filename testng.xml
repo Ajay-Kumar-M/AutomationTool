@@ -2,7 +2,7 @@
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="All Test Suite" parallel="tests" thread-count="3">
 <!--    <listeners>-->
-<!--        <listener class-name="com.automation.listeners.AllureListener" />-->
+<!--        <listener class-name="com.automation.listeners.org.automation.listener.AllureListener" />-->
 <!--    </listeners>-->
 
     <!--test thread-count="5" name="ChromeTest">
@@ -13,7 +13,7 @@
     </test-->
     <test thread-count = "5" name="TestNG Name">
         <classes>
-            <class name="TestLogin" />
+            <class name="org.automation.executor.RunTestcase" />
         </classes>
     </test>
 </suite>

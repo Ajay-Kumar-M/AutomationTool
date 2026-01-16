@@ -165,10 +165,21 @@ EXPOSE 8080
 
 ## 📊 **Demo Screenshots**
 
-| Dashboard | Test Runner | Allure Report |
-|-----------|-------------|---------------|
-|  |  |  |
+| Test Runner |
+|-----------|
+| ![Automation Test Runner](screenshots/AutomationToolTestRunner.png) |
 
+| Create Testcase |
+|-----------|
+| ![Create automation testcase](screenshots/AutomationToolCreateTestCase.png) |
+
+| Runnung Tasks |
+|-----------|
+| ![View the list of test runs](screenshots/AutomationToolRunningTasks.png) |
+
+| Allure Report |
+|-----------|
+| ![Customized allure reporting](screenshots/AutomationToolAllureReport.png) |
 
 **Built with ❤️ for the testing community**
 

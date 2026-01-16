@@ -22,6 +22,17 @@
 <!--        <url-pattern>/run</url-pattern>-->
 <!--    </servlet-mapping>-->
 
+    <servlet>
+        <servlet-name>StartupServlet</servlet-name>
+        <jsp-file>/index.jsp</jsp-file>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>StartupServlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
     <context-param>
         <param-name>AppName</param-name>
         <param-value>AutomationTool</param-value>

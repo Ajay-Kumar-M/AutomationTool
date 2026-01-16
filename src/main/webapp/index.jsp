@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.*, java.io.*" %>
+<%@ page import="java.util.*, java.io.*,java.util.Map, java.util.concurrent.Future" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -743,6 +743,14 @@
             .editor-table td {
                 padding: 8px;
             }
+
+        }
+
+        .task-header {
+                      display: flex;              /* Make children align in a row */
+                      justify-content: space-between; /* Push first item left, last item right */
+                      align-items: center;        /* Vertically center them */
+                      margin-bottom: 10px;        /* Optional spacing */
         }
     </style>
 </head>
@@ -759,6 +767,7 @@
             <button class="tab-button active" onclick="switchTab('runner')">📁 Test Runner</button>
             <button class="tab-button" onclick="switchTab('create')">➕ Create Testcase</button>
             <button class="tab-button" onclick="switchTab('edit')">✏️ Edit Testcase</button>
+            <button class="tab-button" onclick="switchTab('running')">⏩ Running Testcases</button>
         </div>
 
         <!-- Status Messages -->
@@ -917,6 +926,28 @@
                     ✓ Save
                 </button>
             </div>
+        </div>
+
+        <!-- ===== TAB 4: RUNNING TESTCASES ===== -->
+        <div id="running" class="main-section">
+            <div class="section">
+                <div class="task-header">
+                  <div class="section-title">Running Tasks</div>
+                  <button class="btn btn-primary refresh-tasks-btn" onclick="refreshTasks()">🔄 Refresh Tasks</button>
+                </div>
+                <table id="tasksTable" class="editor-table" border="1" style="margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="width: 60%">Task ID</th>
+                            <th style="width: 40%">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="2" style="text-align: center; color: #666;">Click Refresh to load tasks</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="empty-userdata">* More than 5 tasks will be queued.</p>
         </div>
 
         <!-- Footer -->
@@ -1639,6 +1670,46 @@
             }
         }
 
+        async function refreshTasks() {
+            try {
+                const response = await fetch('TaskStatusServlet');
+                const taskStatuses = await response.json();
+                const tbody = document.querySelector('#tasksTable tbody');
+                tbody.innerHTML = '';
+
+                if (Object.keys(taskStatuses).length > 0) {
+                    for (let taskId in taskStatuses) {
+                        if (taskStatuses.hasOwnProperty(taskId)) {
+                            var isRunning = taskStatuses[taskId];
+                            tbody.innerHTML +=
+                                '<tr>' +
+                                    '<td>' + taskId + '</td>' +
+                                    '<td style="color: ' + (isRunning ? '#4caf50' : '#666') +
+                                    '; font-weight: ' + (isRunning ? 'bold' : 'normal') + '">' +
+                                        (isRunning ? '🟢 Running' : '⚪ Completed') +
+                                    '</td>' +
+                                '</tr>';
+                        }
+                    }
+                } else {
+                    tbody.innerHTML =
+                        '<tr>' +
+                            '<td colspan="2" style="text-align: center; color: #666;">' +
+                                'No running tasks' +
+                            '</td>' +
+                        '</tr>';
+                }
+
+            } catch (error) {
+                console.error('Refresh failed:', error);
+                document.querySelector('#tasksTable tbody').innerHTML =
+                    '<tr><td colspan="2" style="color: #f44336;">Failed to load tasks</td></tr>';
+            }
+        }
+
+        // Auto-refresh every 10 seconds
+        setInterval(refreshTasks, 10000);
+
         // ===== UTILITY FUNCTIONS =====
         function showStatus(message, type) {
             const statusDiv = document.getElementById('statusMessage');
@@ -1648,7 +1719,7 @@
             if (type !== 'loading') {
                 setTimeout(() => {
                     statusDiv.classList.remove('show');
-                }, 4000);
+                }, 6000);
             }
         }
 

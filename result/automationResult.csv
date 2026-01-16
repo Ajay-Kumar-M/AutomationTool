@@ -9,3 +9,18 @@ TC002,Validate if dashboard is visible,Failure,Element with xpath '//div[@id='si
 TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
 TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
 TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC002,Validate if dashboard is visible,Failure,Element with xpath '//div[@id='singleHidden']' was not visible within 5 seconds
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC002,Validate if dashboard is visible,Failure,Element with xpath '//div[@id='singleHidden']' was not visible within 5 seconds
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC002,Validate if dashboard is visible,Failure,Element with xpath '//div[@id='singleHidden']' was not visible within 5 seconds
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully
+TC001,Validate Login with invalid credentials,Success,TestCase Executed Successfully

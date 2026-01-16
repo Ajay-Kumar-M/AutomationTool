@@ -27,10 +27,29 @@ public class TestReportGenerator {
      */
     public void generatePdfReport() throws JRException {
         System.out.println("Generating PDF Report...");
+        String[] blacklistedProps = {
+                "java.awt.headless", "true",
+                "net.sf.jasperreports.awt.ignore.missing.font", "true",
+                "net.sf.jasperreports.default.pdf.font.name", "Helvetica",
+                "net.sf.jasperreports.images.keep.objects", "false"
+        };
+        for (int i = 0; i < blacklistedProps.length; i += 2) {
+            System.setProperty(blacklistedProps[i], blacklistedProps[i+1]);
+        }
         JasperPrint jasperPrint = fillReportFromCsv();
         JasperExportManager.exportReportToPdfFile(jasperPrint, OUTPUT_PDF);
         System.out.println("✓ PDF Report saved to: " + OUTPUT_PDF);
-        terminateJasperThreads();
+        if (jasperPrint != null) {
+            // Remove all pages to release memory/references
+            while (!jasperPrint.getPages().isEmpty()) {
+                jasperPrint.removePage(0);  // Remove first page repeatedly [web:34]
+            }
+            jasperPrint.removeProperty("net.sf.jasperreports.export.pdf.tag.hrll");
+            jasperPrint.removeProperty("net.sf.jasperreports.export.pdf.tag.hrlb");
+        }
+        jasperPrint = null;
+        killGraphicsThreads();
+//        System.gc();  // Force Graphics2D disposal
     }
 
     /**
@@ -137,18 +156,19 @@ public class TestReportGenerator {
         return csvDataSource;
     }
 
-    private void terminateJasperThreads() {
-        Thread[] threads = new Thread[Thread.activeCount()];
+    private void killGraphicsThreads() {
+        Thread[] threads = new Thread[Thread.activeCount() + 10];
         int count = Thread.enumerate(threads);
 
         for (int i = 0; i < count; i++) {
             Thread t = threads[i];
-            if (t != null && t.isAlive() &&
-                    (t.getName().contains("Jasper") ||
-                            t.getName().contains("AWT") ||
-                            t.getName().contains("Graphics"))) {
-                if (!t.isDaemon()) {
-                    t.setDaemon(true);  // Mark as daemon retroactively
+            if (t != null && t.isAlive() && !t.isDaemon()) {
+                String name = t.getName().toLowerCase();
+                if (name.contains("awt") || name.contains("graphics") ||
+                        name.contains("jasper") || name.contains("sun.font") ||
+                        name.contains("java2d")) {
+                    t.setDaemon(true);  // Retroactively daemonize
+                    t.interrupt();
                 }
             }
         }

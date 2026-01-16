@@ -92,7 +92,7 @@ public class TestCaseExecutorServlet extends HttpServlet {
             test.setName("Test-" + id);
             // Pass file paths as parameter
             Map<String, String> params = new HashMap<>();
-            params.put("testId", id);
+            params.put("testSuiteId", id);
             params.put("jsonFilePaths", String.join(",", jsonFilePaths));  // "file1.json,file2.json"
             test.setParameters(params);
             test.setXmlClasses(Arrays.asList(new XmlClass(RunTestcase.class)));

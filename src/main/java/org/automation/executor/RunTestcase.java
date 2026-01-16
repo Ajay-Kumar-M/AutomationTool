@@ -1,8 +1,10 @@
 package org.automation.executor;
 
 import io.qameta.allure.*;
+import io.qameta.allure.model.Label;
 import net.sf.jasperreports.engine.JRException;
 import org.automation.listener.AllureListener;
+import org.automation.listener.DriverLifecycleListener;
 import org.automation.records.Action;
 import org.automation.util.*;
 import org.testng.ITestContext;
@@ -17,24 +19,26 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
 
-@Listeners({AllureListener.class})
+@Listeners({
+        AllureListener.class,
+        DriverLifecycleListener.class
+})
 public class RunTestcase {
+
+    JsonScriptRunner runner = new JsonScriptRunner();
 
     @BeforeMethod
     public void setUp(ITestContext context) {
-        String testId = context.getCurrentXmlTest().getParameter("testId");
         Map<String, Object> executionState = new LinkedHashMap<>();
         executionState.put("startTime", System.currentTimeMillis());
         context.setAttribute("executionState", executionState);
-        String threadName = Thread.currentThread().getName();
-        System.out.println("[TEST] Setting up for TestSuite ID: " + testId +" Thread name: " + threadName);
-        Driver browser = DriverConfig.getConfigDriver();
-        browser.storeInThreadLocal();
+//        String testSuiteId = context.getCurrentXmlTest().getParameter("testSuiteId");
+//        String threadName = Thread.currentThread().getName();
+//        System.out.println("[TEST] Setting up for TestSuite ID: " + testSuiteId +" Thread name: " + threadName);
     }
 
     @DataProvider(name = "jsonFiles")
     public static Object[][] getJsonFiles(ITestContext context) {
-        System.out.println("testng runtestcase dataprovider called ");
         String filePathsStr = context.getCurrentXmlTest().getParameter("jsonFilePaths");
         if (filePathsStr == null || filePathsStr.isEmpty()) {
             System.out.println("No jsonFilePaths parameter found!");
@@ -62,14 +66,20 @@ public class RunTestcase {
             Allure.label("epic", actions.getFirst().epic());
             Allure.label("feature", actions.getFirst().feature());
             Allure.label("story", actions.getFirst().story());
+            Allure.label("Testcase ID", testCaseId);
             Allure.getLifecycle().updateTestCase(testCase -> {
                 testCase.setDescription(actions.getFirst().description());
                 testCase.setTestCaseId(testCaseId);
+                testCase.setTestCaseName(actions.getFirst().story());
+                testCase.setName(testCaseId+"- "+actions.getFirst().feature());
+                testCase.setFullName(actions.getFirst().story());
+                testCase.setStart(System.currentTimeMillis());
+                testCase.getLabels().removeIf(l -> "subSuite".equals(l.getName()));
+                testCase.getLabels().add(new Label().setName("subSuite").setValue("Test Run"));
             });
         }
-        Driver browser = Driver.getFromThreadLocal();
-        JsonScriptRunner runner = new JsonScriptRunner();
-        runner.run(browser, actions);
+        Driver driver = Driver.getFromThreadLocal();
+        runner.run(driver, actions);
         if (Driver.isWebDriver()) {
             ScreenshotManager.takeScreenshot(Driver.getWebDriverFromThreadLocal(), "TestCompleted_" + testCaseId, testCaseId);
         } else {
@@ -77,19 +87,18 @@ public class RunTestcase {
         }
     }
 
-    @AfterMethod
-    public void close(){
-        Driver browser = Driver.getFromThreadLocal();
-        if (browser != null) {
-            browser.close();
-        }
-        Driver.cleanupThreadLocal();
-    }
+//    @AfterMethod(alwaysRun = true)
+//    public void close(){
+//        Driver driver = Driver.getFromThreadLocal();
+//        if (driver != null) {
+//            driver.close();
+//        }
+//        Driver.cleanupThreadLocal();
+//    }
 
     @AfterSuite
     public void tearDown() {
         try {
-            System.out.println("\n✓ Tear down triggered!");
             new File("result").mkdirs();
             TestReportGenerator generator = new TestReportGenerator();
             generator.generatePdfReport();
@@ -141,13 +150,11 @@ public class RunTestcase {
 
     private void shutdownExecutorGracefully(ExecutorService executor, long timeout, TimeUnit timeUnit) {
         executor.shutdown();  // Prevent new tasks, allow running tasks to complete
-
         try {
             // Wait for tasks to finish gracefully
             if (!executor.awaitTermination(timeout, timeUnit)) {
                 // Force shutdown if graceful timeout exceeded
                 executor.shutdownNow();
-
                 // Final wait for interrupted tasks to respond
                 executor.awaitTermination(2, TimeUnit.SECONDS);
             }
@@ -165,7 +172,7 @@ public class RunTestcase {
 
     @DataProvider(name = "dynamicJsonFiles")
     public Object[][] filesProvider() {
-        return testSuitefiles.stream()
+        return testSuiteFiles.stream()
                 .map(f -> new Object[]{f})
                 .toArray(Object[][]::new);
     }
@@ -291,6 +298,6 @@ public void onTestFailure(ITestResult result) {
             if (exitCode1 == 0) {
                 System.out.println("✓ Multi-page report generated successfully!");
             } else {
-                System.out.println("✗ Failed to generate multi-page report");
+                System.out.println("✗ Failed to generate multipage report");
             }
  */

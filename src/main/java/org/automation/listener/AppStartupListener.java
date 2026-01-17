@@ -5,6 +5,7 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.automation.executor.TaskManager;
 
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,3 +26,11 @@ public class AppStartupListener implements ServletContextListener {
         taskManager.shutdown();
     }
 }
+
+/*
+
+        System.out.println("==== JVM INPUT ARGUMENTS ====");
+        ManagementFactory.getRuntimeMXBean()
+                .getInputArguments()
+                .forEach(System.out::println);
+ */

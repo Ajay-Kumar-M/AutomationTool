@@ -12,6 +12,9 @@ import java.util.*;
 
 import org.automation.executor.RunTestcase;
 import org.automation.executor.TaskManager;
+import org.automation.listener.AllureListener;
+import org.automation.listener.DriverLifecycleListener;
+import org.automation.util.TestUtils;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -46,15 +49,15 @@ public class TestCaseExecutorServlet extends HttpServlet {
                     resolvedFiles.add(entry);
                 }
             }
-            resolvedFiles.forEach(file -> {
-                System.out.println("file path - "+file);
-            });
-            String executionId = UUID.randomUUID().toString();
+            UUID uuid = UUID.randomUUID();
+            long lsb = uuid.getLeastSignificantBits() & Long.MAX_VALUE;
+            String executionId = Long.toString(lsb, 36);
             TaskManager taskManager = (TaskManager) getServletContext().getAttribute("taskManager");
 //            taskManager.submit(executionId, () -> runSelectedTestCases(executionId,resolvedFiles));
             taskManager.submit(executionId, () -> {
                 try {
-                    runSelectedTestCases(executionId, resolvedFiles);
+                    String tempFilePath = TestUtils.writeListToTempFile(resolvedFiles,executionId);
+                    runSelectedTestCases(executionId, tempFilePath);
                 } catch (Throwable t) {
                     System.err.println("Test execution failed for id " + executionId);
                     t.printStackTrace();
@@ -80,10 +83,12 @@ public class TestCaseExecutorServlet extends HttpServlet {
         }
     }
 
-    private void runSelectedTestCases(String id, List<String> jsonFilePaths) {
+    private void runSelectedTestCases(String id,String tempFilePath) {
         try {
             System.out.println("runSelectedTestCases called id:" + id);
             TestNG testng = new TestNG();
+            testng.addListener(new AllureListener());
+            testng.addListener(new DriverLifecycleListener());
 //            testng.setTestClasses(new Class[]{RunTestcase.class});  // Fixed: use .class
             // Create XML suite with parameters
             XmlSuite suite = new XmlSuite();
@@ -93,15 +98,14 @@ public class TestCaseExecutorServlet extends HttpServlet {
             // Pass file paths as parameter
             Map<String, String> params = new HashMap<>();
             params.put("testSuiteId", id);
-            params.put("jsonFilePaths", String.join(",", jsonFilePaths));  // "file1.json,file2.json"
+            params.put("tempFilePath", tempFilePath);
             test.setParameters(params);
             test.setXmlClasses(Arrays.asList(new XmlClass(RunTestcase.class)));
             suite.setTests(Arrays.asList(test));
             testng.setXmlSuites(Arrays.asList(suite));
             //testng.setVerbose(10); //testng logging
-            System.out.println("jsonFilePaths param: " + String.join(",", jsonFilePaths));
+//            System.out.println("jsonFilePaths param: " + String.join(",", jsonFilePaths));
             testng.run();
-            System.out.println("runSelectedTestCases finsh called ");
         } catch (Exception e) {
             System.out.println("exception occurred in runSelectedTestCases - "+e.getMessage());
             e.printStackTrace();

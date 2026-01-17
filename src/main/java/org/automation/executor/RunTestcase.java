@@ -39,51 +39,60 @@ public class RunTestcase {
 
     @DataProvider(name = "jsonFiles")
     public static Object[][] getJsonFiles(ITestContext context) {
-        String filePathsStr = context.getCurrentXmlTest().getParameter("jsonFilePaths");
-        if (filePathsStr == null || filePathsStr.isEmpty()) {
+        String tempFilePath = context.getCurrentXmlTest().getParameter("tempFilePath");
+        if (tempFilePath == null || tempFilePath.isEmpty()) {
             System.out.println("No jsonFilePaths parameter found!");
             return new Object[0][1];  // Return empty array
         }
-        List<String> jsonFilePaths = Arrays.asList(filePathsStr.split(","));
-        Object[][] data = new Object[jsonFilePaths.size()][1];
-        for (int i = 0; i < jsonFilePaths.size(); i++) {
-            data[i][0] = jsonFilePaths.get(i);
+        try {
+            List<String> jsonFilePaths = TestUtils.readListFromFile(tempFilePath);
+            Object[][] data = new Object[jsonFilePaths.size()][1];
+            for (int i = 0; i < jsonFilePaths.size(); i++) {
+                data[i][0] = jsonFilePaths.get(i);
+            }
+            return data;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return data;
     }
 
     @Test( priority = 1, dataProvider = "jsonFiles" )
     @Severity(SeverityLevel.CRITICAL)
-    public void loginTest(String jsonPath,ITestContext context) throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        String jsonContent = Files.readString(Paths.get(jsonPath));
-        List<Action> actions = mapper.readValue(jsonContent, new TypeReference<>() {});
-        String testCaseId = actions.getFirst().testcaseId();
-        Driver.setTestCaseID(testCaseId);
-        context.setAttribute("testcaseID", testCaseId);
-        System.out.println("Running "+testCaseId+" in path->"+jsonPath);
-        if(actions.getFirst().epic() != null){
-            Allure.label("epic", actions.getFirst().epic());
-            Allure.label("feature", actions.getFirst().feature());
-            Allure.label("story", actions.getFirst().story());
-            Allure.label("Testcase ID", testCaseId);
-            Allure.getLifecycle().updateTestCase(testCase -> {
-                testCase.setDescription(actions.getFirst().description());
-                testCase.setTestCaseId(testCaseId);
-                testCase.setTestCaseName(actions.getFirst().story());
-                testCase.setName(testCaseId+"- "+actions.getFirst().feature());
-                testCase.setFullName(actions.getFirst().story());
-                testCase.setStart(System.currentTimeMillis());
-                testCase.getLabels().removeIf(l -> "subSuite".equals(l.getName()));
-                testCase.getLabels().add(new Label().setName("subSuite").setValue("Test Run"));
+    public void testngRunner(String jsonPath, ITestContext context) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonContent = Files.readString(Paths.get(jsonPath));
+            List<Action> actions = mapper.readValue(jsonContent, new TypeReference<>() {
             });
-        }
-        Driver driver = Driver.getFromThreadLocal();
-        runner.run(driver, actions);
-        if (Driver.isWebDriver()) {
-            ScreenshotManager.takeScreenshot(Driver.getWebDriverFromThreadLocal(), "TestCompleted_" + testCaseId, testCaseId);
-        } else {
-            ScreenshotManager.takeScreenshot(Driver.getPageFromThreadLocal(), "TestCompleted_" + testCaseId, testCaseId);
+            String testCaseId = actions.getFirst().testcaseId();
+            Driver.setTestCaseID(testCaseId);
+            context.setAttribute("testcaseID", testCaseId);
+            System.out.println("Running " + testCaseId + " in path->" + jsonPath);
+            if (actions.getFirst().epic() != null) {
+                Allure.label("epic", actions.getFirst().epic());
+                Allure.label("feature", actions.getFirst().feature());
+                Allure.label("story", actions.getFirst().story());
+                Allure.label("Testcase ID", testCaseId);
+                Allure.getLifecycle().updateTestCase(testCase -> {
+                    testCase.setDescription(actions.getFirst().description());
+                    testCase.setTestCaseId(testCaseId);
+                    testCase.setTestCaseName(actions.getFirst().story());
+                    testCase.setName(testCaseId + "- " + actions.getFirst().feature());
+                    testCase.setFullName(actions.getFirst().story());
+                    testCase.setStart(System.currentTimeMillis());
+                    testCase.getLabels().removeIf(l -> "subSuite".equals(l.getName()));
+                    testCase.getLabels().add(new Label().setName("subSuite").setValue("Test Run"));
+                });
+            }
+            Driver driver = Driver.getFromThreadLocal();
+            runner.run(driver, actions);
+            if (Driver.isWebDriver()) {
+                ScreenshotManager.takeScreenshot(Driver.getWebDriverFromThreadLocal(), "TestCompleted_" + testCaseId, testCaseId);
+            } else {
+                ScreenshotManager.takeScreenshot(Driver.getPageFromThreadLocal(), "TestCompleted_" + testCaseId, testCaseId);
+            }
+        } catch (Exception e) {
+            throw new AssertionError(e.getMessage());
         }
     }
 

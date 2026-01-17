@@ -5,20 +5,23 @@
     "arguments": ["https://www.selenium.dev/selenium/web/hidden.html"],
     "testcaseId": "TC002",
     "additionalData": {"timeout": "30"},
+    "methodName": "gotoUrl",
     "epic": "Product check",
     "feature": "Dashboard",
     "story": "Dashboard visible",
     "description": "Validate if dashboard is visible"
   },
   {
-    "actionType": "assertVisible",
+    "actionType": "isVisible",
     "locator": "//div[@id='singleHidden']",
-    "testcaseId": "TC002"
+    "testcaseId": "TC002",
+    "methodName": "assertVisibility"
   },
   {
     "actionType": "wait",
     "locator": null,
     "testcaseId": "TC002",
-    "arguments": ["3"]
+    "arguments": ["3"],
+    "methodName": "wait"
   }
 ]

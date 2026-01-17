@@ -20,14 +20,12 @@ public class TaskManager {
     public void submit(String id, Runnable task) {
         Future<?> future = executor.submit(() -> {
             try {
-                System.out.println("TaskManager submit called "+id);
                 task.run();
             } finally {
                 runningTasks.remove(id);
             }
         });
         runningTasks.put(id, future);
-        System.out.println("TaskManager submit finish called "+id);
     }
 
     public List<String> getPendingTaskIds() {

@@ -981,8 +981,17 @@
 
     <script>
         // ===== GLOBAL VARIABLES =====
-        const PREDEFINED_ACTIONS = ['gotoUrl', 'click', 'type', 'wait', 'getAttribute', 'assertText', 'scroll', 'hover'];
-        
+        //const PREDEFINED_ACTIONS = ['gotoUrl', 'click', 'type', 'wait', 'assertText', 'scroll', 'hover'];
+        const PREDEFINED_ACTIONS = {
+          gotoUrl: 'gotoUrl',
+          click: 'click',
+          type: 'type',
+          wait: 'wait',
+          scroll: 'scroll',
+          hover: 'hover',
+          isVisible: 'assertVisibility'
+        };
+
         let currentMode = null; // 'create' or 'edit'
         let currentSelectedAction = null; // Track which action is being edited
         let editingFilePath = null; // Track the file being edited
@@ -1016,14 +1025,16 @@
             actionsContainer.innerHTML = '';
             
             // Add predefined actions
-            PREDEFINED_ACTIONS.forEach(action => {
+            Object.entries(PREDEFINED_ACTIONS).forEach(([key, value]) => {
+                console.log(key, value);
                 const actionItem = document.createElement('div');
                 actionItem.className = 'action-item';
                 actionItem.draggable = true;
                 actionItem.textContent = action;
                 actionItem.ondragstart = (e) => {
                     e.dataTransfer.effectAllowed = 'copy';
-                    e.dataTransfer.setData('action', action);
+                    e.dataTransfer.setData('action', key);
+                    e.dataTransfer.setData('methodName', value);
                     actionItem.classList.add('dragging');
                 };
                 actionItem.ondragend = () => {
@@ -1059,15 +1070,15 @@
         function handleDrop(e, mode) {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over');
-            
             const action = e.dataTransfer.getData('action');
+            const methodName = e.dataTransfer.getData('methodName');
             if (action) {
-                addOperation(action, mode);
+                addOperation(action, methodName, mode);
             }
         }
 
         // ===== ADD OPERATION =====
-        function addOperation(action, mode) {
+        function addOperation(action, methodName, mode) {
             console.log("add op action : "+action+" - mode : "+mode);
             const operationsList = document.getElementById('operationsList' + (mode === 'create' ? 'Create' : 'Edit'));
 
@@ -1083,6 +1094,7 @@
                 locator: '',
                 arguments: [],
                 testcaseId: mode === 'create' ? document.getElementById('createTestcaseId').value : '',
+                methodName: methodName,
                 additionalData: {},
                 epic: '',
                 feature: '',
@@ -1142,6 +1154,10 @@
                 '<input type="text" id="editTestcaseId" value="' + (data.testcaseId || '') + '" />' +
                 '</div>' +
                 '<div class="form-group">' +
+                '<label>Additional Data (JSON):</label>' +
+                '<textarea id="editAdditionalData">' + JSON.stringify(data.additionalData || {}, null, 2) + '</textarea>' +
+                '</div>' +
+                '<div class="form-group">' +
                 '<label>Epic:</label>' +
                 '<input type="text" id="editEpic" value="' + (data.epic || '') + '" />' +
                 '</div>' +
@@ -1156,10 +1172,6 @@
                 '<div class="form-group">' +
                 '<label>Description:</label>' +
                 '<textarea id="editDescription">' + (data.description || '') + '</textarea>' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Additional Data (JSON):</label>' +
-                '<textarea id="editAdditionalData">' + JSON.stringify(data.additionalData || {}, null, 2) + '</textarea>' +
                 '</div>' +
                 '<div class="form-buttons">' +
                 '<button class="btn btn-success" onclick="saveOperation(\'' + actionId + '\', \'' + mode + '\')">✓ Save</button>' +
@@ -1267,6 +1279,7 @@
                 locator: op.locator || null,
                 arguments: op.arguments.length > 0 ? op.arguments : undefined,
                 testcaseId: testcaseId,
+                methodName: op.methodName,
                 ...(op.additionalData && Object.keys(op.additionalData).length > 0 ? { additionalData: op.additionalData } : {}),
                 ...(op.epic ? { epic: op.epic } : {}),
                 ...(op.feature ? { feature: op.feature } : {}),
@@ -1355,6 +1368,7 @@
                             arguments: Array.isArray(action.arguments) ? action.arguments : [],
                             testcaseId: action.testcaseId || '',
                             additionalData: action.additionalData || {},
+                            methodName: action.methodName,
                             epic: action.epic || '',
                             feature: action.feature || '',
                             story: action.story || '',
@@ -1433,6 +1447,7 @@
                 locator: normalizeString(op.locator),
                 testcaseId: normalizeString(op.testcaseId),
                 arguments: normalizeArray(op.arguments),
+                methodName: op.methodName,
                 ...addIfNonEmptyObject('additionalData', op.additionalData),
                 ...addIfDefined('epic', op.epic),
                 ...addIfDefined('feature', op.feature),
@@ -1719,7 +1734,7 @@
             if (type !== 'loading') {
                 setTimeout(() => {
                     statusDiv.classList.remove('show');
-                }, 6000);
+                }, 8000);
             }
         }
 

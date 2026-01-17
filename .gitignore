@@ -1,4 +1,8 @@
 target/
+test-output/
+allure-results/
+result/
+tempFiles/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

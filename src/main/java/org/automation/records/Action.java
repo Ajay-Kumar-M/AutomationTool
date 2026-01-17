@@ -7,15 +7,19 @@ public record Action(
         String locator,
         String[] arguments,
         String testcaseId,
-//        String expectedResultType, // e.g., "text", "url", "visible"
-//        String expectedResult, // e.g., "Welcome", "https://dashboard", "#logout"
         Map<String,String> additionalData,
+        String methodName,
         String epic,
         String feature,
         String story,
         String description
 ){}
 
+/*
+
+//        String expectedResultType, // e.g., "text", "url", "visible"
+//        String expectedResult, // e.g., "Welcome", "https://dashboard", "#logout"
+ */
 /*
 private final Map<String, Consumer<Action>> handlers = Map.of(
     "gotoUrl", this::gotoUrl,

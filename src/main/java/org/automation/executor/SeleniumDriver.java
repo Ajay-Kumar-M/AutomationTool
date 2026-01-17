@@ -1,5 +1,6 @@
 package org.automation.executor;
 
+import com.microsoft.playwright.assertions.LocatorAssertions;
 import io.qameta.allure.Step;
 import org.automation.records.Action;
 import org.automation.records.DriverConfig;
@@ -17,7 +18,11 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.Duration;
+import java.util.List;
+import java.awt.Rectangle;
 
+import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
@@ -74,7 +79,7 @@ public class SeleniumDriver implements Driver {
             case "click" -> click(action);
             case "clear" -> clear(action);
             case "wait" -> wait(action);
-            case "assertVisible" -> assertVisible(action);
+            case "assertVisibility" -> assertVisibility(action);
             default -> throw new IllegalArgumentException("Unknown action: " + action.actionType());
         }
     }
@@ -167,22 +172,56 @@ public class SeleniumDriver implements Driver {
         return By.cssSelector(locator);
     }
 
-    @Step("Assert Element is Visible")
-    public void assertVisible(Action action) {
+    @Step("Assert Visibility")
+    public void assertVisibility(Action action) {
         try {
             By locator = parseLocator(action.locator());
 //            WebElement element = driver.findElement(locator);
-            WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
-                    .until(ExpectedConditions.presenceOfElementLocated(locator));
-            ScreenshotManager.takeScreenshot(driver, "assertVisible", action.testcaseId());
-            assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
+            ScreenshotManager.takeScreenshot(driver,action.methodName()+" - "+action.actionType(),action.testcaseId());
+            switch (action.actionType()){
+                case "isVisible": WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                        .until(ExpectedConditions.presenceOfElementLocated(locator));
+                    assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
+                    break;
+                case "isVisibleTimeout": WebElement element2 = new WebDriverWait(driver, Duration.ofSeconds(Long.parseLong(getArg(action, 0))))
+                        .until(ExpectedConditions.presenceOfElementLocated(locator));
+                    assertTrue(element2.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + getArg(action, 0) + " seconds");
+                    break;
+                case "isHidden": WebElement element3 = driver.findElement(locator);
+                    assertFalse(element3.isDisplayed(),"Element with locator '" + locator + "' was not hidden");
+                    break;
+                case "isAttached": List<WebElement> elements4 = driver.findElements(locator);
+                    assertFalse(elements4.isEmpty(), "Element with locator '" + locator + "' was not attached");
+                    break;
+                case "isDetached": List<WebElement> elements5 = driver.findElements(locator);
+                    assertTrue(elements5.isEmpty(), "Element with locator '" + locator + "' was not detached");
+                    break;
+                case "isInViewport": WebElement element6 = driver.findElement(locator);
+                    java.awt.Rectangle elemRect = new java.awt.Rectangle(
+                            element6.getRect().getX(),
+                            element6.getRect().getY(),
+                            element6.getRect().getWidth(),
+                            element6.getRect().getHeight()
+                    );
+                    int viewWidth = ((Long) ((JavascriptExecutor) driver).executeScript("return document.documentElement.clientWidth")).intValue();
+                    int viewHeight = ((Long) ((JavascriptExecutor) driver).executeScript("return document.documentElement.clientHeight")).intValue();
+                    Rectangle viewRect = new Rectangle(0, 0, viewWidth, viewHeight);
+                    assertTrue(viewRect.intersects(elemRect));
+                    break;
+                default: WebElement element7 = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                        .until(ExpectedConditions.presenceOfElementLocated(locator));
+                    assertTrue(element7.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
+                    break;
+            }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
             System.out.println("\ncatch called " + e + ". message " + e.getMessage());
-            throw new AssertionError("Element with xpath '" + action.locator() + "' was not visible within " + explicitWait + " seconds", e);
+            throw new AssertionError(e.getMessage());
         }
     }
 
     public void close() {
-        if (driver != null) driver.quit();
+        if (driver != null) {
+            driver.quit();
+        }
     }
 }

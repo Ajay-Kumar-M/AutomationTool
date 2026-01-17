@@ -102,26 +102,20 @@ public class ScreenshotManager {
             System.err.println("Playwright Page is null. Cannot capture screenshot.");
             return null;
         }
-
         try {
             String fileName = generateFileName(stepName);
             String filePath = SCREENSHOT_DIR + File.separator + testcaseId + File.separator + fileName;
-
             // Create parent directory if needed
             Files.createDirectories(Paths.get(SCREENSHOT_DIR));
-
             // Capture screenshot and save to file
             page.screenshot(new Page.ScreenshotOptions()
                     .setPath(Paths.get(filePath))
                     .setFullPage(false));
-
             // Read bytes and attach to Allure
             byte[] screenshotBytes = Files.readAllBytes(Paths.get(filePath));
             attachToAllure(screenshotBytes, stepName);
-
             System.out.println("[SCREENSHOT] " + stepName + " -> " + filePath);
             return filePath;
-
         } catch (Exception e) {
             System.err.println("Error capturing screenshot: " + e.getMessage());
             e.printStackTrace();

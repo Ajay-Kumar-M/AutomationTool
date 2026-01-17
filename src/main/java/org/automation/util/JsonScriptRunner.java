@@ -22,17 +22,17 @@ public class JsonScriptRunner {
 
     public void runFromJson(List<Action> actions) throws Exception {
         for (Action action : actions) {
-            System.out.println("Executing: " + action.actionType() + " | TestCase: " + action.testcaseId());
+            System.out.println("Executing: " + action.actionType() + " | Method name: " + action.methodName() +" | TestCase: " + action.testcaseId());
             try {
-                driver.getClass().getMethod(action.actionType(), Action.class).invoke(driver,action);
+                driver.getClass().getMethod(action.methodName(), Action.class).invoke(driver,action);
                 queueManager.addRecord(new ExpectedResultData(action.testcaseId(),action.actionType(),action.locator(),"Success","",new String[0]));
             } catch (InvocationTargetException | AssertionError e) {
                 Throwable original = e.getCause();
-                original.printStackTrace();
-                System.out.println("\nPrinting message -" + original.getMessage());
-                System.out.println("\nPrinting message string -" + original);
+                String message = original.getMessage().replace('<',' ').replace('>',' ');
+                System.out.println("\nPrinting message - " + message);
+//                System.out.println("\nPrinting message string -" + original);
                 // handle logging / recovery / reporting
-                storeResultCSV(actions.getFirst(),"Failure",original.getMessage().split("\\R", 2)[0]);
+                storeResultCSV(actions.getFirst(),"Failure",message.split("\\R", 2)[0]);
                 queueManager.addRecord(new ExpectedResultData(action.testcaseId(),action.actionType(),action.locator(),"Failure",original.getMessage(),new String[0]));
                 // Rethrow the original exception to fail the test
                 if (original instanceof AssertionError) {
@@ -40,9 +40,10 @@ public class JsonScriptRunner {
                 } else if (original instanceof Error) {
                     throw (Error) original;
                 } else {
-                    throw new RuntimeException("Test action failed: " + original.getMessage(), original);
+                    throw new RuntimeException("Test action failed: " + message, original);
                 }
             } catch (NoSuchMethodException | IllegalAccessException e) {
+                System.out.println("\nPrinting message - " + e.getMessage());
                 e.printStackTrace();
                 storeResultCSV(actions.getFirst(),"Failure",e.getMessage());
                 queueManager.addRecord(new ExpectedResultData(action.testcaseId(), action.actionType(), action.locator(), "Failure", e.getMessage(), new String[0]

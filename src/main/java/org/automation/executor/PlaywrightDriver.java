@@ -9,7 +9,12 @@ import org.automation.records.ActionRecord;
 import org.automation.records.DriverConfigRecord;
 import org.automation.util.DockerContainerCheck;
 import org.automation.util.ScreenshotManager;
+import org.openqa.selenium.By;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.time.Duration;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
@@ -85,21 +90,42 @@ public class PlaywrightDriver implements Driver {
 
     @Step("Type Text")
     public void type(ActionRecord actionRecord){
-        String selector = parseLocator(actionRecord.locator());
-        page.fill(selector, getArg(actionRecord, 0));
+        Locator locator = parseLocator(actionRecord);
+        locator.fill(getArg(actionRecord, 0));
         ScreenshotManager.takeScreenshot(page, actionRecord.actionType(), actionRecord.testcaseId());
     }
 
     @Step("Click Element")
     public void click(ActionRecord actionRecord){
-        String selector = parseLocator(actionRecord.locator());
-        page.click(selector);
+        Locator locator = parseLocator(actionRecord);
+        locator.click();
         ScreenshotManager.takeScreenshot(page, actionRecord.actionType(), actionRecord.testcaseId());
     }
 
     @Step("Clear Text")
     public void clear(ActionRecord actionRecord){
-        page.fill(actionRecord.locator(), "");
+        Locator locator = parseLocator(actionRecord);
+        locator.fill("");
+        ScreenshotManager.takeScreenshot(page, actionRecord.actionType(), actionRecord.testcaseId());
+    }
+
+    @Step("Scroll Page")
+    public void scroll(ActionRecord actionRecord){
+        Locator locator = parseLocator(actionRecord);
+        locator.scrollIntoViewIfNeeded();
+        ScreenshotManager.takeScreenshot(page, actionRecord.actionType(), actionRecord.testcaseId());
+        /*
+        page.mouse().wheel(0, 500);   // scroll down
+        page.mouse().wheel(0, -500);  // scroll up
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)");
+        page.keyboard().press("PageDown");
+         */
+    }
+
+    @Step("Hover Element")
+    public void hover(ActionRecord actionRecord){
+        Locator locator = parseLocator(actionRecord);
+        locator.hover();
         ScreenshotManager.takeScreenshot(page, actionRecord.actionType(), actionRecord.testcaseId());
     }
 
@@ -113,18 +139,23 @@ public class PlaywrightDriver implements Driver {
         catch (Exception e) { throw new RuntimeException(e); }
     }
 
+    @Step("Switch to Frame")
+    public void frame(ActionRecord actionRecord) {
+        ScreenshotManager.takeScreenshot(page, actionRecord.actionType(), actionRecord.testcaseId());
+    }
+
     @Step("Get Text")
     @Override
     public String getText(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         ScreenshotManager.takeScreenshot(page, actionRecord.actionType(), actionRecord.testcaseId());
-        return page.textContent(selector);
+        return locator.textContent();
     }
 
     public boolean isElementPresent(ActionRecord actionRecord) {
         try {
-            String selector = parseLocator(actionRecord.locator());
-            return page.locator(selector).isVisible();
+            Locator locator = parseLocator(actionRecord);
+            return locator.isVisible();
         } catch (Exception e) {
             return false;
         }
@@ -137,23 +168,27 @@ public class PlaywrightDriver implements Driver {
         return actionRecord.arguments()[index];
     }
 
-    private String parseLocator(String locator) {
-        if (locator.startsWith("xpath:")) {
-            return locator.replace("xpath:", "");
-        } else if (locator.startsWith("css:")) {
-            return locator.replace("css:", "");
-        } else if (locator.startsWith("id:")) {
-            return "#" + locator.replace("id:", "");
-        } else if (locator.startsWith("name:")) {
-            return "[name='"+locator.replace("name:", "")+"']";
-        } else if (locator.startsWith("className:")) {
-            return "." + locator.replace("className:", "");
-        } else if (locator.startsWith("tagName:")) {
-            return locator.replace("tagName:", "");
-        } else if (locator.startsWith("linkText:")) {
-            return "text='" + locator.replace("linkText:", "") + "'";
+    private Locator parseLocator(ActionRecord actionRecord) {
+        String tempLocator = actionRecord.locator();
+        if (tempLocator.startsWith("xpath:")) {
+            tempLocator = tempLocator.replace("xpath:", "");
+        } else if (tempLocator.startsWith("css:")) {
+            tempLocator = tempLocator.replace("css:", "");
+        } else if (tempLocator.startsWith("id:")) {
+            tempLocator = "#" + tempLocator.replace("id:", "");
+        } else if (tempLocator.startsWith("name:")) {
+            tempLocator = "[name='"+tempLocator.replace("name:", "")+"']";
+        } else if (tempLocator.startsWith("className:")) {
+            tempLocator = "." + tempLocator.replace("className:", "");
+        } else if (tempLocator.startsWith("tagName:")) {
+            tempLocator = tempLocator.replace("tagName:", "");
+        } else if (tempLocator.startsWith("linkText:")) {
+            tempLocator = "text='" + tempLocator.replace("linkText:", "") + "'";
         }
-        return locator;
+        if ((actionRecord.frameLocator() != null) && ( !(actionRecord.frameLocator().isEmpty())) ) {
+            return page.frameLocator(actionRecord.frameLocator()).locator(tempLocator);
+        }
+        return page.locator(tempLocator);
     }
 
     // ============================================================
@@ -164,23 +199,23 @@ public class PlaywrightDriver implements Driver {
     /** Assert element is visible on page */
     @Step("Assert Visibility")
     public void assertVisibility(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         ScreenshotManager.takeScreenshot(page, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
         switch (actionRecord.actionType()){
-            case "isVisible": assertThat(page.locator(selector)).isVisible();
+            case "isVisible": assertThat(locator).isVisible();
             break;
-            case "isVisibleTimeout": assertThat(page.locator(selector)).isVisible(
+            case "isVisibleTimeout": assertThat(locator).isVisible(
                     new LocatorAssertions.IsVisibleOptions().setTimeout(Double.parseDouble(getArg(actionRecord,0))));
             break;
-            case "isHidden": assertThat(page.locator(selector)).isHidden();
+            case "isHidden": assertThat(locator).isHidden();
             break;
-            case "isAttached": assertThat(page.locator(selector)).isAttached();
+            case "isAttached": assertThat(locator).isAttached();
             break;
-            case "isDetached": assertThat(page.locator(selector)).not().isAttached();
+            case "isDetached": assertThat(locator).not().isAttached();
             break;
-            case "isInViewport": assertThat(page.locator(selector)).isInViewport();
+            case "isInViewport": assertThat(locator).isInViewport();
             break;
-            default: assertThat(page.locator(selector)).isVisible();
+            default: assertThat(locator).isVisible();
             break;
         }
     }
@@ -189,24 +224,24 @@ public class PlaywrightDriver implements Driver {
     /** Assert element has exact text */
     @Step("Assert Text")
     public void assertText(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         ScreenshotManager.takeScreenshot(page, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
         switch (actionRecord.actionType()){
-            case "hasText": assertThat(page.locator(selector)).hasText(getArg(actionRecord, 0));
+            case "hasText": assertThat(locator).hasText(getArg(actionRecord, 0));
                 break;
             case "hasTextPattern": Pattern pattern1 = Pattern.compile(getArg(actionRecord, 0), Pattern.CASE_INSENSITIVE);
-                assertThat(page.locator(selector)).hasText(pattern1);
+                assertThat(locator).hasText(pattern1);
                 break;
-            case "containsText": assertThat(page.locator(selector)).containsText(getArg(actionRecord, 0));
+            case "containsText": assertThat(locator).containsText(getArg(actionRecord, 0));
                 break;
             case "containsTextPattern": Pattern pattern2 = Pattern.compile(getArg(actionRecord, 0), Pattern.CASE_INSENSITIVE);
-                assertThat(page.locator(selector)).containsText(pattern2);
+                assertThat(locator).containsText(pattern2);
                 break;
-            case "hasTextMultipleElements": assertThat(page.locator(selector)).hasText(actionRecord.arguments());
+            case "hasTextMultipleElements": assertThat(locator).hasText(actionRecord.arguments());
                 break;
-            case "notContainsText": assertThat(page.locator(selector)).not().containsText(getArg(actionRecord, 0));
+            case "notContainsText": assertThat(locator).not().containsText(getArg(actionRecord, 0));
                 break;
-            default: assertThat(page.locator(selector)).hasText(getArg(actionRecord, 0));
+            default: assertThat(locator).hasText(getArg(actionRecord, 0));
                 break;
         }
     }
@@ -215,28 +250,28 @@ public class PlaywrightDriver implements Driver {
     /** Assert input has specific value */
     @Step("Assert Element")
     public void assertElement(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         ScreenshotManager.takeScreenshot(page, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
         switch (actionRecord.actionType()){
-            case "hasValue": assertThat(page.locator(selector)).hasValue(getArg(actionRecord, 0));
+            case "hasValue": assertThat(locator).hasValue(getArg(actionRecord, 0));
                 break;
-            case "isEditable": assertThat(page.locator(selector)).isEditable();
+            case "isEditable": assertThat(locator).isEditable();
                 break;
-            case "isChecked": assertThat(page.locator(selector)).isChecked();
+            case "isChecked": assertThat(locator).isChecked();
                 break;
-            case "isNotChecked": assertThat(page.locator(selector)).not().isChecked();
+            case "isNotChecked": assertThat(locator).not().isChecked();
                 break;
-            case "hasValues": assertThat(page.locator(selector)).hasValues(actionRecord.arguments());
+            case "hasValues": assertThat(locator).hasValues(actionRecord.arguments());
                 break;
-            case "isEnabled": assertThat(page.locator(selector)).isEnabled();
+            case "isEnabled": assertThat(locator).isEnabled();
                 break;
-            case "isDisabled": assertThat(page.locator(selector)).isDisabled();
+            case "isDisabled": assertThat(locator).isDisabled();
                 break;
-            case "isFocused": assertThat(page.locator(selector)).isFocused();
+            case "isFocused": assertThat(locator).isFocused();
                 break;
-            case "hasId": assertThat(page.locator(selector)).hasId(getArg(actionRecord, 0));
+            case "hasId": assertThat(locator).hasId(getArg(actionRecord, 0));
                 break;
-            default: assertThat(page.locator(selector)).hasValue(getArg(actionRecord, 0));
+            default: assertThat(locator).hasValue(getArg(actionRecord, 0));
                 break;
         }
     }
@@ -245,18 +280,18 @@ public class PlaywrightDriver implements Driver {
     /** Assert locator resolves to exact count of elements */
     @Step("Asset Count|List")
     public void assertCount(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         ScreenshotManager.takeScreenshot(page, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
         switch (actionRecord.actionType()){
-            case "hasCount": assertThat(page.locator(selector)).hasCount(Integer.parseInt(getArg(actionRecord, 0)));
+            case "hasCount": assertThat(locator).hasCount(Integer.parseInt(getArg(actionRecord, 0)));
                 break;
-            case "exists": assertThat(page.locator(selector)).not().hasCount(0);
+            case "exists": assertThat(locator).not().hasCount(0);
                 break;
-            case "notExists": assertThat(page.locator(selector)).hasCount(0);
+            case "notExists": assertThat(locator).hasCount(0);
                 break;
-            case "isEmpty": assertThat(page.locator(selector)).isEmpty();
+            case "isEmpty": assertThat(locator).isEmpty();
                 break;
-            default: assertThat(page.locator(selector)).hasCount(Integer.parseInt(getArg(actionRecord, 0)));
+            default: assertThat(locator).hasCount(Integer.parseInt(getArg(actionRecord, 0)));
                 break;
         }
     }
@@ -286,16 +321,19 @@ public class PlaywrightDriver implements Driver {
     /** Assert element has specific CSS class */
     @Step("Assert Class")
     public void assertClass(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         ScreenshotManager.takeScreenshot(page, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
         switch (actionRecord.actionType()){
-            case "hasClass": assertThat(page.locator(selector)).hasClass(getArg(actionRecord, 0));
+            case "hasClass":
+                assertThat(locator).hasClass(getArg(actionRecord, 0));
                 break;
-            case "containsClass": assertThat(page.locator(selector)).containsClass(getArg(actionRecord, 0));
+            case "containsClass":
+                assertThat(locator).containsClass(getArg(actionRecord, 0));
                 break;
-            case "notHasClass": assertThat(page.locator(selector)).not().hasClass(getArg(actionRecord, 0));
+            case "notHasClass":
+                assertThat(locator).not().hasClass(getArg(actionRecord, 0));
                 break;
-            default: assertThat(page.locator(selector)).hasClass(getArg(actionRecord, 0));
+            default: assertThat(locator).hasClass(getArg(actionRecord, 0));
                 break;
         }
     }
@@ -303,22 +341,26 @@ public class PlaywrightDriver implements Driver {
     /** Assert element has attribute (existence check) */
     @Step("Assert Attribute")
     public void assertAttribute(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         ScreenshotManager.takeScreenshot(page, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
         switch (actionRecord.actionType()){
-            case "hasAttribute": assertThat(page.locator(selector)).hasAttribute(getArg(actionRecord, 0), Pattern.compile(".*"));
+            case "hasAttribute":
+                assertThat(locator).hasAttribute(getArg(actionRecord, 0), Pattern.compile(".*"));
                 break;
-            case "hasAttributeValue": assertThat(page.locator(selector)).hasAttribute(getArg(actionRecord, 0), getArg(actionRecord, 1));
+            case "hasAttributeValue":
+                assertThat(locator).hasAttribute(getArg(actionRecord, 0), getArg(actionRecord, 1));
                 break;
-            case "hasAttributePattern": String attrName = getArg(actionRecord, 0);
+            case "hasAttributePattern":
+                String attrName = getArg(actionRecord, 0);
                 Pattern pattern = Pattern.compile(getArg(actionRecord, 1), Pattern.CASE_INSENSITIVE);
-                assertThat(page.locator(selector)).hasAttribute(attrName, pattern);
+                assertThat(locator).hasAttribute(attrName, pattern);
                 break;
-            case "notHasAttribute": String attrName2 = getArg(actionRecord, 0);
+            case "notHasAttribute":
+                String attrName2 = getArg(actionRecord, 0);
                 String value2 = getArg(actionRecord, 1);
-                assertThat(page.locator(selector)).not().hasAttribute(attrName2, value2);
+                assertThat(locator).not().hasAttribute(attrName2, value2);
                 break;
-            default: assertThat(page.locator(selector)).hasAttribute(getArg(actionRecord, 0), Pattern.compile(".*"));
+            default: assertThat(locator).hasAttribute(getArg(actionRecord, 0), Pattern.compile(".*"));
                 break;
         }
     }
@@ -326,19 +368,21 @@ public class PlaywrightDriver implements Driver {
     // --- CSS & STYLING ---
     /** Assert element has specific CSS property value */
     @Step("Assert CSS")
-    public void assertCSS(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+    public void assertCSSProperty(ActionRecord actionRecord) {
+        Locator locator = parseLocator(actionRecord);
         String cssProperty = getArg(actionRecord, 0);
         ScreenshotManager.takeScreenshot(page, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
         switch (actionRecord.actionType()){
-            case "hasCSS": String value1 = getArg(actionRecord, 1);
-                assertThat(page.locator(selector)).hasCSS(cssProperty, value1);
+            case "hasCSSProperty":
+                String value1 = getArg(actionRecord, 1);
+                assertThat(locator).hasCSS(cssProperty, value1);
                 break;
-            case "hasCSSPattern": Pattern pattern = Pattern.compile(getArg(actionRecord, 1), Pattern.CASE_INSENSITIVE);
-                assertThat(page.locator(selector)).hasCSS(cssProperty, pattern);
+            case "hasCSSPropertyPattern":
+                Pattern pattern = Pattern.compile(getArg(actionRecord, 1), Pattern.CASE_INSENSITIVE);
+                assertThat(locator).hasCSS(cssProperty, pattern);
                 break;
             default: String value2 = getArg(actionRecord, 1);
-                assertThat(page.locator(selector)).hasCSS(cssProperty, value2);
+                assertThat(locator).hasCSS(cssProperty, value2);
                 break;
         }
     }
@@ -346,44 +390,44 @@ public class PlaywrightDriver implements Driver {
     // --- ACCESSIBILITY ---
     /** Assert element has specific ARIA role */
     public void assertHasRole(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         AriaRole role = AriaRole.valueOf(getArg(actionRecord, 0).toUpperCase());
-        assertThat(page.locator(selector)).hasRole(role);
+        assertThat(locator).hasRole(role);
     }
 
     /** Assert element has accessible name */
     public void assertHasAccessibleName(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
-        assertThat(page.locator(selector)).hasAccessibleName(getArg(actionRecord, 0));
+        Locator locator = parseLocator(actionRecord);
+        assertThat(locator).hasAccessibleName(getArg(actionRecord, 0));
     }
 
     /** Assert element has accessible name matching pattern */
     public void assertHasAccessibleNamePattern(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         Pattern pattern = Pattern.compile(getArg(actionRecord, 0), Pattern.CASE_INSENSITIVE);
-        assertThat(page.locator(selector)).hasAccessibleName(pattern);
+        assertThat(locator).hasAccessibleName(pattern);
     }
 
     /** Assert element has accessible description */
     public void assertHasAccessibleDescription(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
-        assertThat(page.locator(selector)).hasAccessibleDescription(getArg(actionRecord, 0));
+        Locator locator = parseLocator(actionRecord);
+        assertThat(locator).hasAccessibleDescription(getArg(actionRecord, 0));
     }
 
     /** Assert element has accessible description matching pattern */
     public void assertHasAccessibleDescriptionPattern(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         Pattern pattern = Pattern.compile(getArg(actionRecord, 0), Pattern.CASE_INSENSITIVE);
-        assertThat(page.locator(selector)).hasAccessibleDescription(pattern);
+        assertThat(locator).hasAccessibleDescription(pattern);
     }
 
     // --- JAVASCRIPT PROPERTIES ---
     /** Assert element has specific JavaScript property value */
     public void assertHasJSProperty(ActionRecord actionRecord) {
-        String selector = parseLocator(actionRecord.locator());
+        Locator locator = parseLocator(actionRecord);
         String propertyName = getArg(actionRecord, 0);
         String value =getArg(actionRecord, 1);
-        assertThat(page.locator(selector)).hasJSProperty(propertyName, value);
+        assertThat(locator).hasJSProperty(propertyName, value);
     }
 
     /** Assert with custom timeout and retry logic */

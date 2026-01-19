@@ -11,6 +11,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -20,10 +21,10 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.awt.Rectangle;
+import java.util.regex.Pattern;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 public class SeleniumDriver implements Driver {
@@ -94,40 +95,78 @@ public class SeleniumDriver implements Driver {
 //        Allure.step("Navigate to URL: " + getArg(action, 0));
         String url = getArg(actionRecord, 0);
         driver.get(url);
-        ScreenshotManager.takeScreenshot(driver, "gotoUrl", actionRecord.testcaseId());
+        ScreenshotManager.takeScreenshot(driver, actionRecord.actionType(), actionRecord.testcaseId());
     }
 
     @Step("Type in element")
     public void type(ActionRecord actionRecord) {
         By locator = parseLocator(actionRecord.locator());
         String text = getArg(actionRecord, 0);
-        driver.findElement(locator).clear();
-        driver.findElement(locator).sendKeys(text);
-        ScreenshotManager.takeScreenshot(driver, "type", actionRecord.testcaseId());
+        WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                .until(ExpectedConditions.presenceOfElementLocated(locator));
+        element.clear();
+        element.sendKeys(text);
+        ScreenshotManager.takeScreenshot(driver, actionRecord.actionType(), actionRecord.testcaseId());
     }
 
     @Step("Click element")
     public void click(ActionRecord actionRecord) {
-        By by = parseLocator(actionRecord.locator());
-        driver.findElement(by).click();
-        ScreenshotManager.takeScreenshot(driver, "click", actionRecord.testcaseId());
+        By locator = parseLocator(actionRecord.locator());
+        WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                .until(ExpectedConditions.presenceOfElementLocated(locator));
+        element.click();
+        ScreenshotManager.takeScreenshot(driver, actionRecord.actionType(), actionRecord.testcaseId());
     }
 
     @Step("Clear element")
     public void clear(ActionRecord actionRecord) {
-        By by = parseLocator(actionRecord.locator());
-        driver.findElement(by).clear();
-        ScreenshotManager.takeScreenshot(driver, "clear", actionRecord.testcaseId());
+        By locator = parseLocator(actionRecord.locator());
+        WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                .until(ExpectedConditions.presenceOfElementLocated(locator));
+        element.clear();
+        ScreenshotManager.takeScreenshot(driver, actionRecord.actionType(), actionRecord.testcaseId());
     }
 
     @Step("Wait for Seconds")
     public void wait(ActionRecord actionRecord) {
         try {
             Thread.sleep(Long.parseLong(getArg(actionRecord, 0)) * 1000);
-            ScreenshotManager.takeScreenshot(driver, "wait", actionRecord.testcaseId());
+            ScreenshotManager.takeScreenshot(driver, actionRecord.actionType(), actionRecord.testcaseId());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Step("Scroll Page")
+    public void scroll(ActionRecord actionRecord) {
+        By locator = parseLocator(actionRecord.locator());
+        WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                .until(ExpectedConditions.presenceOfElementLocated(locator));
+        new Actions(driver).scrollToElement(element).perform();
+        ScreenshotManager.takeScreenshot(driver, actionRecord.actionType(), actionRecord.testcaseId());
+        /*
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+        new Actions(driver).scrollToElement(element).perform();
+        ((JavascriptExecutor) driver).executeScript("window.scrollBy(0,500);");
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollTop = arguments[1].offsetTop;",container,element);
+         */
+    }
+
+    @Step("Hover Element")
+    public void hover(ActionRecord actionRecord) {
+        By locator = parseLocator(actionRecord.locator());
+        WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                .until(ExpectedConditions.presenceOfElementLocated(locator));
+        new Actions(driver).moveToElement(element).perform();
+        ScreenshotManager.takeScreenshot(driver, actionRecord.actionType(), actionRecord.testcaseId());
+    }
+
+    @Step("Switch to Frame")
+    public void frame(ActionRecord actionRecord) {
+        By locator = parseLocator(actionRecord.locator());
+        new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                .until(ExpectedConditions.frameToBeAvailableAndSwitchToIt(locator));
+        ScreenshotManager.takeScreenshot(driver, actionRecord.actionType(), actionRecord.testcaseId());
     }
 
     String getArg(ActionRecord actionRecord, int index) {
@@ -179,24 +218,30 @@ public class SeleniumDriver implements Driver {
 //            WebElement element = driver.findElement(locator);
             ScreenshotManager.takeScreenshot(driver, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
             switch (actionRecord.actionType()){
-                case "isVisible": WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                case "isVisible":
+                    WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
                         .until(ExpectedConditions.presenceOfElementLocated(locator));
                     assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
                     break;
-                case "isVisibleTimeout": WebElement element2 = new WebDriverWait(driver, Duration.ofSeconds(Long.parseLong(getArg(actionRecord, 0))))
+                case "isVisibleTimeout":
+                    WebElement element2 = new WebDriverWait(driver, Duration.ofSeconds(Long.parseLong(getArg(actionRecord, 0))))
                         .until(ExpectedConditions.presenceOfElementLocated(locator));
                     assertTrue(element2.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + getArg(actionRecord, 0) + " seconds");
                     break;
-                case "isHidden": WebElement element3 = driver.findElement(locator);
+                case "isHidden":
+                    WebElement element3 = driver.findElement(locator);
                     assertFalse(element3.isDisplayed(),"Element with locator '" + locator + "' was not hidden");
                     break;
-                case "isAttached": List<WebElement> elements4 = driver.findElements(locator);
+                case "isAttached":
+                    List<WebElement> elements4 = driver.findElements(locator);
                     assertFalse(elements4.isEmpty(), "Element with locator '" + locator + "' was not attached");
                     break;
-                case "isDetached": List<WebElement> elements5 = driver.findElements(locator);
+                case "isDetached":
+                    List<WebElement> elements5 = driver.findElements(locator);
                     assertTrue(elements5.isEmpty(), "Element with locator '" + locator + "' was not detached");
                     break;
-                case "isInViewport": WebElement element6 = driver.findElement(locator);
+                case "isInViewport":
+                    WebElement element6 = driver.findElement(locator);
                     java.awt.Rectangle elemRect = new java.awt.Rectangle(
                             element6.getRect().getX(),
                             element6.getRect().getY(),
@@ -211,6 +256,268 @@ public class SeleniumDriver implements Driver {
                 default: WebElement element7 = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
                         .until(ExpectedConditions.presenceOfElementLocated(locator));
                     assertTrue(element7.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
+                    break;
+            }
+        } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
+            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            throw new AssertionError(e.getMessage());
+        }
+    }
+
+    // --- TEXT CONTENT ---
+    /** Assert element has exact text */
+    @Step("Assert Text")
+    public void assertText(ActionRecord actionRecord) {
+        try {
+            By locator = parseLocator(actionRecord.locator());
+            ScreenshotManager.takeScreenshot(driver, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
+            WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                    .until(ExpectedConditions.presenceOfElementLocated(locator));
+            switch (actionRecord.actionType()) {
+                case "hasText":
+                    assertEquals(element.getText(),getArg(actionRecord, 0),"Element with locator '" + locator + "' did not have text '"+ getArg(actionRecord, 0) +"'");
+                    break;
+                case "hasTextPattern":
+                    assertTrue(element.getText().matches(getArg(actionRecord, 0)),"Element with locator '" + locator + "' did not have text pattern '"+ getArg(actionRecord, 0) +"'");
+                    break;
+                case "containsText":
+                    assertTrue(element.getText().contains(getArg(actionRecord, 0)),"Element with locator '" + locator + "' did not contain '"+ getArg(actionRecord, 0) +"'");
+                    break;
+                case "containsTextPattern":
+                    String regex = ".*" + getArg(actionRecord, 0) + ".*";
+                    assertTrue(element.getText().matches(regex),"Element with locator '" + locator + "' did not contain text pattern '"+ getArg(actionRecord, 0) +"'");
+                    break;
+                case "hasTextMultipleElements":
+                    List<WebElement> elements = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                            .until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+                    List<String> expectedTexts = List.of(actionRecord.arguments());
+                    assertEquals(
+                            elements.size(),
+                            expectedTexts.size(),
+                            "Number of elements does not match expected text count"
+                    );
+                    for (int i = 0; i < elements.size(); i++) {
+                        String actualText = elements.get(i).getText().trim();
+                        String expectedText = expectedTexts.get(i);
+                        assertTrue(actualText.equalsIgnoreCase(expectedText),"Element with locator '" + locator + "' did not have text '"+ expectedText +"'");
+                    }
+                    break;
+                case "notContainsText":
+                    assertFalse(element.getText().contains(getArg(actionRecord, 0)),"Element with locator '" + locator + "' contains '"+ getArg(actionRecord, 0) +"'");
+                    break;
+                default:
+                    assertTrue(element.getText().equalsIgnoreCase(getArg(actionRecord, 0)),"Element with locator '" + locator + "' did not have text '"+ getArg(actionRecord, 0) +"'");
+                    break;
+            }
+        } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
+            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            throw new AssertionError(e.getMessage());
+        }
+    }
+
+    // --- INPUT & FORM ---
+    /** Assert input has specific value */
+    @Step("Assert Element")
+    public void assertElement(ActionRecord actionRecord) {
+        try {
+            By locator = parseLocator(actionRecord.locator());
+            ScreenshotManager.takeScreenshot(driver, actionRecord.methodName() + " - " + actionRecord.actionType(), actionRecord.testcaseId());
+            WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                    .until(ExpectedConditions.presenceOfElementLocated(locator));
+            switch (actionRecord.actionType()) {
+                case "hasValue":
+                    assertEquals(element.getAttribute("value"), getArg(actionRecord, 0), "Element with locator '" + locator + "' did not have Value '" + getArg(actionRecord, 0) + "'");
+                    break;
+                case "isEditable":
+                    assertTrue(element.isEnabled(),"Element with locator '" + locator + "' is not Enabled");
+                    assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' is not Displayed");
+                    break;
+                case "isChecked":
+                    assertTrue(element.isSelected(),"Element with locator '" + locator + "' is not Checked");
+                    break;
+                case "isNotChecked":
+                    assertFalse(element.isSelected(),"Element with locator '" + locator + "' is Checked");
+                    break;
+                case "hasValues":
+                    List<WebElement> elements = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                            .until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+                    List<String> expectedTexts = List.of(actionRecord.arguments());
+                    assertEquals(
+                            elements.size(),
+                            expectedTexts.size(),
+                            "Number of elements does not match expected text count"
+                    );
+                    for (int i = 0; i < elements.size(); i++) {
+                        String actualText = elements.get(i).getAttribute("value");
+                        String expectedText = expectedTexts.get(i);
+                        assertTrue(actualText.equalsIgnoreCase(expectedText),"Element with locator '" + locator + "' did not have Value '"+ expectedText +"'");
+                    }
+                    break;
+                case "isEnabled":
+                    assertTrue(element.isEnabled(),"Element with locator '" + locator + "' is not Enabled");
+                    break;
+                case "isDisabled":
+                    assertFalse(element.isEnabled(),"Element with locator '" + locator + "' is Enabled");
+                    break;
+                case "isFocused":
+                    WebElement activeElement = driver.switchTo().activeElement();
+                    assertEquals(
+                            element,
+                            activeElement,
+                            "Expected element with locator '" + locator + "' to be focused"
+                    );
+                    break;
+                case "hasId":
+                    assertEquals(element.getAttribute("id"), getArg(actionRecord, 0), "Element with locator '" + locator + "' did not have ID '" + getArg(actionRecord, 0) + "'");
+                    break;
+                default:
+                    assertEquals(element.getAttribute("value"), getArg(actionRecord, 0), "Element with locator '" + locator + "' did not have Value '" + getArg(actionRecord, 0) + "'");
+                    break;
+            }
+        } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
+            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            throw new AssertionError(e.getMessage());
+        }
+    }
+
+    // --- COUNT & LIST ---
+    /** Assert locator resolves to exact count of elements */
+    @Step("Asset Count|List")
+    public void assertCount(ActionRecord actionRecord) {
+        try {
+            By locator = parseLocator(actionRecord.locator());
+            ScreenshotManager.takeScreenshot(driver, actionRecord.methodName() + " - " + actionRecord.actionType(), actionRecord.testcaseId());
+            List<WebElement> elements = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                    .until(ExpectedConditions.presenceOfAllElementsLocatedBy(locator));
+            switch (actionRecord.actionType()) {
+                case "hasCount":
+                    assertEquals(elements.size(),Integer.parseInt(getArg(actionRecord, 0)),"Element with locator '" + locator + "' does not have Count '" + getArg(actionRecord, 0) + "'");
+                    break;
+                case "exists":
+                    assertNotEquals(0, elements.size(),"Element with locator '" + locator + "' does not Exist");
+                    break;
+                case "notExists", "isEmpty":
+                    assertEquals(0, elements.size(),"Element with locator '" + locator + "' does Exist");
+                    break;
+                default:
+                    assertEquals(elements.size(),Integer.parseInt(getArg(actionRecord, 0)),"Element with locator '" + locator + "' does not have Count '" + getArg(actionRecord, 0) + "'");
+                    break;
+            }
+        } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
+            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            throw new AssertionError(e.getMessage());
+        }
+    }
+
+    // --- PAGE ASSERTIONS ---
+    /** Assert page has specific title (exact match) */
+    @Step("Assert Page")
+    public void assertPage(ActionRecord actionRecord) {
+        try {
+            ScreenshotManager.takeScreenshot(driver, actionRecord.methodName() + " - " + actionRecord.actionType(), actionRecord.testcaseId());
+            switch (actionRecord.actionType()) {
+                case "hasTitle":
+                    assertEquals(driver.getTitle(), getArg(actionRecord, 0),"Page does not have title '" + getArg(actionRecord, 0) + "'");
+                    break;
+                case "hasTitlePattern":
+                    assertTrue(driver.getTitle().matches(getArg(actionRecord, 0)),"Page does not have title that matches the Pattern '" + getArg(actionRecord, 0) + "'");
+                    break;
+                case "hasURL":
+                    assertEquals(driver.getCurrentUrl(), getArg(actionRecord, 0),"Page does not have URL '" + getArg(actionRecord, 0) + "'");
+                    break;
+                case "hasURLPattern":
+                    assertTrue(driver.getCurrentUrl().matches(getArg(actionRecord, 0)),"Page does not have URL that matches the Pattern '" + getArg(actionRecord, 0) + "'");
+                    break;
+                default:
+                    assertEquals(driver.getTitle(), getArg(actionRecord, 0),"Page does not have title '" + getArg(actionRecord, 0) + "'");
+                    break;
+            }
+        } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
+            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            throw new AssertionError(e.getMessage());
+        }
+    }
+
+    // --- CLASS & ATTRIBUTES ---
+    /** Assert element has specific CSS class */
+    @Step("Assert Class")
+    public void assertClass(ActionRecord actionRecord) {
+        try {
+            By locator = parseLocator(actionRecord.locator());
+            ScreenshotManager.takeScreenshot(driver, actionRecord.methodName() + " - " + actionRecord.actionType(), actionRecord.testcaseId());
+            WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                    .until(ExpectedConditions.presenceOfElementLocated(locator));
+            switch (actionRecord.actionType()) {
+                case "hasClass":
+                    assertEquals(element.getAttribute("class"), getArg(actionRecord, 0), "Element with locator '" + locator + "' did not have CSS Class '" + getArg(actionRecord, 0) + "'");
+                    break;
+                case "containsClass":
+                    assertTrue(element.getAttribute("class").contains(getArg(actionRecord, 0)), "Element with locator '" + locator + "' did not contain CSS Class '" + getArg(actionRecord, 0) + "'");
+                    break;
+                case "notHasClass":
+                    assertFalse(element.getAttribute("class").contains(getArg(actionRecord, 0)), "Element with locator '" + locator + "' did contain CSS Class '" + getArg(actionRecord, 0) + "'");
+                    break;
+                default:
+                    assertEquals(element.getAttribute("class"), getArg(actionRecord, 0), "Element with locator '" + locator + "' did not have CSS Class '" + getArg(actionRecord, 0) + "'");
+                    break;
+            }
+        } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
+            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            throw new AssertionError(e.getMessage());
+        }
+    }
+
+    /** Assert element has attribute (existence check) */
+    @Step("Assert Attribute")
+    public void assertAttribute(ActionRecord actionRecord) {
+        try {
+            By locator = parseLocator(actionRecord.locator());
+            ScreenshotManager.takeScreenshot(driver, actionRecord.methodName() + " - " + actionRecord.actionType(), actionRecord.testcaseId());
+            WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                    .until(ExpectedConditions.presenceOfElementLocated(locator));
+            String attributeValue = element.getAttribute(getArg(actionRecord, 0));
+            switch (actionRecord.actionType()) {
+                case "hasAttribute":
+                    assertNotNull(attributeValue, "Element with locator '" + locator + "' did not contain Attribute '" + getArg(actionRecord, 0) + "'");
+                    break;
+                case "hasAttributeValue":
+                    assertEquals(attributeValue, getArg(actionRecord, 1), "Element with locator '" + locator + "' did not contain Attribute '" + getArg(actionRecord, 0) + "' with value '" +getArg(actionRecord, 1) + "'");
+                    break;
+                case "hasAttributePattern":
+                    assertTrue(attributeValue.matches(getArg(actionRecord, 1)), "Element with locator '" + locator + "' did not match Attribute Pattern'" + getArg(actionRecord, 1) + "'");
+                    break;
+                case "notHasAttribute":
+                    assertNull(attributeValue, "Element with locator '" + locator + "' contains Attribute '" + getArg(actionRecord, 0) + "'");
+                    break;
+                default:
+                    assertNotNull(attributeValue, "Element with locator '" + locator + "' did not contain Attribute '" + getArg(actionRecord, 0) + "'");
+                    break;
+            }
+        } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
+            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            throw new AssertionError(e.getMessage());
+        }
+    }
+
+    // --- CSS & STYLING ---
+    /** Assert element has specific CSS property value */
+    @Step("Assert CSS")
+    public void assertCSSProperty(ActionRecord actionRecord) {
+        try {
+            By locator = parseLocator(actionRecord.locator());
+            ScreenshotManager.takeScreenshot(driver, actionRecord.methodName() + " - " + actionRecord.actionType(), actionRecord.testcaseId());
+            WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
+                    .until(ExpectedConditions.presenceOfElementLocated(locator));
+            String propertyValue = element.getCssValue(getArg(actionRecord, 0));
+            switch (actionRecord.actionType()) {
+                case "hasCSSProperty":
+                    assertEquals(propertyValue, getArg(actionRecord, 1), "Element with locator '" + locator + "' did not contain Attribute '" + getArg(actionRecord, 0) + "' with value '" +getArg(actionRecord, 1) + "'");
+                    break;
+                case "hasCSSPropertyPattern":
+                    assertTrue(propertyValue.matches(getArg(actionRecord, 1)), "Element with locator '" + locator + "' did not match Attribute Pattern '" + getArg(actionRecord, 0) + "' with value '" +getArg(actionRecord, 1) + "'");
+                    break;
+                default:
+                    assertEquals(propertyValue, getArg(actionRecord, 1), "Element with locator '" + locator + "' did not contain Attribute '" + getArg(actionRecord, 0) + "' with value '" +getArg(actionRecord, 1) + "'");
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {

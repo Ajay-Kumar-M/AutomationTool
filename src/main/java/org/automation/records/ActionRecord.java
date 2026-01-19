@@ -9,6 +9,7 @@ public record ActionRecord(
         String testcaseId,
         Map<String,String> additionalData,
         String methodName,
+        String frameLocator,
         String epic,
         String feature,
         String story,

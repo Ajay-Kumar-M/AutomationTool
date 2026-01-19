@@ -989,7 +989,46 @@
           wait: 'wait',
           scroll: 'scroll',
           hover: 'hover',
-          isVisible: 'assertVisibility'
+          clear : 'clear',
+          frame: 'frame',
+          isVisible: 'assertVisibility',
+          isVisibleTimeout: 'assertVisibility',
+          isHidden: 'assertVisibility',
+          isAttached: 'assertVisibility',
+          isDetached: 'assertVisibility',
+          isInViewport: 'assertVisibility',
+          hasText: 'assertText',
+          hasTextPattern: 'assertText',
+          containsText: 'assertText',
+          containsTextPattern: 'assertText',
+          hasTextMultipleElements: 'assertText',
+          notContainsText: 'assertText',
+          hasValue: 'assertElement',
+          isEditable: 'assertElement',
+          isChecked: 'assertElement',
+          isNotChecked: 'assertElement',
+          hasValues: 'assertElement',
+          isEnabled: 'assertElement',
+          isDisabled: 'assertElement',
+          isFocused: 'assertElement',
+          hasId: 'assertElement',
+          hasCount: 'assertCount',
+          exists: 'assertCount',
+          notExists: 'assertCount',
+          isEmpty: 'assertCount',
+          hasTitle: 'assertPage',
+          hasTitlePattern: 'assertPage',
+          hasURL: 'assertPage',
+          hasURLPattern: 'assertPage',
+          hasClass: 'assertClass',
+          containsClass: 'assertClass',
+          notHasClass: 'assertClass',
+          hasAttribute: 'assertAttribute',
+          hasAttributeValue: 'assertAttribute',
+          hasAttributePattern: 'assertAttribute',
+          notHasAttribute: 'assertAttribute',
+          hasCSSProperty: 'assertCSSProperty',
+          hasCSSPropertyPattern: 'assertCSSProperty',
         };
 
         let currentMode = null; // 'create' or 'edit'
@@ -1096,6 +1135,7 @@
                 testcaseId: mode === 'create' ? document.getElementById('createTestcaseId').value : '',
                 methodName: methodName,
                 additionalData: {},
+                frameLocator: '',
                 epic: '',
                 feature: '',
                 story: '',
@@ -1158,6 +1198,10 @@
                 '<textarea id="editAdditionalData">' + JSON.stringify(data.additionalData || {}, null, 2) + '</textarea>' +
                 '</div>' +
                 '<div class="form-group">' +
+                '<label>Frame Locator:</label>' +
+                '<input type="text" id="editFrameLocator" value="' + (data.frameLocator || '') + '" placeholder="e.g., #username, button[type=submit]" />' +
+                '</div>' +
+                '<div class="form-group">' +
                 '<label>Epic:</label>' +
                 '<input type="text" id="editEpic" value="' + (data.epic || '') + '" />' +
                 '</div>' +
@@ -1190,6 +1234,7 @@
                 .map(arg => arg.trim())
                 .filter(arg => arg);
             operationsData[actionId].testcaseId = document.getElementById('editTestcaseId').value;
+            operationsData[actionId].frameLocator = document.getElementById('editFrameLocator').value;
             operationsData[actionId].epic = document.getElementById('editEpic').value;
             operationsData[actionId].feature = document.getElementById('editFeature').value;
             operationsData[actionId].story = document.getElementById('editStory').value;
@@ -1280,6 +1325,7 @@
                 arguments: op.arguments.length > 0 ? op.arguments : undefined,
                 testcaseId: testcaseId,
                 methodName: op.methodName,
+                frameLocator: op.frameLocator,
                 ...(op.additionalData && Object.keys(op.additionalData).length > 0 ? { additionalData: op.additionalData } : {}),
                 ...(op.epic ? { epic: op.epic } : {}),
                 ...(op.feature ? { feature: op.feature } : {}),
@@ -1369,6 +1415,7 @@
                             testcaseId: action.testcaseId || '',
                             additionalData: action.additionalData || {},
                             methodName: action.methodName,
+                            frameLocator: action.frameLocator,
                             epic: action.epic || '',
                             feature: action.feature || '',
                             story: action.story || '',
@@ -1448,6 +1495,7 @@
                 testcaseId: normalizeString(op.testcaseId),
                 arguments: normalizeArray(op.arguments),
                 methodName: op.methodName,
+                frameLocator: op.frameLocator,
                 ...addIfNonEmptyObject('additionalData', op.additionalData),
                 ...addIfDefined('epic', op.epic),
                 ...addIfDefined('feature', op.feature),

@@ -4,6 +4,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -12,15 +14,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 @WebServlet("/TestCaseLoadServlet")
 public class TestCaseLoadServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(TestCaseLoadServlet.class);
     protected void doPost (HttpServletRequest request, HttpServletResponse response) throws IOException {
         ObjectMapper responseMapper = new ObjectMapper();
         ObjectNode rootNode = responseMapper.createObjectNode();
         try {
             Path testcaseFilePath = Paths.get(request.getParameter("filePath"));
-            System.out.println("TestCaseLoad Filepath- "+ testcaseFilePath);
+            logger.info("TestCaseLoad Filepath- {}", testcaseFilePath);
             if (Files.exists(testcaseFilePath)) {
                 //String fileContent = Files.readString(filePath); // Java 11+
 //                rootNode.put("data", Files.readString(filePath));
@@ -35,11 +39,11 @@ public class TestCaseLoadServlet extends HttpServlet {
         } catch (Exception e) {
             rootNode.put("success", false);
             rootNode.put("message", "Read JSON file failed: " + e.getMessage());
-            System.out.println("Exception occurred in TestCaseSaveServlet" + e.getMessage());
-            e.printStackTrace();
+            logger.error("Exception occurred in TestCaseLoadServlet{}", e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+//            e.printStackTrace();
         } finally {
             String json = responseMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
-//            System.out.println(json);
             response.getWriter().write(json);
         }
     }

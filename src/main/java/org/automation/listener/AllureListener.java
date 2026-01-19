@@ -5,10 +5,13 @@ import io.qameta.allure.Attachment;
 import org.automation.driver.Driver;
 import org.automation.util.ScreenshotManager;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -16,6 +19,7 @@ import java.util.Map;
  * and detailed Allure reporting
  */
 public class AllureListener implements ITestListener {
+    private static final Logger logger = LoggerFactory.getLogger(AllureListener.class);
 
     @Attachment(value = "Execution Report", type = "text/plain")
     public static String attachExecutionReport(String report) {
@@ -29,16 +33,15 @@ public class AllureListener implements ITestListener {
 
     @Override
     public void onTestStart(ITestResult result) {
-        System.out.println("========================================");
-        System.out.println("TEST STARTED: " + result.getTestClass()
-                .getName() + "." + result.getMethod().getMethodName());
-        System.out.println("========================================");
+        logger.info("========================================");
+        logger.info("TEST STARTED: {}.{}", result.getTestClass().getName(), result.getMethod().getMethodName());
+        logger.info("========================================");
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
         try {
-            System.out.println("✓ TEST PASSED: " + result.getMethod().getMethodName());
+            logger.info("✓ TEST PASSED: {}", result.getMethod().getMethodName());
             ITestContext context = result.getTestContext();
             Map<String, Object> state = (Map<String, Object>) context.getAttribute("executionState");
             long duration = System.currentTimeMillis() - (long) state.get("startTime");
@@ -47,18 +50,19 @@ public class AllureListener implements ITestListener {
 //            String testCaseID = Driver.getTestCaseID();
             String testcaseID = (String) context.getAttribute("testcaseID");
             attachTestcaseId("Testcase ID : "+testcaseID);
-            System.out.println("✓ TESTCaseID: " + testcaseID);
-            System.out.println("Screenshot saved to: " + ScreenshotManager.getScreenshotDirectory());
+            logger.info("✓ TESTCaseID: {}", testcaseID);
+            logger.info("Screenshot saved to: {}", ScreenshotManager.getScreenshotDirectory());
         } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
+            logger.error("onTestSuccess Exception {}", Arrays.toString(e.getStackTrace()));
+//            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
         try {
-            System.out.println("✗ TEST FAILED: " + result.getMethod().getMethodName());
+            logger.warn("✗ TEST FAILED: {}", result.getMethod().getMethodName());
             ITestContext context = result.getTestContext();
             Map<String, Object> state = (Map<String, Object>) context.getAttribute("executionState");
             long duration = System.currentTimeMillis() - (long) state.get("startTime");
@@ -72,40 +76,39 @@ public class AllureListener implements ITestListener {
             String testcaseID = (String) context.getAttribute("testcaseID");
             attachTestcaseId("Testcase ID : "+testcaseID);
 //            Boolean isWebdriver = (Boolean) context.getAttribute("isWebdriver");
-            System.out.println("✗ TESTCaseID: " + testcaseID);
-            System.out.println("Screenshot saved to: " + ScreenshotManager.getScreenshotDirectory());
+            logger.warn("✗ TESTCaseID: {}", testcaseID);
+            logger.warn("Screenshot saved to: {}", ScreenshotManager.getScreenshotDirectory());
         } catch (Exception e) {
+            logger.error("onTestFailure Exception {}", Arrays.toString(e.getStackTrace()));
+//            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
-        System.out.println("⊘ TEST SKIPPED: " + result.getMethod()
-                .getMethodName());
+        logger.info("⊘ TEST SKIPPED: " + result.getMethod().getMethodName());
     }
 
     @Override
     public void onTestFailedButWithinSuccessPercentage(
             ITestResult result) {
         // Handle soft assertions
-        System.out.println("⚠ TEST FAILED (Within success %): " +
-                result.getMethod().getMethodName());
+        logger.warn("⚠ TEST FAILED (Within success %): {}", result.getMethod().getMethodName());
     }
 
     @Override
     public void onStart(ITestContext context) {
-        System.out.println("\n▶ TEST SUITE STARTED: " +
-                context.getName());
+        logger.info("\n▶ TEST SUITE STARTED: {}", context.getName());
     }
 
     @Override
     public void onFinish(ITestContext context) {
-        System.out.println("◀ TEST SUITE FINISHED: " + context.getName());
-        System.out.println("Total Tests: " + context.getAllTestMethods().length);
-        System.out.println("Passed: " + context.getPassedTests().size());
-        System.out.println("Failed: " + context.getFailedTests().size());
-        System.out.println("Skipped: " + context.getSkippedTests().size() + "\n");
+        logger.info("◀ TEST SUITE FINISHED: {}", context.getName());
+        logger.info("Total Tests: {}", context.getAllTestMethods().length);
+        logger.info("Passed: {}", context.getPassedTests().size());
+        logger.info("Failed: {}", context.getFailedTests().size());
+        logger.info("Skipped: {}\n", context.getSkippedTests().size());
     }
 
     /**
@@ -119,16 +122,15 @@ public class AllureListener implements ITestListener {
                     testInstance.getClass().getDeclaredFields();
 
             for (java.lang.reflect.Field field : fields) {
-                System.out.println("Filed name"+field.getName());
-                System.out.println("Filed type"+field.getType());
+                logger.info("Filed name{}", field.getName());
+                logger.info("Filed type{}", field.getType());
                 if (WebDriver.class.isAssignableFrom(field.getType())) {
                     field.setAccessible(true);
                     return (WebDriver) field.get(testInstance);
                 }
             }
         } catch (Exception e) {
-            System.err.println("Could not extract WebDriver: " +
-                    e.getMessage());
+            logger.error("Could not extract Selenium WebDriver: {}", e.getMessage());
         }
         return null;
     }
@@ -147,8 +149,7 @@ public class AllureListener implements ITestListener {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Could not extract WebDriver: " +
-                    e.getMessage());
+            logger.error("Could not extract Playwright Driver: {}", e.getMessage());
         }
         return null;
     }

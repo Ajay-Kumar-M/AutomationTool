@@ -8,6 +8,8 @@ import org.automation.listener.AllureListener;
 import org.automation.listener.DriverLifecycleListener;
 import org.automation.records.ActionRecord;
 import org.automation.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.ITestContext;
 import org.testng.annotations.*;
 import tools.jackson.core.type.TypeReference;
@@ -26,7 +28,8 @@ import java.util.concurrent.*;
 })
 public class RunTestcase {
 
-    JsonScriptRunner runner = new JsonScriptRunner();
+    JSONScriptRunner runner = new JSONScriptRunner();
+    private static final Logger logger = LoggerFactory.getLogger(RunTestcase.class);
 
     @BeforeMethod
     public void setUp(ITestContext context) {
@@ -35,14 +38,14 @@ public class RunTestcase {
         context.setAttribute("executionState", executionState);
 //        String testSuiteId = context.getCurrentXmlTest().getParameter("testSuiteId");
 //        String threadName = Thread.currentThread().getName();
-//        System.out.println("[TEST] Setting up for TestSuite ID: " + testSuiteId +" Thread name: " + threadName);
+//        logger.info("[TEST] Setting up for TestSuite ID: " + testSuiteId +" Thread name: " + threadName);
     }
 
     @DataProvider(name = "jsonFiles")
     public static Object[][] getJsonFiles(ITestContext context) {
         String tempFilePath = context.getCurrentXmlTest().getParameter("tempFilePath");
         if (tempFilePath == null || tempFilePath.isEmpty()) {
-            System.out.println("No jsonFilePaths parameter found!");
+            logger.error("No jsonFilePaths parameter found!");
             return new Object[0][1];  // Return empty array
         }
         try {
@@ -68,7 +71,7 @@ public class RunTestcase {
             String testCaseId = actionRecords.getFirst().testcaseId();
             Driver.setTestCaseID(testCaseId);
             context.setAttribute("testcaseID", testCaseId);
-            System.out.println("Running " + testCaseId + " in path->" + jsonPath);
+            logger.info("Running {} in path->{}", testCaseId, jsonPath);
             if (actionRecords.getFirst().epic() != null) {
                 Allure.label("epic", actionRecords.getFirst().epic());
                 Allure.label("feature", actionRecords.getFirst().feature());
@@ -114,16 +117,16 @@ public class RunTestcase {
             generator.generatePdfReport();
             generateAllureReport();
             SendReportEmail.sendMail();
-            System.out.println("\n✓ All reports generated successfully!");
+            logger.info("\n✓ All reports generated successfully!");
         } catch (JRException e) {
-            System.out.println("Caught exception JRException : "+e.getMessage());
+            logger.error("Caught exception JRException : "+e.getMessage());
         }
     }
 
     private void generateAllureReport() {
         try {
             // Generate SINGLE-FILE report (this is what you need!)
-            System.out.println("Generating single-file Allure report...");
+            logger.info("Generating single-file Allure report...");
             ProcessBuilder singleFileReport = new ProcessBuilder(
                     "allure", "generate",
                     "allure-results",
@@ -134,14 +137,15 @@ public class RunTestcase {
             Process process2 = singleFileReport.start();
             int exitCode2 = process2.waitFor();
             if (exitCode2 == 0) {
-                System.out.println("✓ Single-file report generated successfully!");
-                System.out.println("📄 Report location: result/allure-report-single/index.html");
+                logger.info("✓ Single-file report generated successfully!");
+                logger.info("📄 Report location: result/allure-report-single/index.html");
             } else {
-                System.out.println("✗ Failed to generate single-file report");
+                logger.error("✗ Failed to generate single-file report");
             }
         } catch (IOException | InterruptedException e) {
-            System.err.println("Error generating Allure report: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error generating Allure report: {}", e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
+//            e.printStackTrace();
         }
     }
 
@@ -152,7 +156,7 @@ public class RunTestcase {
             future.get(30, TimeUnit.SECONDS);  // Timeout protection
         } catch (TimeoutException | InterruptedException | ExecutionException e) {
             jasperExecutor.shutdownNow();
-            System.err.println("Jasper task timed out");
+            logger.error("Jasper task timed out");
         } finally {
             shutdownExecutorGracefully(jasperExecutor, 5, TimeUnit.SECONDS);
         }

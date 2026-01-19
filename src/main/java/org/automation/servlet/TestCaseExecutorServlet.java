@@ -15,6 +15,8 @@ import org.automation.executor.TaskManager;
 import org.automation.listener.AllureListener;
 import org.automation.listener.DriverLifecycleListener;
 import org.automation.util.TestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -26,6 +28,7 @@ import org.testng.xml.XmlTest;
 
 @WebServlet("/TestCaseExecutorServlet")
 public class TestCaseExecutorServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(TestCaseExecutorServlet.class);
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ObjectMapper responseMapper = new ObjectMapper();
@@ -59,8 +62,8 @@ public class TestCaseExecutorServlet extends HttpServlet {
                     String tempFilePath = TestUtils.writeListToTempFile(resolvedFiles,executionId);
                     runSelectedTestCases(executionId, tempFilePath);
                 } catch (Throwable t) {
-                    System.err.println("Test execution failed for id " + executionId);
-                    t.printStackTrace();
+                    logger.error("Test execution failed for id " + executionId);
+                    logger.error(Arrays.toString(t.getStackTrace()));
                     // optionally update some status in a shared map
                 }
             });
@@ -69,23 +72,22 @@ public class TestCaseExecutorServlet extends HttpServlet {
             rootNode.put("filesCount", resolvedFiles.size());
             rootNode.put("message", "Testcase execution with ID " + executionId + " has been scheduled !");
             String json = responseMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
-            System.out.println(json);
+//            System.out.println(json);
             response.getWriter().write(json);
         } catch (Exception e) {
             rootNode.put("success", false);
             rootNode.put("filesCount", resolvedFiles.size());
             rootNode.put("message", "Execution failed: " + e.getMessage());
-            System.out.println("Exception occurred in TestCaseExecutorServlet" + e.getMessage());
-            e.printStackTrace();
+            logger.error("Exception occurred in TestCaseExecutorServlet" + e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
             String json = responseMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
-            System.out.println(json);
+//            System.out.println(json);
             response.getWriter().write(json);
         }
     }
 
     private void runSelectedTestCases(String id,String tempFilePath) {
         try {
-            System.out.println("runSelectedTestCases called id:" + id);
             TestNG testng = new TestNG();
             testng.addListener(new AllureListener());
             testng.addListener(new DriverLifecycleListener());
@@ -107,8 +109,8 @@ public class TestCaseExecutorServlet extends HttpServlet {
 //            System.out.println("jsonFilePaths param: " + String.join(",", jsonFilePaths));
             testng.run();
         } catch (Exception e) {
-            System.out.println("exception occurred in runSelectedTestCases - "+e.getMessage());
-            e.printStackTrace();
+            logger.error("Exception occurred in runSelectedTestCases - {}", e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
             throw new RuntimeException(e);
         }
     }

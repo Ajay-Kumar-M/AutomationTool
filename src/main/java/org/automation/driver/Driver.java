@@ -4,9 +4,12 @@ import com.microsoft.playwright.Page;
 import org.automation.records.ActionRecord;
 import org.automation.records.DriverConfigRecord;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface Driver {
 
+    static final Logger logger = LoggerFactory.getLogger(Driver.class);
     void init(DriverConfigRecord driverConfigRecord);
     void execute(ActionRecord actionRecord);
     String getText(ActionRecord actionRecord);
@@ -14,7 +17,7 @@ public interface Driver {
 
     default void storeInThreadLocal() {
         DriverThreadLocalManager.setDriver(this);
-        System.out.println("[DriverManager] Stored " + this.getClass().getSimpleName() + " in ThreadLocal for thread: " + Thread.currentThread().getName());
+        logger.info("[DriverManager] Stored {} in ThreadLocal for thread: {}", this.getClass().getSimpleName(), Thread.currentThread().getName());
     }
 
     static Driver getFromThreadLocal() {

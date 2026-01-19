@@ -4,6 +4,8 @@ import com.microsoft.playwright.Page;
 import org.automation.executor.PlaywrightDriver;
 import org.automation.executor.SeleniumDriver;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Internal ThreadLocal storage manager
@@ -14,6 +16,7 @@ class DriverThreadLocalManager {
     private static final ThreadLocal<Driver> driverThreadLocal = new ThreadLocal<>();
     private static final ThreadLocal<Boolean> isWebDriverThreadLocal = new ThreadLocal<>();
     private static final ThreadLocal<String> testCaseIDThreadLocal = new ThreadLocal<>();
+    private static final Logger logger = LoggerFactory.getLogger(DriverThreadLocalManager.class);
 
     // Package-private methods (not public)
 
@@ -26,22 +29,21 @@ class DriverThreadLocalManager {
             } else if (driver instanceof PlaywrightDriver) {
                 isWebDriverThreadLocal.set(false);
             }
-            System.out.println("[DriverManager] Set " + driver.getClass().getSimpleName() + " for thread: " + Thread.currentThread().getName());
+            logger.info("[DriverManager] Set {} for thread: {}", driver.getClass().getSimpleName(), Thread.currentThread().getName());
         }
     }
 
     static Driver getDriver() {
         Driver driver = driverThreadLocal.get();
         if (driver == null) {
-            System.err.println("[DriverManager] WARNING: Driver is NULL for thread: " +
-                    Thread.currentThread().getName());
+            logger.error("[DriverManager] WARNING: Driver is NULL for thread: {}", Thread.currentThread().getName());
         }
         return driver;
     }
 
     static WebDriver getWebDriver() {
         Driver driver = getDriver();
-        if (driver != null && driver instanceof SeleniumDriver) {
+        if (driver instanceof SeleniumDriver) {
             return ((SeleniumDriver) driver).getDriver();
         }
         return null;
@@ -49,7 +51,7 @@ class DriverThreadLocalManager {
 
     static Page getPage() {
         Driver driver = getDriver();
-        if (driver != null && driver instanceof PlaywrightDriver) {
+        if (driver instanceof PlaywrightDriver) {
             return ((PlaywrightDriver) driver).getPage();
         }
         return null;
@@ -71,7 +73,7 @@ class DriverThreadLocalManager {
 
     static void cleanup() {
         String threadName = Thread.currentThread().getName();
-        System.out.println("[DriverManager] Cleaning up ThreadLocal for thread: " + threadName);
+        logger.info("[DriverManager] Cleaning up ThreadLocal for thread: {}", threadName);
 
         driverThreadLocal.remove();
         isWebDriverThreadLocal.remove();

@@ -4,6 +4,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.databind.node.ObjectNode;
@@ -11,10 +13,12 @@ import tools.jackson.databind.node.ObjectNode;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.util.Objects;
+import java.util.Arrays;
 
 @WebServlet("/TestCaseSaveServlet")
 public class TestCaseSaveServlet extends HttpServlet {
+    private static final Logger logger = LoggerFactory.getLogger(TestCaseSaveServlet.class);
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         ObjectMapper responseMapper = new ObjectMapper();
         ObjectNode rootNode = responseMapper.createObjectNode();
@@ -23,7 +27,6 @@ public class TestCaseSaveServlet extends HttpServlet {
             BufferedReader reader = request.getReader();
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode reqBody = (ObjectNode) mapper.readTree(reader);
-            System.out.println("filename to save - "+reqBody.get("fileName"));
             String operation = reqBody.get("operation").asText();
             ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
             String path = "";
@@ -36,11 +39,11 @@ public class TestCaseSaveServlet extends HttpServlet {
                     parentDir.mkdirs();
                 }
                 writer.writeValue(file, reqBody.get("data"));
-                System.out.println("Pretty JSON file created!");
+                logger.info("JSON file created with name - {}", reqBody.get("fileName"));
             } else if ("edit".equalsIgnoreCase(operation)){
                 path = reqBody.get("filePath").asText();
                 writer.writeValue(new File(path), reqBody.get("data"));
-                System.out.println("Pretty JSON file edited!");
+                logger.info("JSON file edited - {}", reqBody.get("data"));
             }
 
             rootNode.put("success", true);
@@ -51,10 +54,10 @@ public class TestCaseSaveServlet extends HttpServlet {
         } catch (Exception e) {
             rootNode.put("success", false);
             rootNode.put("message", "Save servlet failed: " + e.getMessage());
-            System.out.println("Exception occurred in TestCaseSaveServlet" + e.getMessage());
-            e.printStackTrace();
+            logger.error("Exception occurred in TestCaseSaveServlet{}", e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
             String json = responseMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode);
-            System.out.println(json);
+//            System.out.println(json);
             response.getWriter().write(json);
         }
     }

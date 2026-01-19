@@ -22,7 +22,6 @@ public class TaskStatusServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         TaskManager taskManager = (TaskManager) getServletContext().getAttribute("taskManager");
         Map<String, Boolean> taskStatuses = taskManager.getTaskStatuses();
-        // Jackson JSON response
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();

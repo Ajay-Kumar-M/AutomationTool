@@ -6,6 +6,8 @@ import org.automation.driver.Driver;
 import org.automation.records.ActionRecord;
 import org.automation.records.ExpectedResultRecord;
 import org.automation.records.RecordQueueManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -14,22 +16,24 @@ import java.io.File;
 import java.io.FileWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.*;
+import java.util.Arrays;
 import java.util.List;
 
-public class JsonScriptRunner {
+public class JSONScriptRunner {
     private Driver driver;
     static RecordQueueManager queueManager = RecordQueueManager.getInstance();
+    private static final Logger logger = LoggerFactory.getLogger(JSONScriptRunner.class);
 
     public void runFromJson(List<ActionRecord> actionRecords) throws Exception {
         for (ActionRecord actionRecord : actionRecords) {
-            System.out.println("Executing: " + actionRecord.actionType() + " | Method name: " + actionRecord.methodName() +" | TestCase: " + actionRecord.testcaseId());
+            logger.info("Executing: " + actionRecord.actionType() + " | Method name: " + actionRecord.methodName() +" | TestCase: " + actionRecord.testcaseId());
             try {
                 driver.getClass().getMethod(actionRecord.methodName(), ActionRecord.class).invoke(driver, actionRecord);
                 queueManager.addRecord(new ExpectedResultRecord(actionRecord.testcaseId(), actionRecord.actionType(), actionRecord.locator(),"Success","",new String[0]));
             } catch (InvocationTargetException | AssertionError e) {
                 Throwable original = e.getCause();
                 String message = original.getMessage().replace('<',' ').replace('>',' ');
-                System.out.println("\nPrinting message - " + message);
+                logger.warn("\nPrinting testrun exception message - " + message);
 //                System.out.println("\nPrinting message string -" + original);
                 // handle logging / recovery / reporting
                 storeResultCSV(actionRecords.getFirst(),"Failure",message.split("\\R", 2)[0]);
@@ -43,8 +47,8 @@ public class JsonScriptRunner {
                     throw new RuntimeException("Test action failed: " + message, original);
                 }
             } catch (NoSuchMethodException | IllegalAccessException e) {
-                System.out.println("\nPrinting message - " + e.getMessage());
-                e.printStackTrace();
+                logger.warn("\nPrinting testrun exception - " + e.getMessage());
+                logger.warn(Arrays.toString(e.getStackTrace()));
                 storeResultCSV(actionRecords.getFirst(),"Failure",e.getMessage());
                 queueManager.addRecord(new ExpectedResultRecord(actionRecord.testcaseId(), actionRecord.actionType(), actionRecord.locator(), "Failure", e.getMessage(), new String[0]
                 ));
@@ -66,7 +70,7 @@ public class JsonScriptRunner {
     public static void main(String[] args) throws Exception {
         Driver driver1 = DriverConfig.getConfigDriver();
         ObjectMapper mapper = new ObjectMapper();
-        JsonScriptRunner runner = new JsonScriptRunner();
+        JSONScriptRunner runner = new JSONScriptRunner();
         try {
             String jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC001.json"));
             List<ActionRecord> actionRecords = mapper.readValue(jsonContent, new TypeReference<List<ActionRecord>>() {});
@@ -81,9 +85,9 @@ public class JsonScriptRunner {
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
             SendReportEmail.sendMail();
-            System.out.println("\n✓ All reports generated successfully!");
+            logger.info("\n✓ All reports generated successfully!");
         } catch (JRException | AssertionError e) {
-            System.out.println("Caught exception JRException | AssertionError : "+e.getMessage());
+            logger.info("Caught exception JRException | AssertionError : "+e.getMessage());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

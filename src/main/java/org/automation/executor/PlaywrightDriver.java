@@ -9,12 +9,9 @@ import org.automation.records.ActionRecord;
 import org.automation.records.DriverConfigRecord;
 import org.automation.util.DockerContainerCheck;
 import org.automation.util.ScreenshotManager;
-import org.openqa.selenium.By;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
@@ -25,6 +22,7 @@ public class PlaywrightDriver implements Driver {
     private Page page;
     private String browserType = "chromium";
     private Playwright playwright;
+    private static final Logger logger = LoggerFactory.getLogger(PlaywrightDriver.class);
 
 //    public PlaywrightDriver() {
 //        Playwright playwright = Playwright.create();
@@ -35,28 +33,29 @@ public class PlaywrightDriver implements Driver {
     @Override
     public void init(DriverConfigRecord driverConfigRecord) {
         playwright = Playwright.create();
+        String browserType = driverConfigRecord.browserType();
         if(driverConfigRecord.isDocker()){
-            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(driverConfigRecord.dockerContainerName()));
-            if (driverConfigRecord.browserType().equalsIgnoreCase("chrome") || driverConfigRecord.browserType().equalsIgnoreCase("chromium")) {
-                System.out.println("Using docker-"+ driverConfigRecord.dockerUrl());
+            logger.info("Is docker container running: {}", DockerContainerCheck.isContainerRunning(driverConfigRecord.dockerContainerName()));
+            if (browserType.equalsIgnoreCase("chrome") || browserType.equalsIgnoreCase("chromium")) {
+                logger.info("Using docker- {}", driverConfigRecord.dockerUrl());
                 browser = playwright.chromium().connect(driverConfigRecord.dockerUrl());
-            } else if (driverConfigRecord.browserType().equalsIgnoreCase("firefox")) {
+            } else if (browserType.equalsIgnoreCase("firefox")) {
                 browser = playwright.firefox().connect(driverConfigRecord.dockerUrl());
-            } else if (driverConfigRecord.browserType().equalsIgnoreCase("webkit")) {
+            } else if (browserType.equalsIgnoreCase("webkit")) {
                 browser = playwright.webkit().connect(driverConfigRecord.dockerUrl());
             }
         } else {
-            if (driverConfigRecord.browserType().equalsIgnoreCase("chrome") || driverConfigRecord.browserType().equalsIgnoreCase("chromium")) {
+            if (browserType.equalsIgnoreCase("chrome") || browserType.equalsIgnoreCase("chromium")) {
                 browser = playwright.chromium().launch(new BrowserType.LaunchOptions()
                         .setHeadless(false)
                         .setSlowMo(100) // 100 MS delay after every action
                 );
-            } else if (driverConfigRecord.browserType().equalsIgnoreCase("firefox")) {
+            } else if (browserType.equalsIgnoreCase("firefox")) {
                 browser = playwright.firefox().launch(new BrowserType.LaunchOptions()
                         .setHeadless(false)
                         .setSlowMo(100) // 100 MS delay after every action
                 );
-            } else if (driverConfigRecord.browserType().equalsIgnoreCase("webkit")) {
+            } else if (browserType.equalsIgnoreCase("webkit")) {
                 browser = playwright.webkit().launch(new BrowserType.LaunchOptions()
                         .setHeadless(false)
                         .setSlowMo(100) // 100 MS delay after every action

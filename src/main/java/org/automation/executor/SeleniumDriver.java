@@ -15,15 +15,15 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.awt.Rectangle;
-import java.util.regex.Pattern;
 
-import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -31,6 +31,7 @@ public class SeleniumDriver implements Driver {
     private WebDriver driver;
     private long implicitWait = 10;
     private long explicitWait = 5;
+    private static final Logger logger = LoggerFactory.getLogger(SeleniumDriver.class);
 
 //    public SeleniumDriver() {
 //        driver = new ChromeDriver();
@@ -39,16 +40,17 @@ public class SeleniumDriver implements Driver {
 
     @Override
     public void init(DriverConfigRecord driverConfigRecord) {
+        String browserType = driverConfigRecord.browserType();
         if(driverConfigRecord.isDocker()){
-            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(driverConfigRecord.dockerContainerName()));
-            if ((driverConfigRecord.browserType().equalsIgnoreCase("chrome"))||(driverConfigRecord.browserType().equalsIgnoreCase("chromium"))) {
+            logger.info("Is docker container running:{}", DockerContainerCheck.isContainerRunning(driverConfigRecord.dockerContainerName()));
+            if ((browserType.equalsIgnoreCase("chrome"))||(browserType.equalsIgnoreCase("chromium"))) {
                 ChromeOptions options = new ChromeOptions();
                 try {
                     driver = new RemoteWebDriver(URI.create(driverConfigRecord.dockerUrl()).toURL(), options);
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }
-            } else if (driverConfigRecord.browserType().equalsIgnoreCase("firefox")) {
+            } else if (browserType.equalsIgnoreCase("firefox")) {
                 FirefoxOptions options = new FirefoxOptions();
                 try {
                     driver = new RemoteWebDriver(URI.create(driverConfigRecord.dockerUrl()).toURL(), options);
@@ -58,11 +60,11 @@ public class SeleniumDriver implements Driver {
             }
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
         } else {
-            if ((driverConfigRecord.browserType().equalsIgnoreCase("chrome"))||(driverConfigRecord.browserType().equalsIgnoreCase("chromium"))) {
+            if ((browserType.equalsIgnoreCase("chrome"))||(browserType.equalsIgnoreCase("chromium"))) {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--start-maximized");
                 driver = new ChromeDriver(options);
-            } else if (driverConfigRecord.browserType().equalsIgnoreCase("firefox")) {
+            } else if (browserType.equalsIgnoreCase("firefox")) {
                 driver = new FirefoxDriver();
             }
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
@@ -259,7 +261,7 @@ public class SeleniumDriver implements Driver {
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
-            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            logger.error("Assert Visibility\nassertion failed {}. message {}", e, e.getMessage());
             throw new AssertionError(e.getMessage());
         }
     }
@@ -310,7 +312,7 @@ public class SeleniumDriver implements Driver {
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
-            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            logger.error("Assert Text\nassertion failed {}. message {}", e, e.getMessage());
             throw new AssertionError(e.getMessage());
         }
     }
@@ -375,7 +377,7 @@ public class SeleniumDriver implements Driver {
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
-            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            logger.error("Assert Element\nassertion failed {}. message {}", e, e.getMessage());
             throw new AssertionError(e.getMessage());
         }
     }
@@ -404,7 +406,7 @@ public class SeleniumDriver implements Driver {
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
-            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            logger.error("Assert Count\nassertion failed {}. message {}", e, e.getMessage());
             throw new AssertionError(e.getMessage());
         }
     }
@@ -433,7 +435,7 @@ public class SeleniumDriver implements Driver {
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
-            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            logger.error("Assert Page\nassertion failed {}. message {}", e, e.getMessage());
             throw new AssertionError(e.getMessage());
         }
     }
@@ -462,7 +464,7 @@ public class SeleniumDriver implements Driver {
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
-            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            logger.error("Assert Class\nassertion failed {}. message {}", e, e.getMessage());
             throw new AssertionError(e.getMessage());
         }
     }
@@ -494,7 +496,7 @@ public class SeleniumDriver implements Driver {
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
-            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            logger.error("Assert Attribute\nassertion failed {}. message {}", e, e.getMessage());
             throw new AssertionError(e.getMessage());
         }
     }
@@ -521,7 +523,7 @@ public class SeleniumDriver implements Driver {
                     break;
             }
         } catch (NoSuchElementException | TimeoutException | NullPointerException | AssertionError e) {
-            System.out.println("\ncatch called " + e + ". message " + e.getMessage());
+            logger.error("Assert Css Property\nassertion failed {}. message {}", e, e.getMessage());
             throw new AssertionError(e.getMessage());
         }
     }

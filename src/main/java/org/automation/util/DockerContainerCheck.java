@@ -27,7 +27,6 @@ public class DockerContainerCheck {
 
     public static void main(String[] args) {
         String container = "selenium-chrome1";
-
         if (isContainerRunning(container)) {
             System.out.println(container + " is running");
         } else {

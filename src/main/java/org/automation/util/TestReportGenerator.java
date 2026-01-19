@@ -3,8 +3,11 @@ package org.automation.util;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRCsvDataSource;
 import net.sf.jasperreports.engine.util.JRLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +17,7 @@ import java.util.Map;
  */
 public class TestReportGenerator {
 
+    private static final Logger logger = LoggerFactory.getLogger(TestReportGenerator.class);
     // Configuration
     private static final String REPORT_TEMPLATE = "TestResult.jrxml";
     private static final String CSV_DATA_FILE = "result/automationResult.csv";
@@ -26,7 +30,7 @@ public class TestReportGenerator {
      * Generate PDF report from CSV data
      */
     public void generatePdfReport() throws JRException {
-        System.out.println("Generating PDF Report...");
+        logger.info("Generating PDF Report...");
         String[] blacklistedProps = {
                 "java.awt.headless", "true",
                 "net.sf.jasperreports.awt.ignore.missing.font", "true",
@@ -38,7 +42,7 @@ public class TestReportGenerator {
         }
         JasperPrint jasperPrint = fillReportFromCsv();
         JasperExportManager.exportReportToPdfFile(jasperPrint, OUTPUT_PDF);
-        System.out.println("✓ PDF Report saved to: " + OUTPUT_PDF);
+        logger.info("✓ PDF Report saved to: " + OUTPUT_PDF);
         if (jasperPrint != null) {
             // Remove all pages to release memory/references
             while (!jasperPrint.getPages().isEmpty()) {
@@ -56,29 +60,29 @@ public class TestReportGenerator {
      * Generate HTML report from CSV data
      */
     public void generateHtmlReport() throws JRException {
-        System.out.println("Generating HTML Report...");
+        logger.info("Generating HTML Report...");
         JasperPrint jasperPrint = fillReportFromCsv();
         JasperExportManager.exportReportToHtmlFile(jasperPrint, OUTPUT_HTML);
-        System.out.println("✓ HTML Report saved to: " + OUTPUT_HTML);
+        logger.info("✓ HTML Report saved to: " + OUTPUT_HTML);
     }
 
     /**
      * Generate Excel report from CSV data
      */
     public void generateExcelReport() throws JRException {
-        System.out.println("Generating Excel Report...");
+        logger.info("Generating Excel Report...");
         JasperPrint jasperPrint = fillReportFromCsv();
         // Note: XLS export requires additional library
         // Use JasperExportManager for basic Excel support
         // For advanced Excel features, use JRXlsxExporter
-        System.out.println("✓ Excel Report generation requires JRXlsxExporter (optional dependency)");
+        logger.info("✓ Excel Report generation requires JRXlsxExporter (optional dependency)");
     }
 
     /**
      * Core method: Load CSV, compile template, fill report
      */
     private JasperPrint fillReportFromCsv() throws JRException {
-        System.out.println("Step 1: Loading JRXML template...");
+        logger.info("Step 1: Loading JRXML template...");
         // Load the JRXML template from classpath
 //        InputStream templateStream = getClass().getClassLoader().getResourceAsStream(REPORT_TEMPLATE);
 //
@@ -87,15 +91,15 @@ public class TestReportGenerator {
 //        }
 //
 //        // Compile JRXML template
-//        System.out.println("Step 2: Compiling JRXML template...");
+//        logger.info("Step 2: Compiling JRXML template...");
 //        JasperReport jasperReport = JasperCompileManager.compileReport(templateStream);
-//        System.out.println("✓ Template compiled successfully");
+//        logger.info("✓ Template compiled successfully");
 //
         try {
             // Load CSV data
-            System.out.println("Step 3: Loading CSV data source...");
+            logger.info("Step 3: Loading CSV data source...");
             JRCsvDataSource csvDataSource = loadCsvDataSource();
-            System.out.println("✓ CSV data loaded");
+            logger.info("✓ CSV data loaded");
 
 //            InputStream jasperStream = getClass().getResourceAsStream("TestResult.jasper");
             InputStream jasperStream = getClass().getClassLoader().getResourceAsStream("TestResult.jasper");
@@ -110,18 +114,18 @@ public class TestReportGenerator {
             params.put("CSV_FILE_PATH", "result/automationResult.csv");
 
             // Fill report with data
-            System.out.println("Step 4: Filling report with data...");
+            logger.info("Step 4: Filling report with data...");
             JasperPrint jasperPrint = JasperFillManager.fillReport(
                     jasperReport,
                     params,
                     csvDataSource
             );
-            System.out.println("✓ Report filled successfully");
+            logger.info("✓ Report filled successfully");
 
             return jasperPrint;
         } catch (Exception e) {
-            System.out.println("Exception occurred - "+e.getMessage());
-            e.printStackTrace();
+            logger.error("fillReportFromCsv Exception occurred - "+e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
             throw new RuntimeException(e);
         }
     }
@@ -149,9 +153,8 @@ public class TestReportGenerator {
             csvDataSource.setFieldDelimiter(',');     // Field delimiter
             return csvDataSource;
         } catch (Exception e) {
-            System.out.println("Unable to load csv "+e.getMessage());
-            System.out.println(e.toString());
-            e.printStackTrace();
+            logger.error("Unable to load csv {}", e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
         }
         return csvDataSource;
     }
@@ -185,8 +188,6 @@ public class TestReportGenerator {
             // Generate all report formats
             generator.generatePdfReport();
 //            generator.generateHtmlReport();
-            System.out.println("\n✓ All reports generated successfully!");
-            System.out.println("Check the 'output' directory for generated reports.");
         } catch (JRException e) {
             System.err.println("✗ Error generating report: " + e.getMessage());
             e.printStackTrace();

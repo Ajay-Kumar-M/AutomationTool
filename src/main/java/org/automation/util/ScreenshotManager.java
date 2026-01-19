@@ -8,17 +8,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
 import com.microsoft.playwright.Page;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ScreenshotManager {
 
     private static final String SCREENSHOT_DIR = "result";
     private static final String TIMESTAMP_PATTERN = "yyyy-MM-dd_HH-mm-ss-SSS";
+    private static final Logger logger = LoggerFactory.getLogger(ScreenshotManager.class);
 
     static {
         createScreenshotDirectory();
@@ -60,7 +65,7 @@ public class ScreenshotManager {
      */
     public static String takeScreenshot(WebDriver driver, String stepName, String testcaseId) {
         if (driver == null) {
-            System.err.println("WebDriver is null. Cannot capture screenshot.");
+            logger.error("WebDriver is null. Cannot capture screenshot.");
             return null;
         }
 
@@ -78,13 +83,12 @@ public class ScreenshotManager {
 
             // Attach to Allure
             attachToAllure(screenshotBytes, stepName);
-
-            System.out.println("[SCREENSHOT] " + stepName + " -> " + filePath);
+            logger.info("[SCREENSHOT] {} -> {}", stepName, filePath);
             return filePath;
 
         } catch (Exception e) {
-            System.err.println("Error capturing screenshot: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error capturing screenshot: " + e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
             return null;
         }
     }
@@ -99,7 +103,7 @@ public class ScreenshotManager {
      */
     public static String takeScreenshot(Page page, String stepName, String testcaseId) {
         if (page == null) {
-            System.err.println("Playwright Page is null. Cannot capture screenshot.");
+            logger.error("Playwright Page is null. Cannot capture screenshot.");
             return null;
         }
         try {
@@ -114,11 +118,11 @@ public class ScreenshotManager {
             // Read bytes and attach to Allure
             byte[] screenshotBytes = Files.readAllBytes(Paths.get(filePath));
             attachToAllure(screenshotBytes, stepName);
-            System.out.println("[SCREENSHOT] " + stepName + " -> " + filePath);
+            logger.info("[SCREENSHOT] {} -> {}", stepName, filePath);
             return filePath;
         } catch (Exception e) {
-            System.err.println("Error capturing screenshot: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error capturing screenshot: " + e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
             return null;
         }
     }
@@ -131,7 +135,7 @@ public class ScreenshotManager {
      */
     public static String takeFullPageScreenshot(Page page, String stepName) {
         if (page == null) {
-            System.err.println("Playwright Page is null. Cannot capture screenshot.");
+            logger.error("Playwright Page is null. Cannot capture screenshot.");
             return null;
         }
 
@@ -146,13 +150,12 @@ public class ScreenshotManager {
 
             byte[] screenshotBytes = Files.readAllBytes(Paths.get(filePath));
             attachToAllure(screenshotBytes, stepName);
-
-            System.out.println("[SCREENSHOT] " + stepName + " -> " + filePath);
+            logger.info("[SCREENSHOT] {} -> {}", stepName, filePath);
             return filePath;
 
         } catch (Exception e) {
-            System.err.println("Error capturing full-page screenshot: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error capturing full-page screenshot: " + e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
             return null;
         }
     }
@@ -167,7 +170,7 @@ public class ScreenshotManager {
             com.microsoft.playwright.Locator locator,
             String stepName) {
         if (locator == null) {
-            System.err.println("Playwright Locator is null. Cannot capture screenshot.");
+            logger.error("Playwright Locator is null. Cannot capture screenshot.");
             return null;
         }
 
@@ -181,13 +184,12 @@ public class ScreenshotManager {
 
             byte[] screenshotBytes = Files.readAllBytes(Paths.get(filePath));
             attachToAllure(screenshotBytes, stepName);
-
-            System.out.println("[SCREENSHOT] " + stepName + " -> " + filePath);
+            logger.info("[SCREENSHOT] {} -> {}", stepName, filePath);
             return filePath;
 
         } catch (Exception e) {
-            System.err.println("Error capturing element screenshot: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Error capturing element screenshot: " + e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
             return null;
         }
     }
@@ -208,7 +210,7 @@ public class ScreenshotManager {
                     "png"
             );
         } catch (Exception e) {
-            System.err.println("Error attaching screenshot to Allure: " + e.getMessage());
+            logger.error("Error attaching screenshot to Allure: " + e.getMessage());
         }
     }
 
@@ -237,7 +239,7 @@ public class ScreenshotManager {
                         }
                     });
         } catch (IOException e) {
-            System.err.println("Error clearing screenshots: " + e.getMessage());
+            logger.error("Error clearing screenshots: " + e.getMessage());
         }
     }
 }

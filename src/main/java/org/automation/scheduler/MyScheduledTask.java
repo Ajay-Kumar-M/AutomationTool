@@ -1,5 +1,8 @@
 package org.automation.scheduler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.util.concurrent.ScheduledFuture;
 
@@ -7,6 +10,7 @@ public class MyScheduledTask implements Runnable {
 
     private ScheduledFuture<?> future;   // handle to cancel the schedule
     private int runCount = 0;
+    private static final Logger logger = LoggerFactory.getLogger(MyScheduledTask.class);
 
     // setter used by the scheduler class
     public void setFuture(ScheduledFuture<?> future) {
@@ -16,17 +20,15 @@ public class MyScheduledTask implements Runnable {
     @Override
     public void run() {
         runCount++;
-        System.out.println("Task START at " + LocalDateTime.now());
-
+        logger.info("Schedule Task START at " + LocalDateTime.now());
         try {
             Thread.sleep(3000); // simulate work
         } catch (InterruptedException e) {
+            logger.warn("Schedule task interrupted");
             Thread.currentThread().interrupt();
         }
-
-        System.out.println("Task END   at " + LocalDateTime.now());
-        System.out.println("Run count = " + runCount);
-        System.out.println("--------------------------");
+        logger.info("Schedule Task END   at " + LocalDateTime.now());
+        logger.info("Schedule Task Run count = " + runCount);
 
         // Example condition to cancel after 3 runs
 //        if (runCount >= 3) {
@@ -36,7 +38,7 @@ public class MyScheduledTask implements Runnable {
 
     public void cancel() {
         if (future != null) {
-            System.out.println("Cancelling task at " + LocalDateTime.now());
+            logger.info("Cancelling schedule task at " + LocalDateTime.now());
             future.cancel(false); // false = do not interrupt if running
         }
     }

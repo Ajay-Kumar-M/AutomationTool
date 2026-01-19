@@ -2,6 +2,9 @@ package org.automation.util;
 
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
+import org.automation.executor.PlaywrightDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Properties;
 
 import static org.automation.util.TestUtils.getResultDir;
@@ -16,6 +20,7 @@ import static org.automation.util.TestUtils.getResultDir;
 public class SendReportEmail {
 
     private static final Properties config = new Properties();
+    private static final Logger logger = LoggerFactory.getLogger(SendReportEmail.class);
 
     static {
         try (InputStream is = Thread.currentThread()
@@ -77,10 +82,10 @@ public class SendReportEmail {
             message.setContent(multipart);
             // Send email
             Transport.send(message);
-            System.out.println("Email with attachment sent successfully!");
+            logger.info("Email with attachment sent successfully!");
         } catch (MessagingException e) {
-            System.err.println("Failed to send email: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("Failed to send email: {}", e.getMessage());
+            logger.error(Arrays.toString(e.getStackTrace()));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

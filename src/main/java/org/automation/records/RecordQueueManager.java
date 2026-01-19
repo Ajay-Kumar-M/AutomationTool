@@ -45,7 +45,7 @@ public class RecordQueueManager {
     private static final String DEFAULT_OUTPUT_DIR = "result";
     private static final String FILE_EXTENSION = ".json";
 
-    private static RecordQueueManager instance;
+    private static volatile RecordQueueManager instance;
     private static final Object INSTANCE_LOCK = new Object();
 
     private final ConcurrentLinkedQueue<ExpectedResultRecord> queue;
@@ -68,7 +68,7 @@ public class RecordQueueManager {
     /**
      * Package-scoped singleton accessor. Thread-safe initialization with double-checked locking.
      */
-    public static <ExpectedResultData> RecordQueueManager getInstance() {
+    public static RecordQueueManager getInstance() {
         if (instance == null) {
             synchronized (INSTANCE_LOCK) {
                 if (instance == null) {
@@ -76,9 +76,9 @@ public class RecordQueueManager {
                 }
             }
         }
-        @SuppressWarnings("unchecked")
-        RecordQueueManager castedInstance = (RecordQueueManager) instance;
-        return castedInstance;
+//        @SuppressWarnings("unchecked")
+//        RecordQueueManager castedInstance = instance;
+        return instance;
     }
 
     /**
@@ -266,49 +266,6 @@ public class RecordQueueManager {
 
     private void writeRecordsToFile() {
         try {
-//            for (ExpectedResultData record : records) {
-//                // Extract ID from record for filename
-//                String recordId = recordIdExtractor.extractId(record);
-//                if (recordId == null || recordId.isEmpty()) {
-//                    logger.warn("Record ID extractor returned null or empty ID, skipping record");
-//                    continue;
-//                }
-//
-//                String filename = recordId + FILE_EXTENSION;
-//                Path filePath = outputPath.resolve(filename);
-//
-//                // Read existing content if file exists
-//                List<ExpectedResultData> allRecords = new ArrayList<>();
-//                if (Files.exists(filePath)) {
-//                    try {
-//                        String existingContent = Files.readString(filePath);
-//                        @SuppressWarnings("unchecked")
-//                        List<ExpectedResultData> existingRecords = objectMapper.readValue(
-//                                existingContent,
-//                                objectMapper.getTypeFactory().constructCollectionType(List.class, record.getClass())
-//                        );
-//                        allRecords.addAll(existingRecords);
-//                        logger.debug("Read {} existing records from file: {}", existingRecords.size(), filename);
-//                    } catch (IOException e) {
-//                        logger.warn("Failed to read existing records from {}, will overwrite", filename, e);
-//                    }
-//                }
-//
-//                // Add new record to the list
-//                allRecords.add(record);
-//
-//                // Write combined content back to file
-//                String jsonContent = objectMapper.writeValueAsString(allRecords);
-//                Files.writeString(
-//                        filePath,
-//                        jsonContent,
-//                        StandardOpenOption.CREATE,
-//                        StandardOpenOption.WRITE,
-//                        StandardOpenOption.APPEND
-//                );
-//
-//                logger.info("Successfully wrote {} total records to file: {}", allRecords.size(), filename);
-//            }
             ExpectedResultRecord record = queue.peek();
             assert record != null;
             String recordId = record.testcaseId(); // recordIdExtractor.extractId(record);
@@ -316,12 +273,10 @@ public class RecordQueueManager {
                 logger.warn("Record ID extractor returned null or empty ID, skipping record");
                 return;
             }
-
             Files.createDirectories(Paths.get(DEFAULT_OUTPUT_DIR+"/"+recordId));
             String filename = recordId + "/" + recordId + "Result" + FILE_EXTENSION;
             Path filePath = outputPath.resolve(filename);
             String jsonContent = objectMapper.writeValueAsString(queue);
-            System.out.println(jsonContent);
             Files.writeString(
                     filePath,
                     jsonContent,
@@ -336,3 +291,49 @@ public class RecordQueueManager {
         }
     }
 }
+
+/*
+            for (ExpectedResultData record : records) {
+                // Extract ID from record for filename
+                String recordId = recordIdExtractor.extractId(record);
+                if (recordId == null || recordId.isEmpty()) {
+                    logger.warn("Record ID extractor returned null or empty ID, skipping record");
+                    continue;
+                }
+
+                String filename = recordId + FILE_EXTENSION;
+                Path filePath = outputPath.resolve(filename);
+
+                // Read existing content if file exists
+                List<ExpectedResultData> allRecords = new ArrayList<>();
+                if (Files.exists(filePath)) {
+                    try {
+                        String existingContent = Files.readString(filePath);
+                        @SuppressWarnings("unchecked")
+                        List<ExpectedResultData> existingRecords = objectMapper.readValue(
+                                existingContent,
+                                objectMapper.getTypeFactory().constructCollectionType(List.class, record.getClass())
+                        );
+                        allRecords.addAll(existingRecords);
+                        logger.debug("Read {} existing records from file: {}", existingRecords.size(), filename);
+                    } catch (IOException e) {
+                        logger.warn("Failed to read existing records from {}, will overwrite", filename, e);
+                    }
+                }
+
+                // Add new record to the list
+                allRecords.add(record);
+
+                // Write combined content back to file
+                String jsonContent = objectMapper.writeValueAsString(allRecords);
+                Files.writeString(
+                        filePath,
+                        jsonContent,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.WRITE,
+                        StandardOpenOption.APPEND
+                );
+
+                logger.info("Successfully wrote {} total records to file: {}", allRecords.size(), filename);
+            }
+ */

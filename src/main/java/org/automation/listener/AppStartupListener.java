@@ -5,7 +5,6 @@ import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import org.automation.executor.TaskManager;
 
-import java.lang.management.ManagementFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 

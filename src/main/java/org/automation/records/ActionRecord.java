@@ -2,7 +2,7 @@ package org.automation.records;
 
 import java.util.Map;
 
-public record Action(
+public record ActionRecord(
         String actionType,
         String locator,
         String[] arguments,

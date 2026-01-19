@@ -1,6 +1,6 @@
 package org.automation.records;
 
-public record DriverConfig(
+public record DriverConfigRecord(
         String browserType,
         String implicitWait,
         String driverType,

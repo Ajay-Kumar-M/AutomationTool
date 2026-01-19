@@ -1,8 +1,6 @@
 package org.automation.records;
 
-import java.util.Map;
-
-public record ExpectedResultData(
+public record ExpectedResultRecord(
         String testcaseId,
         String actionType,
         String locator,

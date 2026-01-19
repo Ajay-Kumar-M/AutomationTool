@@ -11,16 +11,22 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Properties;
 
+import static org.automation.util.TestUtils.getResultDir;
+
 public class SendReportEmail {
 
     private static final Properties config = new Properties();
 
     static {
-        try (InputStream is = Files.newInputStream(
-                Paths.get("config/email.properties"))) {
+        try (InputStream is = Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("email.properties")) {
+            if (is == null) {
+                throw new RuntimeException("email.properties not found on classpath");
+            }
             config.load(is);
-        } catch (IOException e) {
-            throw new ExceptionInInitializerError(e);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load driver.properties", e);
         }
     }
 
@@ -55,17 +61,16 @@ public class SendReportEmail {
             messageBodyPart.setText("Hello!\n\nAutomation testcase has been executed.\nCheck the attached report for detailed break-down.\n\nBest regards.");
             multipart.addBodyPart(messageBodyPart);
             // Attachment part(s) - add one or more
-            File file = new File("result/test_report.pdf");
-            if (file.exists()) {
+            File jasperReport = new File(getResultDir()+"/test_report.pdf");
+            if (jasperReport.exists()) {
                 MimeBodyPart attachmentPart = new MimeBodyPart();
-                String filePath = "result/test_report.pdf";
-                attachmentPart.attachFile(new File(filePath));
+                attachmentPart.attachFile(new File(jasperReport.getAbsolutePath()));
                 multipart.addBodyPart(attachmentPart);
             }
-            file = new File("result/allure-report-single/index.html");
-            if (file.exists()) {
+            File allureReport = new File(getResultDir()+"/allure-report-single/index.html");
+            if (allureReport.exists()) {
                 MimeBodyPart attachmentPart2 = new MimeBodyPart();
-                attachmentPart2.attachFile(new File("result/allure-report-single/index.html"));
+                attachmentPart2.attachFile(new File(allureReport.getAbsolutePath()));
                 multipart.addBodyPart(attachmentPart2);
             }
             // Set multipart content

@@ -1,15 +1,15 @@
 package org.automation.executor;
 
 import com.microsoft.playwright.Page;
-import org.automation.records.Action;
-import org.automation.records.DriverConfig;
+import org.automation.records.ActionRecord;
+import org.automation.records.DriverConfigRecord;
 import org.openqa.selenium.WebDriver;
 
 public interface Driver {
 
-    void init(DriverConfig driverConfig);
-    void execute(Action action);
-    String getText(Action action);
+    void init(DriverConfigRecord driverConfigRecord);
+    void execute(ActionRecord actionRecord);
+    String getText(ActionRecord actionRecord);
     void close();
 
     default void storeInThreadLocal() {

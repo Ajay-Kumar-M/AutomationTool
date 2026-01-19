@@ -1,9 +1,8 @@
 package org.automation.executor;
 
-import org.automation.records.DriverConfig;
+import org.automation.records.DriverConfigRecord;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -11,29 +10,35 @@ import java.util.Properties;
 public class DriverFactory {
     private static final Map<String, String> driverClassMap = new HashMap<>();
 
-    static {
-        try {
-            Properties props = new Properties();
-            props.load(new FileInputStream("config/driver.properties"));
+    public static void loadDriverProperties() {
+        Properties properties = new Properties();
 
-            for (String key : props.stringPropertyNames()) {
+        try (InputStream is = Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream("driver.properties")) {
+            if (is == null) {
+                throw new RuntimeException("driver.properties not found on classpath");
+            }
+            properties.load(is);
+            for (String key : properties.stringPropertyNames()) {
                 if (key.startsWith("drivers.")) {
                     String driverName = key.substring("drivers.".length());
-                    String className = props.getProperty(key);
+                    String className = properties.getProperty(key);
                     driverClassMap.put(driverName, className);
                 }
             }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load drivers config", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load driver.properties", e);
         }
     }
 
-    public static Driver createDriverInstance(DriverConfig driverConfig) {
-        String className = driverClassMap.get(driverConfig.driverType().toLowerCase());
+    public static Driver createDriverInstance(DriverConfigRecord driverConfigRecord) {
+        loadDriverProperties();
+        String className = driverClassMap.get(driverConfigRecord.driverType().toLowerCase());
 
         if (className == null) {
             throw new IllegalArgumentException(
-                    "Unknown driver: " + driverConfig.driverType() +
+                    "Unknown driver: " + driverConfigRecord.driverType() +
                             ". Available: " + driverClassMap.keySet()
             );
         }
@@ -42,7 +47,7 @@ public class DriverFactory {
             Class<?> driverClass = Class.forName(className);
             return (Driver) driverClass.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create driver: " + driverConfig.driverType(), e);
+            throw new RuntimeException("Failed to create driver: " + driverConfigRecord.driverType(), e);
         }
     }
 }

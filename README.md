@@ -127,17 +127,18 @@ notify.on.success=false
 ```properties
 drivers.TYPE=PACKAGE_NAME
 ```
+
 ```java
-import org.automation.records.DriverConfig;
+import org.automation.records.DriverConfigRecord;
 
 // Custom framework integration
 public class CustomFrameworkExecutor implements Driver {
     @Override
-    public void init(DriverConfig driverConfig) {
+    public void init(DriverConfigRecord driverConfigRecord) {
         // Your driver initialization logic here
     }
 
-    public void gotoUrl(Action action) {
+    public void gotoUrl(Action actionRecord) {
         // Your custom logic here
     }
 }

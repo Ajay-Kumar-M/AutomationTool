@@ -3,8 +3,8 @@ package org.automation.util;
 import net.sf.jasperreports.engine.JRException;
 import org.automation.executor.DriverConfig;
 import org.automation.executor.Driver;
-import org.automation.records.Action;
-import org.automation.records.ExpectedResultData;
+import org.automation.records.ActionRecord;
+import org.automation.records.ExpectedResultRecord;
 import org.automation.records.RecordQueueManager;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
@@ -20,20 +20,20 @@ public class JsonScriptRunner {
     private Driver driver;
     static RecordQueueManager queueManager = RecordQueueManager.getInstance();
 
-    public void runFromJson(List<Action> actions) throws Exception {
-        for (Action action : actions) {
-            System.out.println("Executing: " + action.actionType() + " | Method name: " + action.methodName() +" | TestCase: " + action.testcaseId());
+    public void runFromJson(List<ActionRecord> actionRecords) throws Exception {
+        for (ActionRecord actionRecord : actionRecords) {
+            System.out.println("Executing: " + actionRecord.actionType() + " | Method name: " + actionRecord.methodName() +" | TestCase: " + actionRecord.testcaseId());
             try {
-                driver.getClass().getMethod(action.methodName(), Action.class).invoke(driver,action);
-                queueManager.addRecord(new ExpectedResultData(action.testcaseId(),action.actionType(),action.locator(),"Success","",new String[0]));
+                driver.getClass().getMethod(actionRecord.methodName(), ActionRecord.class).invoke(driver, actionRecord);
+                queueManager.addRecord(new ExpectedResultRecord(actionRecord.testcaseId(), actionRecord.actionType(), actionRecord.locator(),"Success","",new String[0]));
             } catch (InvocationTargetException | AssertionError e) {
                 Throwable original = e.getCause();
                 String message = original.getMessage().replace('<',' ').replace('>',' ');
                 System.out.println("\nPrinting message - " + message);
 //                System.out.println("\nPrinting message string -" + original);
                 // handle logging / recovery / reporting
-                storeResultCSV(actions.getFirst(),"Failure",message.split("\\R", 2)[0]);
-                queueManager.addRecord(new ExpectedResultData(action.testcaseId(),action.actionType(),action.locator(),"Failure",original.getMessage(),new String[0]));
+                storeResultCSV(actionRecords.getFirst(),"Failure",message.split("\\R", 2)[0]);
+                queueManager.addRecord(new ExpectedResultRecord(actionRecord.testcaseId(), actionRecord.actionType(), actionRecord.locator(),"Failure",original.getMessage(),new String[0]));
                 // Rethrow the original exception to fail the test
                 if (original instanceof AssertionError) {
                     throw (AssertionError) original;
@@ -45,19 +45,19 @@ public class JsonScriptRunner {
             } catch (NoSuchMethodException | IllegalAccessException e) {
                 System.out.println("\nPrinting message - " + e.getMessage());
                 e.printStackTrace();
-                storeResultCSV(actions.getFirst(),"Failure",e.getMessage());
-                queueManager.addRecord(new ExpectedResultData(action.testcaseId(), action.actionType(), action.locator(), "Failure", e.getMessage(), new String[0]
+                storeResultCSV(actionRecords.getFirst(),"Failure",e.getMessage());
+                queueManager.addRecord(new ExpectedResultRecord(actionRecord.testcaseId(), actionRecord.actionType(), actionRecord.locator(), "Failure", e.getMessage(), new String[0]
                 ));
                 throw new RuntimeException("Reflection error: " + e.getMessage(), e);
             }
             // Optional: validate expected_result, take screenshot, etc.
         }
-        storeResultCSV(actions.getFirst(),"Success","TestCase Executed Successfully");
+        storeResultCSV(actionRecords.getFirst(),"Success","TestCase Executed Successfully");
     }
 
-    public void run(Driver driver, List<Action> actions) throws Exception {
+    public void run(Driver driver, List<ActionRecord> actionRecords) throws Exception {
         this.driver = driver;
-        runFromJson(actions);
+        runFromJson(actionRecords);
         queueManager.flushNow();
         // App shutdown
 //        queueManager.shutdown();
@@ -69,11 +69,11 @@ public class JsonScriptRunner {
         JsonScriptRunner runner = new JsonScriptRunner();
         try {
             String jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC001.json"));
-            List<Action> actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
-            runner.run(driver1, actions);
+            List<ActionRecord> actionRecords = mapper.readValue(jsonContent, new TypeReference<List<ActionRecord>>() {});
+            runner.run(driver1, actionRecords);
             jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC002.json"));
-            actions = mapper.readValue(jsonContent, new TypeReference<List<Action>>() {});
-            runner.run(driver1, actions);
+            actionRecords = mapper.readValue(jsonContent, new TypeReference<List<ActionRecord>>() {});
+            runner.run(driver1, actionRecords);
 
             new File("result").mkdirs();
             TestReportGenerator generator = new TestReportGenerator();
@@ -94,15 +94,15 @@ public class JsonScriptRunner {
         driver1.close();
     }
 
-    private void storeResultCSV(Action action, String status, String message){
-        File file = new File("result/automationResult.csv");
-        boolean fileExists = file.exists();
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
+    private void storeResultCSV(ActionRecord actionRecord, String status, String message){
+        File testrunResultFile = new File(TestUtils.getResultDir()+"/automationResult.csv");
+        boolean fileExists = testrunResultFile.exists();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(testrunResultFile, true))) {
             if (!fileExists) {
                 writer.write("TestCaseID,Description,Status,Message");
                 writer.newLine();
             }
-            writer.write(action.testcaseId()+","+action.description()+","+status+","+message.replace("\"","'"));
+            writer.write(actionRecord.testcaseId()+","+ actionRecord.description()+","+status+","+message.replace("\"","'"));
             writer.newLine();
         } catch (Exception e) {
             throw new RuntimeException(e);

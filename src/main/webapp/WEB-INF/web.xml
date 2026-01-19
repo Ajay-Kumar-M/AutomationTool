@@ -37,6 +37,10 @@
         <param-name>AppName</param-name>
         <param-value>AutomationTool</param-value>
     </context-param>
+    <context-param>
+        <param-name>tempFolder</param-name>
+        <param-value>tempFolder</param-value>  <!-- Relative to CATALINA_BASE (Tomcat root) -->
+    </context-param>
 
     <session-config>
         <cookie-config>

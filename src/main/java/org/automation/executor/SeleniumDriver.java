@@ -1,9 +1,8 @@
 package org.automation.executor;
 
-import com.microsoft.playwright.assertions.LocatorAssertions;
 import io.qameta.allure.Step;
-import org.automation.records.Action;
-import org.automation.records.DriverConfig;
+import org.automation.records.ActionRecord;
+import org.automation.records.DriverConfigRecord;
 import org.automation.util.DockerContainerCheck;
 import org.automation.util.ScreenshotManager;
 import org.openqa.selenium.*;
@@ -37,31 +36,31 @@ public class SeleniumDriver implements Driver {
 //    }
 
     @Override
-    public void init(DriverConfig driverConfig) {
-        if(driverConfig.isDocker()){
-            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(driverConfig.dockerContainerName()));
-            if ((driverConfig.browserType().equalsIgnoreCase("chrome"))||(driverConfig.browserType().equalsIgnoreCase("chromium"))) {
+    public void init(DriverConfigRecord driverConfigRecord) {
+        if(driverConfigRecord.isDocker()){
+            System.out.println("Is docker container running:"+ DockerContainerCheck.isContainerRunning(driverConfigRecord.dockerContainerName()));
+            if ((driverConfigRecord.browserType().equalsIgnoreCase("chrome"))||(driverConfigRecord.browserType().equalsIgnoreCase("chromium"))) {
                 ChromeOptions options = new ChromeOptions();
                 try {
-                    driver = new RemoteWebDriver(URI.create(driverConfig.dockerUrl()).toURL(), options);
+                    driver = new RemoteWebDriver(URI.create(driverConfigRecord.dockerUrl()).toURL(), options);
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }
-            } else if (driverConfig.browserType().equalsIgnoreCase("firefox")) {
+            } else if (driverConfigRecord.browserType().equalsIgnoreCase("firefox")) {
                 FirefoxOptions options = new FirefoxOptions();
                 try {
-                    driver = new RemoteWebDriver(URI.create(driverConfig.dockerUrl()).toURL(), options);
+                    driver = new RemoteWebDriver(URI.create(driverConfigRecord.dockerUrl()).toURL(), options);
                 } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
                 }
             }
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
         } else {
-            if ((driverConfig.browserType().equalsIgnoreCase("chrome"))||(driverConfig.browserType().equalsIgnoreCase("chromium"))) {
+            if ((driverConfigRecord.browserType().equalsIgnoreCase("chrome"))||(driverConfigRecord.browserType().equalsIgnoreCase("chromium"))) {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--start-maximized");
                 driver = new ChromeDriver(options);
-            } else if (driverConfig.browserType().equalsIgnoreCase("firefox")) {
+            } else if (driverConfigRecord.browserType().equalsIgnoreCase("firefox")) {
                 driver = new FirefoxDriver();
             }
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(implicitWait));
@@ -72,69 +71,69 @@ public class SeleniumDriver implements Driver {
     public WebDriver getDriver() { return driver; }
 
     @Override
-    public void execute(Action action) {
-        switch (action.actionType()) {
-            case "gotoUrl" -> gotoUrl(action);
-            case "type" -> type(action);
-            case "click" -> click(action);
-            case "clear" -> clear(action);
-            case "wait" -> wait(action);
-            case "assertVisibility" -> assertVisibility(action);
-            default -> throw new IllegalArgumentException("Unknown action: " + action.actionType());
+    public void execute(ActionRecord actionRecord) {
+        switch (actionRecord.actionType()) {
+            case "gotoUrl" -> gotoUrl(actionRecord);
+            case "type" -> type(actionRecord);
+            case "click" -> click(actionRecord);
+            case "clear" -> clear(actionRecord);
+            case "wait" -> wait(actionRecord);
+            case "assertVisibility" -> assertVisibility(actionRecord);
+            default -> throw new IllegalArgumentException("Unknown action: " + actionRecord.actionType());
         }
     }
 
     @Override
-    public String getText(Action action) {
+    public String getText(ActionRecord actionRecord) {
         return "";
     }
 
     @Step("Navigate to URL")
-    public void gotoUrl(Action action) {
+    public void gotoUrl(ActionRecord actionRecord) {
 //        Allure.step("Navigate to URL: " + getArg(action, 0));
-        String url = getArg(action, 0);
+        String url = getArg(actionRecord, 0);
         driver.get(url);
-        ScreenshotManager.takeScreenshot(driver, "gotoUrl", action.testcaseId());
+        ScreenshotManager.takeScreenshot(driver, "gotoUrl", actionRecord.testcaseId());
     }
 
     @Step("Type in element")
-    public void type(Action action) {
-        By locator = parseLocator(action.locator());
-        String text = getArg(action, 0);
+    public void type(ActionRecord actionRecord) {
+        By locator = parseLocator(actionRecord.locator());
+        String text = getArg(actionRecord, 0);
         driver.findElement(locator).clear();
         driver.findElement(locator).sendKeys(text);
-        ScreenshotManager.takeScreenshot(driver, "type", action.testcaseId());
+        ScreenshotManager.takeScreenshot(driver, "type", actionRecord.testcaseId());
     }
 
     @Step("Click element")
-    public void click(Action action) {
-        By by = parseLocator(action.locator());
+    public void click(ActionRecord actionRecord) {
+        By by = parseLocator(actionRecord.locator());
         driver.findElement(by).click();
-        ScreenshotManager.takeScreenshot(driver, "click", action.testcaseId());
+        ScreenshotManager.takeScreenshot(driver, "click", actionRecord.testcaseId());
     }
 
     @Step("Clear element")
-    public void clear(Action action) {
-        By by = parseLocator(action.locator());
+    public void clear(ActionRecord actionRecord) {
+        By by = parseLocator(actionRecord.locator());
         driver.findElement(by).clear();
-        ScreenshotManager.takeScreenshot(driver, "clear", action.testcaseId());
+        ScreenshotManager.takeScreenshot(driver, "clear", actionRecord.testcaseId());
     }
 
     @Step("Wait for Seconds")
-    public void wait(Action action) {
+    public void wait(ActionRecord actionRecord) {
         try {
-            Thread.sleep(Long.parseLong(getArg(action, 0)) * 1000);
-            ScreenshotManager.takeScreenshot(driver, "wait", action.testcaseId());
+            Thread.sleep(Long.parseLong(getArg(actionRecord, 0)) * 1000);
+            ScreenshotManager.takeScreenshot(driver, "wait", actionRecord.testcaseId());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    String getArg(Action action, int index) {
-        if (action.arguments() == null || action.arguments().length <= index) {
-            throw new IllegalArgumentException("Missing argument " + index + " for " + action.actionType());
+    String getArg(ActionRecord actionRecord, int index) {
+        if (actionRecord.arguments() == null || actionRecord.arguments().length <= index) {
+            throw new IllegalArgumentException("Missing argument " + index + " for " + actionRecord.actionType());
         }
-        return action.arguments()[index];
+        return actionRecord.arguments()[index];
     }
 
     @Step("Get element text")
@@ -173,19 +172,19 @@ public class SeleniumDriver implements Driver {
     }
 
     @Step("Assert Visibility")
-    public void assertVisibility(Action action) {
+    public void assertVisibility(ActionRecord actionRecord) {
         try {
-            By locator = parseLocator(action.locator());
+            By locator = parseLocator(actionRecord.locator());
 //            WebElement element = driver.findElement(locator);
-            ScreenshotManager.takeScreenshot(driver,action.methodName()+" - "+action.actionType(),action.testcaseId());
-            switch (action.actionType()){
+            ScreenshotManager.takeScreenshot(driver, actionRecord.methodName()+" - "+ actionRecord.actionType(), actionRecord.testcaseId());
+            switch (actionRecord.actionType()){
                 case "isVisible": WebElement element = new WebDriverWait(driver, Duration.ofSeconds(explicitWait))
                         .until(ExpectedConditions.presenceOfElementLocated(locator));
                     assertTrue(element.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + explicitWait + " seconds");
                     break;
-                case "isVisibleTimeout": WebElement element2 = new WebDriverWait(driver, Duration.ofSeconds(Long.parseLong(getArg(action, 0))))
+                case "isVisibleTimeout": WebElement element2 = new WebDriverWait(driver, Duration.ofSeconds(Long.parseLong(getArg(actionRecord, 0))))
                         .until(ExpectedConditions.presenceOfElementLocated(locator));
-                    assertTrue(element2.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + getArg(action, 0) + " seconds");
+                    assertTrue(element2.isDisplayed(),"Element with locator '" + locator + "' was not visible within " + getArg(actionRecord, 0) + " seconds");
                     break;
                 case "isHidden": WebElement element3 = driver.findElement(locator);
                     assertFalse(element3.isDisplayed(),"Element with locator '" + locator + "' was not hidden");

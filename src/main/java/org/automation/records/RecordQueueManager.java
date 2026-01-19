@@ -7,10 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,7 +17,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.automation.records.ExpectedResultData;
 
 
 /**
@@ -53,14 +48,14 @@ public class RecordQueueManager {
     private static RecordQueueManager instance;
     private static final Object INSTANCE_LOCK = new Object();
 
-    private final ConcurrentLinkedQueue<ExpectedResultData> queue;
+    private final ConcurrentLinkedQueue<ExpectedResultRecord> queue;
     private final ScheduledExecutorService scheduledExecutor;
     private final ExecutorService fileWriteExecutor;
     private final ReadWriteLock flushLock;
     private final ObjectMapper objectMapper;
     private final Path outputPath;
     private volatile boolean isShutdown;
-    private volatile RecordIdExtractor<ExpectedResultData> recordIdExtractor;
+    private volatile RecordIdExtractor<ExpectedResultRecord> recordIdExtractor;
 
     /**
      * Functional interface to extract ID from record for filename generation.
@@ -142,7 +137,7 @@ public class RecordQueueManager {
     /**
      * Add a record to the queue. Thread-safe operation.
      */
-    public void addRecord(ExpectedResultData record) {
+    public void addRecord(ExpectedResultRecord record) {
         if (isShutdown) {
             throw new IllegalStateException("RecordQueueManager is shut down");
         }
@@ -314,7 +309,7 @@ public class RecordQueueManager {
 //
 //                logger.info("Successfully wrote {} total records to file: {}", allRecords.size(), filename);
 //            }
-            ExpectedResultData record = queue.peek();
+            ExpectedResultRecord record = queue.peek();
             assert record != null;
             String recordId = record.testcaseId(); // recordIdExtractor.extractId(record);
             if (recordId == null || recordId.isEmpty()) {

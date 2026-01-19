@@ -5,7 +5,7 @@ import io.qameta.allure.model.Label;
 import net.sf.jasperreports.engine.JRException;
 import org.automation.listener.AllureListener;
 import org.automation.listener.DriverLifecycleListener;
-import org.automation.records.Action;
+import org.automation.records.ActionRecord;
 import org.automation.util.*;
 import org.testng.ITestContext;
 import org.testng.annotations.*;
@@ -62,30 +62,30 @@ public class RunTestcase {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String jsonContent = Files.readString(Paths.get(jsonPath));
-            List<Action> actions = mapper.readValue(jsonContent, new TypeReference<>() {
+            List<ActionRecord> actionRecords = mapper.readValue(jsonContent, new TypeReference<>() {
             });
-            String testCaseId = actions.getFirst().testcaseId();
+            String testCaseId = actionRecords.getFirst().testcaseId();
             Driver.setTestCaseID(testCaseId);
             context.setAttribute("testcaseID", testCaseId);
             System.out.println("Running " + testCaseId + " in path->" + jsonPath);
-            if (actions.getFirst().epic() != null) {
-                Allure.label("epic", actions.getFirst().epic());
-                Allure.label("feature", actions.getFirst().feature());
-                Allure.label("story", actions.getFirst().story());
+            if (actionRecords.getFirst().epic() != null) {
+                Allure.label("epic", actionRecords.getFirst().epic());
+                Allure.label("feature", actionRecords.getFirst().feature());
+                Allure.label("story", actionRecords.getFirst().story());
                 Allure.label("Testcase ID", testCaseId);
                 Allure.getLifecycle().updateTestCase(testCase -> {
-                    testCase.setDescription(actions.getFirst().description());
+                    testCase.setDescription(actionRecords.getFirst().description());
                     testCase.setTestCaseId(testCaseId);
-                    testCase.setTestCaseName(actions.getFirst().story());
-                    testCase.setName(testCaseId + "- " + actions.getFirst().feature());
-                    testCase.setFullName(actions.getFirst().story());
+                    testCase.setTestCaseName(actionRecords.getFirst().story());
+                    testCase.setName(testCaseId + "- " + actionRecords.getFirst().feature());
+                    testCase.setFullName(actionRecords.getFirst().story());
                     testCase.setStart(System.currentTimeMillis());
                     testCase.getLabels().removeIf(l -> "subSuite".equals(l.getName()));
                     testCase.getLabels().add(new Label().setName("subSuite").setValue("Test Run"));
                 });
             }
             Driver driver = Driver.getFromThreadLocal();
-            runner.run(driver, actions);
+            runner.run(driver, actionRecords);
             if (Driver.isWebDriver()) {
                 ScreenshotManager.takeScreenshot(Driver.getWebDriverFromThreadLocal(), "TestCompleted_" + testCaseId, testCaseId);
             } else {

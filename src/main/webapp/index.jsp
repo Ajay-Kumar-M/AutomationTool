@@ -1026,11 +1026,11 @@
             
             // Add predefined actions
             Object.entries(PREDEFINED_ACTIONS).forEach(([key, value]) => {
-                console.log(key, value);
+                //console.log(key, value);
                 const actionItem = document.createElement('div');
                 actionItem.className = 'action-item';
                 actionItem.draggable = true;
-                actionItem.textContent = action;
+                actionItem.textContent = key;
                 actionItem.ondragstart = (e) => {
                     e.dataTransfer.effectAllowed = 'copy';
                     e.dataTransfer.setData('action', key);

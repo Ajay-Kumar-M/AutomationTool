@@ -1,8 +1,8 @@
 package org.automation.util;
 
 import net.sf.jasperreports.engine.JRException;
-import org.automation.executor.DriverConfig;
-import org.automation.executor.Driver;
+import org.automation.driver.DriverConfig;
+import org.automation.driver.Driver;
 import org.automation.records.ActionRecord;
 import org.automation.records.ExpectedResultRecord;
 import org.automation.records.RecordQueueManager;

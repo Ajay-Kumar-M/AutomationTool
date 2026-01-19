@@ -2,7 +2,7 @@ package org.automation.listener;
 
 import com.microsoft.playwright.Page;
 import io.qameta.allure.Attachment;
-import org.automation.executor.Driver;
+import org.automation.driver.Driver;
 import org.automation.util.ScreenshotManager;
 import org.openqa.selenium.WebDriver;
 import org.testng.ITestContext;
@@ -66,9 +66,7 @@ public class AllureListener implements ITestListener {
                     result.getThrowable().getMessage(),
                     duration
             );
-            System.out.println("Before attach");
             attachExecutionReport(report);
-            System.out.println("after attach");
             String testCaseDriverID = Driver.getTestCaseID();
             // ✓ Retrieve testcaseID and driver from context
             String testcaseID = (String) context.getAttribute("testcaseID");

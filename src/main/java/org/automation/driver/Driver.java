@@ -1,4 +1,4 @@
-package org.automation.executor;
+package org.automation.driver;
 
 import com.microsoft.playwright.Page;
 import org.automation.records.ActionRecord;

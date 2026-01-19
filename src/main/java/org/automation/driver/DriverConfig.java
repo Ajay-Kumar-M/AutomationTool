@@ -1,10 +1,7 @@
-package org.automation.executor;
+package org.automation.driver;
 
 import org.automation.records.DriverConfigRecord;
-import org.automation.util.TestUtils;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 

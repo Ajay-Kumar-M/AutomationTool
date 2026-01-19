@@ -3,6 +3,7 @@ package org.automation.executor;
 import io.qameta.allure.*;
 import io.qameta.allure.model.Label;
 import net.sf.jasperreports.engine.JRException;
+import org.automation.driver.Driver;
 import org.automation.listener.AllureListener;
 import org.automation.listener.DriverLifecycleListener;
 import org.automation.records.ActionRecord;

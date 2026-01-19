@@ -1,6 +1,7 @@
 package org.automation.executor;
 
 import io.qameta.allure.Step;
+import org.automation.driver.Driver;
 import org.automation.records.ActionRecord;
 import org.automation.records.DriverConfigRecord;
 import org.automation.util.DockerContainerCheck;

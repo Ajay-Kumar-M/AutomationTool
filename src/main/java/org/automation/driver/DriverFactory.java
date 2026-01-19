@@ -1,4 +1,4 @@
-package org.automation.executor;
+package org.automation.driver;
 
 import org.automation.records.DriverConfigRecord;
 

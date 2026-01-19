@@ -4,6 +4,7 @@ import com.microsoft.playwright.*;
 import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.options.AriaRole;
 import io.qameta.allure.Step;
+import org.automation.driver.Driver;
 import org.automation.records.ActionRecord;
 import org.automation.records.DriverConfigRecord;
 import org.automation.util.DockerContainerCheck;

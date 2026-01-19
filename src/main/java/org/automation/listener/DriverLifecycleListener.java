@@ -1,7 +1,7 @@
 package org.automation.listener;
 
-import org.automation.executor.Driver;
-import org.automation.executor.DriverConfig;
+import org.automation.driver.Driver;
+import org.automation.driver.DriverConfig;
 import org.testng.IInvokedMethod;
 import org.testng.IInvokedMethodListener;
 import org.testng.ITestResult;

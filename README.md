@@ -71,7 +71,7 @@ graph TB
     G --> I[JasperReports]
     H --> J[Email Notifications]
     I --> J
-    J --> K[Web Dashboard]
+    J --> K[Web Dashboard -> Running Testcases]
 ```
 
 ## 📁 **Project Structure**
@@ -81,6 +81,7 @@ AutomationTool/
 ├── src/main/java/
 │   ├── com.automation/
 │   │   ├── servlet/     # Web controllers
+│   │   ├── driver/      # Driver config
 │   │   ├── executor/    # Test runners
 │   │   ├── util/        # Allure/Jasper
 │   │   └── records/     # Test case models
@@ -95,7 +96,7 @@ AutomationTool/
 
 ## 🔧 **Configuration**
 
-### **Email Notifications** (`config/email.properties`)
+### **Email Notifications** (`src/main/resources/email.properties`)
 ```properties
 smtp.host=smtp.gmail.com
 smtp.port=587
@@ -105,7 +106,7 @@ notify.on.failure=true
 notify.on.success=false
 ```
 
-### **Test Scheduling** (`config/scheduler.xml`)
+### **Test Scheduling** (`src/main/resources/scheduler.xml`)
 ```xml
 <scheduler>
     <job name="daily-regression" cron="0 0 2 * * ?">

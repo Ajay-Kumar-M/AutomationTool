@@ -3,6 +3,7 @@ test-output/
 allure-results/
 result/
 tempFiles/
+src/main/resources/email.properties
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

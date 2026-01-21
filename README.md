@@ -84,14 +84,14 @@ AutomationTool/
 │   │   ├── driver/      # Driver config
 │   │   ├── executor/    # Test runners
 │   │   ├── util/        # Allure/Jasper
+│   │   ├── listener/    # Product / allure listeners
 │   │   └── records/     # Test case models
 ├── src/main/webapp/
-│   ├── jsp/             # UI pages
+│   ├── /                # UI pages
 │   ├── css/             # Styles
 │   └── js/              # Client-side logic
 ├── testcaseData/        # Sample test cases
-├── result/              # Test result reports
-└── config/              # Driver + Email + other configs
+└── result/              # Test result reports
 ```
 
 ## 🔧 **Configuration**

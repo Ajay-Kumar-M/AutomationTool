@@ -72,10 +72,10 @@ public class JSONScriptRunner {
         ObjectMapper mapper = new ObjectMapper();
         JSONScriptRunner runner = new JSONScriptRunner();
         try {
-            String jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC001.json"));
+            String jsonContent = Files.readString(Paths.get("testcaseData/TC001.json"));
             List<ActionRecord> actionRecords = mapper.readValue(jsonContent, new TypeReference<List<ActionRecord>>() {});
             runner.run(driver1, actionRecords);
-            jsonContent = Files.readString(Paths.get("src/main/java/org/automation/data/TC002.json"));
+            jsonContent = Files.readString(Paths.get("testcaseData/TC002.json"));
             actionRecords = mapper.readValue(jsonContent, new TypeReference<List<ActionRecord>>() {});
             runner.run(driver1, actionRecords);
 

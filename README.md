@@ -65,7 +65,7 @@ graph TB
     B --> D[Playwright Java]
     C --> E[Chrome/Firefox/Edge]
     D --> F[Chrome/Firefox/WebKit]
-    E --> G[Step Screenshots]
+    E --> G[TestNG]
     F --> G
     G --> H[Allure Reports]
     G --> I[JasperReports]

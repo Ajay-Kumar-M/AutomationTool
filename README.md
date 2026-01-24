@@ -124,7 +124,7 @@ notify.on.success=false
 | **Live Logs** | Real-time execution monitoring |
 
 ## 🤝 **Extending Your Framework**
-### **Driver Config** (`config/driver.properties`)
+### **Driver Config** (`src/main/resources/driver.properties`)
 ```properties
 drivers.TYPE=PACKAGE_NAME
 ```
@@ -152,7 +152,7 @@ public class CustomFrameworkExecutor implements Driver {
 ```bash
 docker-compose up -d
 ```
-### **Docker Config** (`config/driver.properties`)
+### **Docker Config** (`src/main/resources/driver.properties`)
 ```properties
 docker.enable=false
 docker.url=ws://0.0.0.0:3000/

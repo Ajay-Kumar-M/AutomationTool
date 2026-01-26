@@ -4,16 +4,17 @@
 
 ## ✨ **Key Features**
 
-| Feature | Description |
-|---------|-------------|
-| **🧪 Dual Framework Support** | Run test cases with **Selenium** or **Playwright** |
-| **⏰ Scheduled Execution** | Schedule test runs using cron-like expressions |
+| Feature | Description                                             |
+|---------|---------------------------------------------------------|
+| **🧪 Dual Framework Support** | Run test cases with **Selenium** or **Playwright**      |
+| **⏰ Scheduled Execution** | Schedule test runs using cron-like expressions          |
 | **📊 Advanced Reporting** | **Allure** + **JasperReports** with rich visualizations |
-| **📧 Mail Notifications** | Automatic email alerts on test completion/failure |
-| **🔧 Framework Extensibility** | Extend with your custom automation frameworks |
-| **🐳 Docker Ready** | Containerized deployment for CI/CD pipelines |
-| **📸 Step-by-Step Screenshots** | Automatic screenshots attached to every report |
-| **⚡ Web UI** | JSP/Servlet-based dashboard |
+| **📧 Mail Notifications** | Automatic email alerts on test completion/failure       |
+| **🔧 Framework Extensibility** | Extend with your custom automation frameworks           |
+| **🐳 Docker Ready** | Containerized deployment for CI/CD pipelines            |
+| **📸 Step-by-Step Screenshots** | Automatic screenshots attached to every report          |
+| **⚡ Web UI** | JSP/Servlet-based dashboard                             |
+| **🔍 Locator Discovery** | Lists locators for all **interactable elements**        |
 
 ## 🎯 **Use Cases**
 
@@ -123,7 +124,7 @@ notify.on.success=false
 | **Jasper** | PDF/Excel exports, charts |
 | **Live Logs** | Real-time execution monitoring |
 
-## 🤝 **Extending Your Framework**
+## 🤝 **Extending Framework**
 ### **Driver Config** (`src/main/resources/driver.properties`)
 ```properties
 drivers.TYPE=PACKAGE_NAME
@@ -164,6 +165,17 @@ FROM tomcat:10.0-jdk11
 COPY target/AutomationTool.war /usr/local/tomcat/webapps/
 EXPOSE 8080
 ```
+
+### 🔍 Locator Discovery
+
+Tool automatically scans the specified webpage and lists locators for all **interactable elements** (buttons, inputs, links, etc.).
+It helps automation engineers quickly identify reliable selectors without manually inspecting the DOM.
+
+**Supported locators include:**
+- ID
+- Name
+- CSS Selector
+- XPath
 
 ## 📊 **Demo Screenshots**
 

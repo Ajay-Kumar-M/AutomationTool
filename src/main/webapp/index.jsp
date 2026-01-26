@@ -752,6 +752,77 @@
                       align-items: center;        /* Vertically center them */
                       margin-bottom: 10px;        /* Optional spacing */
         }
+
+        /* Loading Div */
+        .loading-div {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: var(--color-accent-light);
+            border: 1px solid var(--color-accent);
+            border-radius: var(--radius-md);
+            margin-top: 20px;
+            color: var(--color-accent);
+            font-weight: 500;
+        }
+
+        /* Elements Table */
+        .elements-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: var(--color-white);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            display: none; /* Hidden until data is fetched */
+        }
+
+        .elements-table thead {
+            background: var(--color-accent-light);
+            border-bottom: 2px solid var(--color-accent);
+        }
+
+        .elements-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-accent);
+            border-right: 1px solid var(--color-border);
+        }
+
+        .elements-table th:last-child {
+            border-right: none;
+        }
+
+        .elements-table td {
+            padding: 10px 16px;
+            border-right: 1px solid var(--color-border);
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text-dark);
+            font-size: 13px;
+            word-break: break-all; /* Handle long selectors */
+        }
+
+        .elements-table td:last-child {
+            border-right: none;
+        }
+
+        .elements-table tbody tr:hover {
+            background: var(--color-hover);
+        }
+
+        .elements-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Line Separator */
+        .line-separator {
+            border: none;
+            border-top: 1px solid var(--color-border);
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -869,6 +940,46 @@
                     ✓ Create
                 </button>
             </div>
+
+            <hr class="line-separator">
+
+            <div class="section">
+                <div class="section-title">Fetch Page Elements</div>
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="createUrlInput"
+                        class="input-field"
+                        placeholder="Enter webpage URL (e.g., https://example.com)"
+                        autocomplete="off"
+                    />
+                    <button class="btn btn-primary" id="fetchElementsCreateBtn" onclick="fetchPageElements('create')">
+                        📡 Fetch Elements
+                    </button>
+                </div>
+            </div>
+
+            <div id="loadingCreate" class="loading-div">
+                Loading elements... Please wait.
+            </div>
+
+            <table id="elementsTableCreate" class="elements-table" style="table-layout: fixed">
+                  <colgroup>
+                      <col style="width: 15%;">
+                      <col style="width: 15%;">
+                      <col style="width: 35%;">
+                      <col style="width: 35%;">
+                  </colgroup>
+                <thead>
+                    <tr>
+                        <th>Tag Name</th>
+                        <th>Element Text</th>
+                        <th>CSS Selector</th>
+                        <th>XPath Selector</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
 
         <!-- ===== TAB 3: EDIT TESTCASE ===== -->
@@ -926,6 +1037,45 @@
                     ✓ Save
                 </button>
             </div>
+            <hr class="line-separator">
+
+            <div class="section">
+                <div class="section-title">Fetch Page Elements</div>
+                <div class="input-group">
+                    <input
+                        type="text"
+                        id="editUrlInput"
+                        class="input-field"
+                        placeholder="Enter webpage URL (e.g., https://example.com)"
+                        autocomplete="off"
+                    />
+                    <button class="btn btn-primary" id="fetchElementsEditBtn" onclick="fetchPageElements('edit')">
+                        📡 Fetch Elements
+                    </button>
+                </div>
+            </div>
+
+            <div id="loadingEdit" class="loading-div">
+                Loading elements... Please wait.
+            </div>
+
+            <table id="elementsTableEdit" class="elements-table" style="table-layout: fixed">
+                <colgroup>
+                    <col style="width: 15%;">
+                    <col style="width: 15%;">
+                    <col style="width: 35%;">
+                    <col style="width: 35%;">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>Tag Name</th>
+                        <th>Element Text</th>
+                        <th>CSS Selector</th>
+                        <th>XPath Selector</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
 
         <!-- ===== TAB 4: RUNNING TESTCASES ===== -->
@@ -1061,7 +1211,9 @@
             const actionsContainer = document.getElementById('availableActions' + (mode === 'create' ? 'Create' : 'Edit'));
             
             // Clear previous actions
-            actionsContainer.innerHTML = '';
+            while (actionsContainer.firstChild) {
+                actionsContainer.removeChild(actionsContainer.firstChild);
+            }
             
             // Add predefined actions
             Object.entries(PREDEFINED_ACTIONS).forEach(([key, value]) => {
@@ -1084,11 +1236,20 @@
 
             // Clear operations list
             const operationsList = document.getElementById('operationsList' + (mode === 'create' ? 'Create' : 'Edit'));
-            operationsList.innerHTML = 'Drop actions here to build your test case';
+            while (operationsList.firstChild) {
+                operationsList.removeChild(operationsList.firstChild);
+            }
+            operationsList.appendChild(document.createTextNode('Drop actions here to build your test case'));
             
             // Clear userdata form
             const userdataForm = document.getElementById('userdataForm' + (mode === 'create' ? 'Create' : 'Edit'));
-            userdataForm.innerHTML = '<div class="empty-userdata">Click an operation to edit its details</div>';
+            while (userdataForm.firstChild) {
+                userdataForm.removeChild(userdataForm.firstChild);
+            }
+            const placeholder = document.createElement('div');
+            placeholder.className = 'empty-userdata';
+            placeholder.textContent = 'Click an operation to edit its details';
+            userdataForm.appendChild(placeholder);
             
             operationsData = {};
             currentSelectedAction = null;
@@ -1123,7 +1284,9 @@
 
             // Clear placeholder if first item
             if (operationsList.textContent.includes('Drop actions here')) {
-                operationsList.innerHTML = '';
+                while (operationsList.firstChild) {
+                    operationsList.removeChild(operationsList.firstChild);
+                }
             }
 
             const actionId = 'action_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -1153,14 +1316,30 @@
             };
             const operationContent = document.createElement('div');
             operationContent.className = 'operation-item-content';
-            operationContent.innerHTML = '<div class="operation-wrapper">' +
-                                        '<div class="operation-item-index">' + operationIndex + '</div>' +
-                                        '<div class="operation-item-action">' + action + '</div></div>';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'operation-wrapper';
+            const indexDiv = document.createElement('div');
+            indexDiv.className = 'operation-item-index';
+            indexDiv.textContent = operationIndex;  // safely insert text
+            const actionDiv = document.createElement('div');
+            actionDiv.className = 'operation-item-action';
+            actionDiv.textContent = action;  // safely insert text
+            wrapper.appendChild(indexDiv);
+            wrapper.appendChild(actionDiv);
+            operationContent.appendChild(wrapper);
+
             operationContent.style.cursor = 'pointer';
             operationContent.onclick = () => editOperation(actionId, mode);
             const operationButtons = document.createElement('div');
             operationButtons.className = 'operation-item-buttons';
-            operationButtons.innerHTML = '<button class="btn btn-secondary" style="padding: 4px 8px;" onclick="deleteOperation(\'' + actionId + '\', \'' + mode + '\')">🗑</button>';
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-secondary';
+            btn.style.padding = '4px 8px';
+            btn.textContent = '🗑';
+            btn.addEventListener('click', () => {
+                deleteOperation(actionId, mode);
+            });
+            operationButtons.appendChild(btn);
             operationItem.appendChild(operationContent);
             operationItem.appendChild(operationButtons);
             operationsList.appendChild(operationItem);
@@ -1174,56 +1353,65 @@
             currentSelectedAction = actionId;
             const data = operationsData[actionId];
             const userdataForm = document.getElementById('userdataForm' + (mode === 'create' ? 'Create' : 'Edit'));
-            
-            let formHTML = '<div class="userdata-form">' +
-                '<h4>Edit Action: ' + data.actionType + '</h4>' +
-                '<div class="form-group">' +
-                '<label>Action Type:</label>' +
-                '<input type="text" value="' + data.actionType + '" readonly style="background: #f5f5f5;" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Locator:</label>' +
-                '<input type="text" id="editLocator" value="' + (data.locator || '') + '" placeholder="e.g., #username, button[type=submit]" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Arguments (comma-separated):</label>' +
-                '<input type="text" id="editArguments" value="' + (Array.isArray(data.arguments) ? data.arguments.join(', ') : '') + '" placeholder="e.g., admin, secret123" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Test Case ID:</label>' +
-                '<input type="text" id="editTestcaseId" value="' + (data.testcaseId || '') + '" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Additional Data (JSON):</label>' +
-                '<textarea id="editAdditionalData">' + JSON.stringify(data.additionalData || {}, null, 2) + '</textarea>' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Frame Locator:</label>' +
-                '<input type="text" id="editFrameLocator" value="' + (data.frameLocator || '') + '" placeholder="e.g., #username, button[type=submit]" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Epic:</label>' +
-                '<input type="text" id="editEpic" value="' + (data.epic || '') + '" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Feature:</label>' +
-                '<input type="text" id="editFeature" value="' + (data.feature || '') + '" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Story:</label>' +
-                '<input type="text" id="editStory" value="' + (data.story || '') + '" />' +
-                '</div>' +
-                '<div class="form-group">' +
-                '<label>Description:</label>' +
-                '<textarea id="editDescription">' + (data.description || '') + '</textarea>' +
-                '</div>' +
-                '<div class="form-buttons">' +
-                '<button class="btn btn-success" onclick="saveOperation(\'' + actionId + '\', \'' + mode + '\')">✓ Save</button>' +
-                '<button class="btn btn-secondary" onclick="cancelEditOperation(\'' + mode + '\')">✗ Cancel</button>' +
-                '</div>' +
-                '</div>';
-            
-            userdataForm.innerHTML = formHTML;
+            while (userdataForm.firstChild) {
+                userdataForm.removeChild(userdataForm.firstChild);
+            }
+            const formWrapper = document.createElement('div');
+            formWrapper.className = 'userdata-form';
+
+            const heading = document.createElement('h4');
+            heading.textContent = 'Edit Action: ' + data.actionType;
+            formWrapper.appendChild(heading);
+
+            function createInputGroup(labelText, inputType, inputId, value, placeholder, readOnly = false, isTextarea = false) {
+                const group = document.createElement('div');
+                group.className = 'form-group';
+                const label = document.createElement('label');
+                label.textContent = labelText;
+                group.appendChild(label);
+                let input;
+                if (isTextarea) {
+                    input = document.createElement('textarea');
+                } else {
+                    input = document.createElement('input');
+                    input.type = inputType;
+                }
+                if (inputId) input.id = inputId;
+                if (value !== undefined) input.value = value;
+                if (placeholder) input.placeholder = placeholder;
+                if (readOnly) input.readOnly = true;
+                if (readOnly) input.style.background = '#f5f5f5';
+                group.appendChild(input);
+                return group;
+            }
+
+            formWrapper.appendChild(createInputGroup('Action Type:', 'text', null, data.actionType, null, true));
+            formWrapper.appendChild(createInputGroup('Locator:', 'text', 'editLocator', data.locator || '', 'e.g., #username, button[type=submit]'));
+            formWrapper.appendChild(createInputGroup('Arguments (comma-separated):', 'text', 'editArguments', Array.isArray(data.arguments) ? data.arguments.join(', ') : '', 'e.g., admin, secret123'));
+            formWrapper.appendChild(createInputGroup('Test Case ID:', 'text', 'editTestcaseId', data.testcaseId || ''));
+            formWrapper.appendChild(createInputGroup('Additional Data (JSON):', 'text', 'editAdditionalData', JSON.stringify(data.additionalData || {}, null, 2), null, false, true));
+            formWrapper.appendChild(createInputGroup('Frame Locator:', 'text', 'editFrameLocator', data.frameLocator || '', 'e.g., #username, button[type=submit]'));
+            formWrapper.appendChild(createInputGroup('Epic:', 'text', 'editEpic', data.epic || ''));
+            formWrapper.appendChild(createInputGroup('Feature:', 'text', 'editFeature', data.feature || ''));
+            formWrapper.appendChild(createInputGroup('Story:', 'text', 'editStory', data.story || ''));
+            formWrapper.appendChild(createInputGroup('Description:', 'text', 'editDescription', data.description || '', null, false, true));
+
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'form-buttons';
+            const saveBtn = document.createElement('button');
+            saveBtn.className = 'btn btn-success';
+            saveBtn.textContent = '✓ Save';
+            saveBtn.addEventListener('click', () => saveOperation(actionId, mode));
+            buttonsDiv.appendChild(saveBtn);
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'btn btn-secondary';
+            cancelBtn.textContent = '✗ Cancel';
+            cancelBtn.addEventListener('click', () => cancelEditOperation(mode));
+            buttonsDiv.appendChild(cancelBtn);
+            formWrapper.appendChild(buttonsDiv);
+
+            userdataForm.appendChild(formWrapper);
+
         }
 
         // ===== SAVE OPERATION =====
@@ -1253,7 +1441,13 @@
         // ===== CANCEL EDIT OPERATION =====
         function cancelEditOperation(mode) {
             const userdataForm = document.getElementById('userdataForm' + (mode === 'create' ? 'Create' : 'Edit'));
-            userdataForm.innerHTML = '<div class="empty-userdata">Click an operation to edit its details</div>';
+            while (userdataForm.firstChild) {
+                userdataForm.removeChild(userdataForm.firstChild);
+            }
+            const placeholder = document.createElement('div');
+            placeholder.className = 'empty-userdata';
+            placeholder.textContent = 'Click an operation to edit its details';
+            userdataForm.appendChild(placeholder);
             currentSelectedAction = null;
         }
 
@@ -1444,7 +1638,9 @@
 
             // Clear placeholder if first item
             if (operationsList.textContent.includes('Drop actions here')) {
-                operationsList.innerHTML = '';
+                while (operationsList.firstChild) {
+                    operationsList.removeChild(operationsList.firstChild);
+                }
             }
 
             //const actionId = 'action_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -1461,14 +1657,30 @@
             };
             const operationContent = document.createElement('div');
             operationContent.className = 'operation-item-content';
-            operationContent.innerHTML = '<div class="operation-wrapper">' +
-                                        '<div class="operation-item-index">' + operationIndex + '</div>' +
-                                        '<div class="operation-item-action">' + action + '</div></div>';
+            const wrapper = document.createElement('div');
+            wrapper.className = 'operation-wrapper';
+            const indexDiv = document.createElement('div');
+            indexDiv.className = 'operation-item-index';
+            indexDiv.textContent = operationIndex;
+            const actionDiv = document.createElement('div');
+            actionDiv.className = 'operation-item-action';
+            actionDiv.textContent = action;
+            wrapper.appendChild(indexDiv);
+            wrapper.appendChild(actionDiv);
+            operationContent.appendChild(wrapper);
+
             operationContent.style.cursor = 'pointer';
             operationContent.onclick = () => editOperation(actionId, mode);
             const operationButtons = document.createElement('div');
             operationButtons.className = 'operation-item-buttons';
-            operationButtons.innerHTML = '<button class="btn btn-secondary" style="padding: 4px 8px;" onclick="deleteOperation(\'' + actionId + '\', \'' + mode + '\')">🗑</button>';
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-secondary';
+            btn.style.padding = '4px 8px';
+            btn.textContent = '🗑';
+            btn.addEventListener('click', () => {
+                deleteOperation(actionId, mode);
+            });
+            operationButtons.appendChild(btn);
             operationItem.appendChild(operationContent);
             operationItem.appendChild(operationButtons);
             operationsList.appendChild(operationItem);
@@ -1523,6 +1735,83 @@
             // showStatus((mode === 'create' ? 'Create' : 'Edit') + ' cancelled', 'success');
         }
 
+        // ===== FETCH PAGE ELEMENTS =====
+        async function fetchPageElements(mode) {
+            const urlInput = document.getElementById(mode === 'create' ? 'createUrlInput' : 'editUrlInput');
+            const url = urlInput.value.trim();
+
+            if (!url) {
+                showStatus('Please enter a valid URL', 'error');
+                return;
+            }
+
+            const loadingDiv = document.getElementById(mode === 'create' ? 'loadingCreate' : 'loadingEdit');
+            const elementsTable = document.getElementById(mode === 'create' ? 'elementsTableCreate' : 'elementsTableEdit');
+            const tbody = elementsTable.querySelector('tbody');
+
+            // Show loading
+            loadingDiv.style.display = 'block';
+            elementsTable.style.display = 'none';
+            while (tbody.firstChild) {
+                tbody.removeChild(tbody.firstChild);
+            }
+            showStatus('Fetching page elements...', 'loading');
+
+            try {
+                const response = await fetch('WebpageLocatorGenServlet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'url=' + encodeURIComponent(url)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const result = await response.json();
+                console.log(JSON.stringify(result));
+                console.log(Array.isArray(result));
+                console.log(result.length);
+                console.log(typeof result);
+                console.log(Array.isArray(result));
+
+
+                if (result.length > 0) {
+                    // Render table rows
+                    result.forEach(item => {
+                        console.log(item);
+                        const row = document.createElement('tr');
+                        const cellTag = document.createElement('td');
+                        cellTag.textContent = item.tagName || 'N/A';
+                        row.appendChild(cellTag);
+                        const cellText = document.createElement('td');
+                        cellText.textContent = item.text || 'N/A';
+                        row.appendChild(cellText);
+                        const cellCss = document.createElement('td');
+                        cellCss.textContent = item.css || 'N/A';
+                        row.appendChild(cellCss);
+                        const cellXpath = document.createElement('td');
+                        cellXpath.textContent = item.xpath || 'N/A';
+                        row.appendChild(cellXpath);
+                        tbody.appendChild(row);
+                    });
+
+                    elementsTable.style.display = 'table';
+                    showStatus('✓ Elements fetched successfully! (' + result.length + ' items)', 'success');
+                } else {
+                    showStatus('No elements found or empty response', 'warning');
+                }
+            } catch (error) {
+                console.error('Error fetching elements:', error);
+                showStatus('Error fetching elements: ' + error.message, 'error');
+            } finally {
+                // Hide loading
+                loadingDiv.style.display = 'none';
+            }
+        }
+
         // ===== RUNNER TAB FUNCTIONS =====
         async function fetchTestCases() {
             const folderName = document.getElementById('folderName').value.trim();
@@ -1565,10 +1854,24 @@
 
         function renderTree(data) {
             const container = document.getElementById('treeContainer');
-            container.innerHTML = '';
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
             
             if (!data || data.length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">❌</div><div>No test cases found in the specified folder</div></div>';
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                }
+                const emptyState = document.createElement('div');
+                emptyState.className = 'empty-state';
+                const iconDiv = document.createElement('div');
+                iconDiv.className = 'empty-state-icon';
+                iconDiv.textContent = '❌';
+                emptyState.appendChild(iconDiv);
+                const messageDiv = document.createElement('div');
+                messageDiv.textContent = 'No test cases found in the specified folder';
+                emptyState.appendChild(messageDiv);
+                container.appendChild(emptyState);
                 return;
             }
 
@@ -1738,35 +2041,49 @@
                 const response = await fetch('TaskStatusServlet');
                 const taskStatuses = await response.json();
                 const tbody = document.querySelector('#tasksTable tbody');
-                tbody.innerHTML = '';
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
 
                 if (Object.keys(taskStatuses).length > 0) {
                     for (let taskId in taskStatuses) {
                         if (taskStatuses.hasOwnProperty(taskId)) {
                             var isRunning = taskStatuses[taskId];
-                            tbody.innerHTML +=
-                                '<tr>' +
-                                    '<td>' + taskId + '</td>' +
-                                    '<td style="color: ' + (isRunning ? '#4caf50' : '#666') +
-                                    '; font-weight: ' + (isRunning ? 'bold' : 'normal') + '">' +
-                                        (isRunning ? '🟢 Running' : '⚪ Completed') +
-                                    '</td>' +
-                                '</tr>';
+                            const row = document.createElement('tr');
+                            const cellId = document.createElement('td');
+                            cellId.textContent = taskId;
+                            row.appendChild(cellId);
+                            const cellStatus = document.createElement('td');
+                            cellStatus.textContent = isRunning ? '🟢 Running' : '⚪ Completed';
+                            cellStatus.style.color = isRunning ? '#4caf50' : '#666';
+                            cellStatus.style.fontWeight = isRunning ? 'bold' : 'normal';
+                            row.appendChild(cellStatus);
+
+                            tbody.appendChild(row);
                         }
                     }
                 } else {
-                    tbody.innerHTML =
-                        '<tr>' +
-                            '<td colspan="2" style="text-align: center; color: #666;">' +
-                                'No running tasks' +
-                            '</td>' +
-                        '</tr>';
+                    const row = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 2; // colspan="2"
+                    cell.style.textAlign = 'center';
+                    cell.style.color = '#666';
+                    cell.textContent = 'No running tasks';
+                    row.appendChild(cell);
+                    tbody.appendChild(row);
                 }
 
             } catch (error) {
                 console.error('Refresh failed:', error);
-                document.querySelector('#tasksTable tbody').innerHTML =
-                    '<tr><td colspan="2" style="color: #f44336;">Failed to load tasks</td></tr>';
+                // Get tbody
+                const tbody = document.querySelector('#tasksTable tbody');
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 2;
+                cell.style.color = '#f44336';
+                cell.textContent = 'Failed to load tasks';
+                row.appendChild(cell);
+                tbody.appendChild(row);
             }
         }
 

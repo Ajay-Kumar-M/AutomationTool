@@ -166,7 +166,7 @@ COPY target/AutomationTool.war /usr/local/tomcat/webapps/
 EXPOSE 8080
 ```
 
-### 🔍 Locator Discovery
+## 🔍 **Locator Discovery**
 
 Tool automatically scans the specified webpage and lists locators for all **interactable elements** (buttons, inputs, links, etc.).
 It helps automation engineers quickly identify reliable selectors without manually inspecting the DOM.

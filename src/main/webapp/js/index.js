@@ -504,6 +504,7 @@ async function recordTestcaseServer(fileName, location, testcaseId, epic, featur
             document.getElementById('feature').value = '';
             document.getElementById('story').value = '';
             document.getElementById('description').value = '';
+            document.getElementById('webpageUrl').value = '';
         } else {
             showStatus(result.message || 'Failed to record test case', 'error');
         }

@@ -155,7 +155,7 @@ public class ActionRecorder {
 //                        lastTs = ts;
 //                    }
 //                }
-                logger.info("⏱️ Synced → total actions: {} %n", actions.size());
+                logger.info("⏱️ Synced → total actions: {}", actions.size());
             }
         } catch (Exception e) {
             // Silent fail during polling - usually page closing
@@ -166,7 +166,6 @@ public class ActionRecorder {
     private void injectRecorderScript(Page page) {
         page.addInitScript("""
             // Load existing actions from localStorage (survives same-origin navigation)
-//            let recordedActions = [];
             window.recordedActions = window.recordedActions || [];
             try {
                 const stored = localStorage.getItem('recordedActions');
@@ -215,6 +214,75 @@ public class ActionRecorder {
                 } catch (e) {
                     console.error('Failed to save to localStorage:', e);
                 }
+            }
+            
+            function getElementText(element) {
+                try {
+                    if (!element) return '';
+                    let text = '';
+                    // 0. Selected text (highest priority)
+                    const selection = window.getSelection();
+                    if (selection && selection.toString().trim()) {
+                        return selection.toString().trim();
+                    }
+                    // 7. value (for inputs & buttons)
+                    if ('value' in element) {
+                        text = element.value;
+                        if (text && text.trim()) {
+                            return text.trim();
+                        }
+                    }
+                    // 1. Visible text
+                    text = element.innerText || element.textContent;
+                    if (text && text.trim()) {
+                        return text.trim();
+                    }
+                    // 2. aria-label
+                    text = element.getAttribute('aria-label');
+                    if (text && text.trim()) {
+                        return text.trim();
+                    }
+                    // 3. Associated <label for="id">
+                    const id = element.getAttribute('id');
+                    if (id) {
+                        const label = document.querySelector(`label[for="${CSS.escape(id)}"]`);
+                        if (label && label.innerText.trim()) {
+                            return label.innerText.trim();
+                        }
+                    }
+                    // 5. placeholder
+                    text = element.getAttribute('placeholder');
+                    if (text && text.trim()) {
+                        return text.trim();
+                    }
+                    // 6. title
+                    text = element.getAttribute('title');
+                    if (text && text.trim()) {
+                        return text.trim();
+                    }
+                    // 4. Parent <label>
+                    const parentLabel = element.closest('label');
+                    if (parentLabel) {
+                        text = parentLabel.innerText;
+                        if (text && text.trim()) {
+                            return text.trim();
+                        }
+                    }
+                    return '';
+                } catch (e) {
+                    return '';
+                }
+            }
+            
+            function getElementFromSelection() {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return null;
+                let node = selection.getRangeAt(0).commonAncestorContainer;
+                // If it's a text node, get its parent element
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node = node.parentElement;
+                }
+                return node;
             }
 
             // CLICK
@@ -273,6 +341,33 @@ public class ActionRecorder {
                 saveActions();
             }, true);
 
+            //Assert Contains Text
+            document.addEventListener('keydown', e => {
+                // Detect Ctrl+C (Windows/Linux) or Cmd+C (Mac)
+                const isCopy = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c';
+                console.log('--- is copy-'+isCopy);
+                if (!isCopy) return;
+            
+                let active = document.activeElement;
+                if (!active || active === document.body) {
+                    active = getElementFromSelection();
+                }
+                const extractedText = getElementText(active);
+                console.log('--- extractedText-'+extractedText);
+                const selector = getRobustSelector(active);
+            
+                const action = {
+                    actionType: 'containsText',
+                    locator: selector,
+                    arguments: [extractedText],
+                    methodName: 'assertText'
+                };
+            
+                window.recordedActions.push(action);
+                console.log("ACTION:", action);
+                saveActions();
+            }, true);
+
             // SCROLL - debounced
             window.addEventListener('scroll', () => {
                 const now = Date.now();
@@ -301,7 +396,7 @@ public class ActionRecorder {
         try {
             Files.createDirectories(Paths.get(path).getParent());
             mapper.writerWithDefaultPrettyPrinter().writeValue(new File(path), actions);
-            logger.info("✅ Saved {} actions to: {} %n", actions.size(), path);
+            logger.info("✅ Saved {} actions to: {}", actions.size(), path);
         } catch (Exception e) {
             logger.error("Failed to save JSON: {}", e.getMessage());
         }
@@ -329,4 +424,25 @@ public class ActionRecorder {
 //            System.out.println("Playwright detected browser/page closure");
 //            syncActionsFromPage(page);
 //        }
+ */
+
+/*
+            document.addEventListener('copy', e => {
+                console.log('!!! copy listener');
+                const selection = window.getSelection();
+                const extractedText = selection ? selection.toString().trim() : '';
+
+                const active = document.activeElement;
+
+                const action = {
+                    actionType: 'containsText',
+                    locator: active ? getRobustSelector(active) : null,
+                    arguments: [extractedText],
+                    methodName: 'assertText'
+                };
+
+                window.recordedActions.push(action);
+                console.log('COPY ACTION:', action);
+                saveActions();
+            }, true);
  */

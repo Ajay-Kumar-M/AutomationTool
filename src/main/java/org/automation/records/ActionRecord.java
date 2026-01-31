@@ -14,7 +14,15 @@ public record ActionRecord(
         String feature,
         String story,
         String description
-){}
+){
+    public ActionRecord withTestcaseId(String testcaseId) {
+        return new ActionRecord(
+                actionType, locator, arguments, testcaseId,
+                additionalData, methodName, frameLocator,
+                epic, feature, story, description
+        );
+    }
+}
 
 /*
 

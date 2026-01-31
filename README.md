@@ -196,5 +196,9 @@ It helps automation engineers quickly identify reliable selectors without manual
 |-----------|
 | ![Customized allure reporting](screenshots/AutomationToolAllureReport.png) |
 
+| Locator Discovery                                                                             |
+|-----------------------------------------------------------------------------------------------|
+| ![Discover Locator for Interactable Elements](screenshots/AutomationToolLocatorDiscovery.png) |
+
 **Built with ❤️ for the testing community**
 

@@ -358,10 +358,11 @@
         </div>
     </div>
 
-    <div id="loadingOverlay" aria-hidden="true">
+    <div id="loadingOverlay" aria-hidden="false">
       <div class="loader-card">
         <div class="spinner"></div>
-        <div class="loading-text">Loading…</div>
+        <div class="loading-text">Recording Testcase…</div>
+        <div class="loading-text">Perform testcase actions in RECORDER BROWSER and close to save the testcase.</div>
       </div>
     </div>
 

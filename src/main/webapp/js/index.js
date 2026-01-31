@@ -145,7 +145,7 @@ function handleDrop(e, mode) {
 
 // ===== ADD OPERATION =====
 function addOperation(action, methodName, mode) {
-    console.log("addOperation action : "+action+" - mode : "+mode);
+//    console.log("addOperation action : "+action+" - mode : "+mode);
     const operationsList = document.getElementById('operationsList' + (mode === 'create' ? 'Create' : 'Edit'));
 
     // Clear placeholder if first item
@@ -215,7 +215,7 @@ function addOperation(action, methodName, mode) {
 
 // ===== EDIT OPERATION =====
 function editOperation(actionId, mode) {
-    console.log("editOperation action id : "+actionId+" mode : "+mode);
+//    console.log("editOperation action id : "+actionId+" mode : "+mode);
     currentSelectedAction = actionId;
     const data = operationsData[actionId];
     const userdataForm = document.getElementById('userdataForm' + (mode === 'create' ? 'Create' : 'Edit'));
@@ -505,7 +505,6 @@ async function recordTestcaseServer(fileName, location, testcaseId, epic, featur
             document.getElementById('story').value = '';
             document.getElementById('description').value = '';
         } else {
-        console.log(result.message);
             showStatus(result.message || 'Failed to record test case', 'error');
         }
         hideLoading();

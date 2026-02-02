@@ -4,18 +4,18 @@
 
 ## ✨ **Key Features**
 
-| Feature                         | Description                                                                                |
-|---------------------------------|--------------------------------------------------------------------------------------------|
-| **🧪 Dual Framework Support**   | Run test cases with **Selenium** or **Playwright**                                         |
-| **⏰ Scheduled Execution**       | Schedule test runs using cron-like expressions                                             |
-| **📊 Advanced Reporting**       | **Allure** + **JasperReports** with rich visualizations                                    |
+| Feature                         | Description                                                                               |
+|---------------------------------|-------------------------------------------------------------------------------------------|
+| **🧪 Dual Framework Support**   | Run test cases with **Selenium** or **Playwright**                                        |
+| **⏰ Scheduled Execution**       | Schedule test runs                                             |
+| **📊 Advanced Reporting**       | **Allure** + **JasperReports** with rich visualizations                                   |
 | **🎥 Action Recorder**          | Record actions performed in browser & automatically save test case when the browser closes |
-| **📧 Mail Notifications**       | Automatic email alerts on test completion/failure                                          |
-| **🔧 Framework Extensibility**  | Extend with your custom automation frameworks                                              |
-| **🐳 Docker Ready**             | Containerized deployment for CI/CD pipelines                                               |
-| **📸 Step-by-Step Screenshots** | Automatic screenshots attached to every report                                             |
-| **⚡ Web UI**                    | JSP/Servlet-based dashboard                                                                |
-| **🔍 Locator Discovery**        | Lists locators for all **interactable elements**                                           |
+| **📧 Mail Notifications**       | Automatic email alerts on test completion/failure                                         |
+| **🔧 Framework Extensibility**  | Extend with your custom automation frameworks                                             |
+| **🐳 Docker Ready**             | Containerized deployment for CI/CD pipelines                                              |
+| **📸 Step-by-Step Screenshots** | Automatic screenshots attached to every report                                            |
+| **⚡ Web UI**                    | JSP/Servlet-based dashboard                                                               |
+| **🔍 Locator Discovery**        | Lists locators for all **interactable elements**                                          |
 
 ## 🎯 **Use Cases**
 
@@ -23,6 +23,10 @@
 - **Mobile web testing** with responsive frameworks
 - **Regression testing** suites with scheduling
 - **CI/CD integration** via Docker
+- Run automated tests using both **Selenium and Playwright** within a single platform
+- **Schedule** automated regression and smoke tests
+- Generate rich visual test reports with **Allure and JasperReports**
+- **Record** browser actions to auto-generate test cases without manual scripting
 
 ## 🚀 **Quick Start**
 
@@ -177,6 +181,7 @@ It helps automation engineers quickly identify reliable selectors without manual
 - Name
 - CSS Selector
 - XPath
+
 
 ## 📊 **Demo Screenshots**
 

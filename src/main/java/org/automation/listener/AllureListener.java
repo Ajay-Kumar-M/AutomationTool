@@ -14,10 +14,6 @@ import org.testng.ITestResult;
 import java.util.Arrays;
 import java.util.Map;
 
-/**
- * TestNG Listener for automatic screenshot capture on test failures
- * and detailed Allure reporting
- */
 public class AllureListener implements ITestListener {
     private static final Logger logger = LoggerFactory.getLogger(AllureListener.class);
 

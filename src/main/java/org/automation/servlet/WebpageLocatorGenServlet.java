@@ -24,7 +24,6 @@ public class WebpageLocatorGenServlet extends HttpServlet {
         String url = request.getParameter("url");
         WebpageLocatorGenerator generator = new WebpageLocatorGenerator();
         List<LocatorData> records = generator.generateLocators(url);
-//        String json = objectMapper.writeValueAsString(records);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();

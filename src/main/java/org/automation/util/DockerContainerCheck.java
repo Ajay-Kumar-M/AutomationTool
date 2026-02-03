@@ -12,14 +12,11 @@ public class DockerContainerCheck {
                     "-f", "{{.State.Running}}",
                     containerName
             ).start();
-
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(process.getInputStream())
             );
-
             String output = reader.readLine();
             return "true".equals(output);
-
         } catch (Exception e) {
             return false; // container not found or Docker not running
         }

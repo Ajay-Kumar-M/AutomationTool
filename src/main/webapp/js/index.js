@@ -51,7 +51,7 @@ const PREDEFINED_ACTIONS = {
 let currentMode = null; // 'create' or 'edit'
 let currentSelectedAction = null; // Track which action is being edited
 let editingFilePath = null; // Track the file being edited
-let operationsData = {}; // Store operation details: { actionId: { actionType, locator, arguments, etc } }
+let operationsData = []; // Store operation details: [ actionId: { actionType, locator, arguments, etc } ]
 let selectedItems = new Set(); // For runner tab
 let treeData = null; // For runner tab
 
@@ -117,7 +117,7 @@ function initializeEditor(mode) {
     placeholder.textContent = 'Click an operation to edit its details';
     userdataForm.appendChild(placeholder);
 
-    operationsData = {};
+    operationsData.length = 0;
     currentSelectedAction = null;
     currentMode = mode;
 }
@@ -146,78 +146,32 @@ function handleDrop(e, mode) {
 // ===== ADD OPERATION =====
 function addOperation(action, methodName, mode) {
 //    console.log("addOperation action : "+action+" - mode : "+mode);
-    const operationsList = document.getElementById('operationsList' + (mode === 'create' ? 'Create' : 'Edit'));
-
-    // Clear placeholder if first item
-    if (operationsList.textContent.includes('Drop actions here')) {
-        while (operationsList.firstChild) {
-            operationsList.removeChild(operationsList.firstChild);
-        }
-    }
-
     const actionId = 'action_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-    const operationIndex = Array.from(operationsList.children).length + 1;
-    operationsData[actionId] = {
-        actionType: action,
-        locator: '',
-        arguments: [],
-        testcaseId: mode === 'create' ? document.getElementById('createTestcaseId').value : '',
-        methodName: methodName,
-        additionalData: {},
-        frameLocator: '',
-        epic: '',
-        feature: '',
-        story: '',
-        description: ''
-    };
-
-    // Create operation div item
-    const operationItem = document.createElement('div');
-    operationItem.className = 'operation-item';
-    operationItem.id = 'op_' + actionId;
-    operationItem.draggable = true;
-    operationItem.ondragstart = (e) => {
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('operationId', actionId);
-    };
-    const operationContent = document.createElement('div');
-    operationContent.className = 'operation-item-content';
-    const wrapper = document.createElement('div');
-    wrapper.className = 'operation-wrapper';
-    const indexDiv = document.createElement('div');
-    indexDiv.className = 'operation-item-index';
-    indexDiv.textContent = operationIndex;  // safely insert text
-    const actionDiv = document.createElement('div');
-    actionDiv.className = 'operation-item-action';
-    actionDiv.textContent = action;  // safely insert text
-    wrapper.appendChild(indexDiv);
-    wrapper.appendChild(actionDiv);
-    operationContent.appendChild(wrapper);
-
-    operationContent.style.cursor = 'pointer';
-    operationContent.onclick = () => editOperation(actionId, mode);
-    const operationButtons = document.createElement('div');
-    operationButtons.className = 'operation-item-buttons';
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-secondary';
-    btn.style.padding = '4px 8px';
-    btn.textContent = '🗑';
-    btn.addEventListener('click', () => {
-        deleteOperation(actionId, mode);
+    operationsData.push({
+      actionId: actionId, // store the id explicitly
+      actionType: action,
+      locator: '',
+      arguments: [],
+      testcaseId: mode === 'create'
+        ? document.getElementById('createTestcaseId').value
+        : '',
+      methodName: methodName,
+      additionalData: {},
+      frameLocator: '',
+      epic: '',
+      feature: '',
+      story: '',
+      description: ''
     });
-    operationButtons.appendChild(btn);
-    operationItem.appendChild(operationContent);
-    operationItem.appendChild(operationButtons);
-    operationsList.appendChild(operationItem);
 
     reindexOperations(mode);
 }
 
 // ===== EDIT OPERATION =====
-function editOperation(actionId, mode) {
+function editOperation(actionId, mode, index) {
 //    console.log("editOperation action id : "+actionId+" mode : "+mode);
     currentSelectedAction = actionId;
-    const data = operationsData[actionId];
+    const data = operationsData[index];
     const userdataForm = document.getElementById('userdataForm' + (mode === 'create' ? 'Create' : 'Edit'));
     while (userdataForm.firstChild) {
         userdataForm.removeChild(userdataForm.firstChild);
@@ -267,7 +221,7 @@ function editOperation(actionId, mode) {
     const saveBtn = document.createElement('button');
     saveBtn.className = 'btn btn-success';
     saveBtn.textContent = '✓ Save';
-    saveBtn.addEventListener('click', () => saveOperation(actionId, mode));
+    saveBtn.addEventListener('click', () => saveOperation(actionId, mode, index));
     buttonsDiv.appendChild(saveBtn);
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'btn btn-secondary';
@@ -281,23 +235,23 @@ function editOperation(actionId, mode) {
 }
 
 // ===== SAVE OPERATION =====
-function saveOperation(actionId, mode) {
-    operationsData[actionId].locator = document.getElementById('editLocator').value;
-    operationsData[actionId].arguments = document.getElementById('editArguments').value
+function saveOperation(actionId, mode, index) {
+    operationsData[index].locator = document.getElementById('editLocator').value;
+    operationsData[index].arguments = document.getElementById('editArguments').value
         .split(',')
         .map(arg => arg.trim())
         .filter(arg => arg);
-    operationsData[actionId].testcaseId = document.getElementById('editTestcaseId').value;
-    operationsData[actionId].frameLocator = document.getElementById('editFrameLocator').value;
-    operationsData[actionId].epic = document.getElementById('editEpic').value;
-    operationsData[actionId].feature = document.getElementById('editFeature').value;
-    operationsData[actionId].story = document.getElementById('editStory').value;
-    operationsData[actionId].description = document.getElementById('editDescription').value;
+    operationsData[index].testcaseId = document.getElementById('editTestcaseId').value;
+    operationsData[index].frameLocator = document.getElementById('editFrameLocator').value;
+    operationsData[index].epic = document.getElementById('editEpic').value;
+    operationsData[index].feature = document.getElementById('editFeature').value;
+    operationsData[index].story = document.getElementById('editStory').value;
+    operationsData[index].description = document.getElementById('editDescription').value;
 
     try {
-        operationsData[actionId].additionalData = JSON.parse(document.getElementById('editAdditionalData').value);
+        operationsData[index].additionalData = JSON.parse(document.getElementById('editAdditionalData').value);
     } catch (e) {
-        operationsData[actionId].additionalData = {};
+        operationsData[index].additionalData = {};
     }
 
     cancelEditOperation(mode);
@@ -318,15 +272,33 @@ function cancelEditOperation(mode) {
 }
 
 // ===== DELETE OPERATION =====
-function deleteOperation(actionId, mode) {
+function deleteOperation(actionId, mode, index) {
     const operationItem = document.getElementById('op_' + actionId);
     if (operationItem) {
         operationItem.remove();
     }
-    delete operationsData[actionId];
+    operationsData.splice(index, 1);
     reindexOperations(mode);
     cancelEditOperation(mode);
     showStatus('Operation deleted', 'success');
+}
+
+// ===== MOVE UP OPERATION =====
+function moveUpOperation(actionId, mode, index) {
+    if (index === 0) return;
+    [operationsData[index - 1], operationsData[index]] =
+        [operationsData[index], operationsData[index - 1]];
+    reindexOperations(mode);
+//    showStatus('Operation re-ordered', 'success');
+}
+
+// ===== MOVE DOWN OPERATION =====
+function moveDownOperation(actionId, mode, index) {
+    if (index === operationsData.length - 1) return;
+    [operationsData[index], operationsData[index + 1]] =
+        [operationsData[index + 1], operationsData[index]];
+    reindexOperations(mode);
+//    showStatus('Operation re-ordered', 'success');
 }
 
 // ===== REINDEX OPERATIONS =====
@@ -337,6 +309,78 @@ function reindexOperations(mode) {
         if (indexBadge) {
             indexBadge.textContent = index + 1;
         }
+    });
+
+    while (operationsList.firstChild) {
+        operationsList.removeChild(operationsList.firstChild);
+    }
+    operationsList.appendChild(document.createTextNode('Drop actions here to build your test case'));
+
+    // Clear placeholder if first item
+    if ( (operationsData.length > 0) && (operationsList.textContent.includes('Drop actions here'))) {
+        while (operationsList.firstChild) {
+            operationsList.removeChild(operationsList.firstChild);
+        }
+    }
+
+    operationsData.forEach((item, index) => {
+        // Create operation div item
+//        const operationIndex = Array.from(operationsList.children).length + 1;
+        const actionId = item.actionId;
+        const operationItem = document.createElement('div');
+        operationItem.className = 'operation-item';
+        operationItem.id = 'op_' + actionId;
+        operationItem.draggable = true;
+        operationItem.ondragstart = (e) => {
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('operationId', actionId);
+            e.dataTransfer.setData('operationIndex', index);
+        };
+        const operationContent = document.createElement('div');
+        operationContent.className = 'operation-item-content';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'operation-wrapper';
+        const indexDiv = document.createElement('div');
+        indexDiv.className = 'operation-item-index';
+        indexDiv.textContent = index+1;
+        const actionDiv = document.createElement('div');
+        actionDiv.className = 'operation-item-action';
+        actionDiv.textContent = item.actionType;
+        wrapper.appendChild(indexDiv);
+        wrapper.appendChild(actionDiv);
+        operationContent.appendChild(wrapper);
+
+        operationContent.style.cursor = 'pointer';
+        operationContent.onclick = () => editOperation(actionId, mode, index);
+        const operationButtons = document.createElement('div');
+        operationButtons.className = 'operation-item-buttons';
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'btn btn-secondary';
+        deleteButton.style.padding = '4px 8px';
+        deleteButton.textContent = '🗑';
+        deleteButton.addEventListener('click', () => {
+            deleteOperation(actionId, mode, index);
+        });
+        operationButtons.appendChild(deleteButton);
+        const moveUp = document.createElement('button');
+        moveUp.className = 'btn btn-secondary';
+        moveUp.style.padding = '4px 8px';
+        moveUp.textContent = '⬆';
+        moveUp.addEventListener('click', () => {
+            moveUpOperation(actionId, mode, index);
+        });
+        operationButtons.appendChild(moveUp);
+        const moveDown = document.createElement('button');
+        moveDown.className = 'btn btn-secondary';
+        moveDown.style.padding = '4px 8px';
+        moveDown.textContent = '⬇';
+        moveDown.addEventListener('click', () => {
+            moveDownOperation(actionId, mode, index);
+        });
+        operationButtons.appendChild(moveDown);
+        operationItem.appendChild(operationContent);
+        operationItem.appendChild(operationButtons);
+        operationsList.appendChild(operationItem);
     });
 }
 
@@ -349,7 +393,7 @@ function createTestcase() {
         return;
     }
 
-    if (Object.keys(operationsData).length === 0) {
+    if (operationsData.length === 0) {
         showStatus('Please add at least one operation', 'error');
         return;
     }
@@ -391,17 +435,17 @@ function confirmSaveLocation() {
 
     // Prepare data for saving
     const testcaseId = document.getElementById('createTestcaseId').value;
-    const testcaseData = Object.values(operationsData).map(op => ({
+    const testcaseData = operationsData.map(op => ({
         actionType: op.actionType,
         locator: op.locator || null,
-        arguments: op.arguments.length > 0 ? op.arguments : undefined,
+        arguments: op.arguments && op.arguments.length > 0 ? op.arguments : undefined,
         testcaseId: testcaseId,
         methodName: op.methodName,
         frameLocator: op.frameLocator,
         ...(op.additionalData && Object.keys(op.additionalData).length > 0 ? { additionalData: op.additionalData } : {}),
         ...(op.epic ? { epic: op.epic } : {}),
         ...(op.feature ? { feature: op.feature } : {}),
-        ...(op.story ? { feature: op.story } : {}),
+        ...(op.story ? { story: op.story } : {}),
         ...(op.description ? { description: op.description } : {})
     }));
 
@@ -554,11 +598,12 @@ async function loadTestcaseFile() {
 
         if (result.success) {
             editingFilePath = filePath;
-            operationsData = {};
+            operationsData.length = 0;
             // Load operations
             result.data.forEach(action => {
                 const actionId = 'action_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                operationsData[actionId] = {
+                operationsData.push({
+                    actionId: actionId,
                     actionType: action.actionType,
                     locator: action.locator || '',
                     arguments: Array.isArray(action.arguments) ? action.arguments : [],
@@ -570,9 +615,10 @@ async function loadTestcaseFile() {
                     feature: action.feature || '',
                     story: action.story || '',
                     description: action.description || ''
-                };
-                editAddOperation(action.actionType, 'edit', actionId);
+                });
+//                editAddOperation(action.actionType, 'edit', actionId);
             });
+            reindexOperations('edit');
             showStatus('Test case loaded successfully', 'success');
 
             // Show save/cancel buttons
@@ -646,10 +692,11 @@ function editAddOperation(action, mode, actionId) {
 
 // ===== SAVE TESTCASE FILE (EDIT) =====
 function saveTestcaseFile() {
-    if (Object.keys(operationsData).length === 0) {
+    if (operationsData.length === 0) {
         showStatus('Please add at least one operation', 'error');
         return;
     }
+
     const normalizeString = value => value ?? "";
     const normalizeArray = value => Array.isArray(value) ? value : [];
     const normalizeObject = value => value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -657,7 +704,7 @@ function saveTestcaseFile() {
     const addIfNonEmptyArray = (key, value) => Array.isArray(value) && value.length > 0 ? { [key]: value } : {};
     const addIfNonEmptyObject = (key, value) => value && Object.keys(value).length > 0 ? { [key]: value } : {};
 
-    const testcaseData = Object.values(operationsData).map(op => ({
+    const testcaseData = operationsData.map(op => ({
         actionType: op.actionType,
         locator: normalizeString(op.locator),
         testcaseId: normalizeString(op.testcaseId),
@@ -668,7 +715,7 @@ function saveTestcaseFile() {
         ...addIfDefined('epic', op.epic),
         ...addIfDefined('feature', op.feature),
         ...addIfDefined('story', op.story),
-        ...addIfDefined('description', op.description),
+        ...addIfDefined('description', op.description)
     }));
 
     saveTestcaseToServer('', '', testcaseData, 'edit');

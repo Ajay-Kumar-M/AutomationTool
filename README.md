@@ -86,12 +86,13 @@ graph TB
 AutomationTool/
 ├── src/main/java/
 │   ├── com.automation/
-│   │   ├── servlet/     # Web controllers
 │   │   ├── driver/      # Driver config
 │   │   ├── executor/    # Test runners
-│   │   ├── util/        # Allure/Jasper
 │   │   ├── listener/    # Product / allure listeners
-│   │   └── records/     # Test case models
+│   │   ├── records/     # Test case data models
+│   │   ├── servlet/     # Web controllers
+│   │   └── util/        # Allure/Jasper
+├── src/main/resources/  # Properties / Resources files
 ├── src/main/webapp/
 │   ├── /                # UI pages
 │   ├── css/             # Styles

@@ -1,13 +1,14 @@
 package org.automation.servlet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.automation.WebpageLocatorGenerator;
+import org.automation.util.WebpageLocatorGenerator;
 import org.automation.records.LocatorData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,6 +17,7 @@ import java.util.List;
 @WebServlet("/WebpageLocatorGenServlet")
 public class WebpageLocatorGenServlet extends HttpServlet {
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Logger logger = LoggerFactory.getLogger(WebpageLocatorGenServlet.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -27,7 +29,7 @@ public class WebpageLocatorGenServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
         PrintWriter out = response.getWriter();
         objectMapper.writeValue(out, records);
-        System.out.println("Java json --------- \n"+records.toString());
+        logger.info("Webpage Locators Generated - {}",records.toString());
         out.flush();
     }
 }

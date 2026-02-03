@@ -1,4 +1,4 @@
-package org.automation;
+package org.automation.util;
 
 import org.automation.records.LocatorData;
 import org.openqa.selenium.*;
@@ -25,7 +25,7 @@ public class WebpageLocatorGenerator {
 
     private void setupDriver() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless"); // Optional: run headless
+        options.addArguments("--headless");
         driver = new ChromeDriver(options);
     }
 
@@ -35,16 +35,9 @@ public class WebpageLocatorGenerator {
         List<WebElement> interactableElements = findAllInteractableElements();
         List<LocatorData> allLocatorData = new ArrayList<>(List.of());
 
-        System.out.println("Found " + interactableElements.size() + " interactable elements:");
-        System.out.println("═".repeat(80));
-
         for (int i = 0; i < interactableElements.size(); i++) {
             WebElement element = interactableElements.get(i);
             LocatorData locators = generateUniqueLocators(element);
-            System.out.printf("\n[%d] %s%n", i + 1, locators.tagName());
-            System.out.println("   CSS: " + locators.css());
-            System.out.println("   XPath: " + locators.xpath());
-            System.out.println("   Text: " + locators.text());
             allLocatorData.add(locators);
         }
         driver.quit();
@@ -82,7 +75,6 @@ public class WebpageLocatorGenerator {
             String tag = element.getTagName();
             // Skip hidden/disabled elements
             if (!element.isDisplayed() || !element.isEnabled()) return false;
-
             // Skip non-interactable tags
             if (tag.equals("script") || tag.equals("style")) return false;
 
@@ -99,45 +91,12 @@ public class WebpageLocatorGenerator {
     }
 
     private LocatorData generateUniqueLocators(WebElement element) {
-        String css = generateRelativeCSS3(element);
-        String xpath = generateRelativeXPath4(element);
+        String css = generateRelativeCSS(element);
+        String xpath = generateRelativeXPath(element);
         return new LocatorData(element.getTagName().toUpperCase(), getElementText(element), css, xpath);
     }
 
-    private String generateRelativeCSS2(WebElement element) {
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        String cssPath = (String) js.executeScript(
-                "function getCSSPath(el) {" +
-                        "  if (!(el instanceof Element)) return '';" +
-                        "  const path = [];" +
-                        "  let current = el;" +
-                        "  while (current && current.nodeType === Node.ELEMENT_NODE) {" +
-                        "    let selector = current.nodeName.toLowerCase();" +
-                        "    if (current.id && document.getElementById(current.id)) {" +
-                        "      return '#' + CSS.escape(current.id);" +
-                        "    }" +
-                        "    const siblings = Array.from(current.parentNode ? current.parentNode.children : []);" +
-                        "    const sameTagSiblings = siblings.filter(sib => sib.nodeName === current.nodeName);" +
-                        "    const index = sameTagSiblings.indexOf(current) + 1;" +
-                        "    if (sameTagSiblings.length > 1) {" +
-                        "      selector += ':nth-of-type(' + index + ');';" +
-                        "    }" +
-                        "    const classes = current.className ? current.className.trim().split(/\\s+/) : [];" +
-                        "    if (classes.length) {" +
-                        "      selector += '.' + classes[0].replace(/[^a-zA-Z0-9_-]/g, '\\\\$&');" +
-                        "    }" +
-                        "    path.unshift(selector);" +
-                        "    current = current.parentNode;" +
-                        "    if (path.length > 6) break;" +
-                        "  }" +
-                        "  return path.join(' > ');" +
-                        "}" +
-                        "return getCSSPath(arguments[0]);", element);
-
-        return isUnique("cssSelector", cssPath) ? cssPath : fallbackCSS(element);
-    }
-
-    public String generateRelativeCSS3(WebElement element) {
+    public String generateRelativeCSS(WebElement element) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         String css = (String) js.executeScript("""
             function generateCssPath(el) {
@@ -238,13 +197,10 @@ public class WebpageLocatorGenerator {
                         "}" +
                         "return getXPath(arguments[0]);", element);
 
-
-        System.out.println("Xpath - "+xpath);
-        System.out.println("is unique Xpath - "+isUnique("xpath", xpath));
-        return isUnique("xpath", xpath) ? xpath : fallbackXPath(element);
+        return xpath;
     }
 
-    public String generateRelativeXPath4(WebElement element) {
+    public String generateRelativeXPath(WebElement element) {
         JavascriptExecutor js = (JavascriptExecutor) driver;
         String xpath = (String) js.executeScript("""
                 function generateXPath(el) {
@@ -351,7 +307,6 @@ public class WebpageLocatorGenerator {
     }
 
     private String fallbackXPath(WebElement el) {
-        System.out.println("fallbackxpath called "+el.getTagName());
         try {
             String id = el.getAttribute("id");
             if (id != null && !id.isBlank()) {
@@ -366,19 +321,6 @@ public class WebpageLocatorGenerator {
             return "//" + tag;
         } catch (Exception e) {
             return "//" + el.getTagName().toLowerCase();
-        }
-    }
-
-    private boolean isUniqueSelector(String strategy, String selector) {
-        try {
-            List<WebElement> elements = switch (strategy) {
-                case "cssSelector" -> driver.findElements(By.cssSelector(selector));
-                case "xpath" -> driver.findElements(By.xpath(selector));
-                default -> List.of();
-            };
-            return elements.size() == 1;
-        } catch (Exception e) {
-            return false;
         }
     }
 
@@ -441,118 +383,3 @@ public class WebpageLocatorGenerator {
     }
 
 }
-
-/*
-    private String generateRelativeXPath2(WebElement element) {
-        try {
-            // JavaScript function to generate unique relative XPath
-            String jsScript = "function getXPath(element) {" +
-                    "    if (element.id !== '') {" +
-                    "        return 'id(\"' + element.id + '\")';" +
-                    "    }" +
-                    "    if (element === document.body) {" +
-                    "        return element.tagName.toLowerCase();" +
-                    "    }" +
-                    "    var ix = 0;" +
-                    "    var siblings = element.parentNode.childNodes;" +
-                    "    for (var i = 0; i < siblings.length; i++) {" +
-                    "        var sibling = siblings[i];" +
-                    "        if (sibling === element) {" +
-                    "            return getXPath(element.parentNode) + '/' + element.tagName.toLowerCase() + '[' + (ix + 1) + ']';" +
-                    "        }" +
-                    "        if (sibling.nodeType === 1 && sibling.tagName === element.tagName) {" +
-                    "            ix++;" +
-                    "        }" +
-                    "    }" +
-                    "};" +
-                    "return getXPath(arguments[0]);";
-
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            String xpath = (String) js.executeScript(jsScript, element);
-            System.out.println("Element: " + element.getTagName() + " - XPath: " + xpath);
-            // Clean up and verify
-//            if (xpath.startsWith("//")) {
-//                xpath = xpath.replaceAll("//+", "//"); // Normalize
-//                System.out.println("Xpath - "+xpath);
-//                System.out.println("is unique Xpath - "+isUniqueSelector("xpath", xpath));
-//                if (isUniqueSelector("xpath", xpath)) {
-//                    return xpath;
-//                }
-//            }
-            System.out.println("Xpath - "+xpath);
-            System.out.println("is unique Xpath - "+isUniqueSelector("xpath", xpath));
-            return xpath;
-        } catch (Exception e) {
-            // Fallback to basic relative
-            System.out.println("Xpath exception occurred");
-            return "//" + element.getTagName().toLowerCase() +
-                    "[contains(@class,'" + element.getAttribute("class") + "')]";
-        }
-//        return "XPath generation failed";
-    }
-
-    private String fallbackXPathOld(WebElement el) {
-        try {
-            String id = el.getAttribute("id");
-            if (id != null && !id.isEmpty()) {
-                return "//*[@id='" + id + "']";
-            }
-            return "//" + el.getTagName().toLowerCase() +
-                    "[contains(@class,'" + el.getAttribute("class") + "')]";
-        } catch (Exception e) {
-            return "//" + el.getTagName().toLowerCase();
-        }
-    }
- */
-/*
-    private String generateRelativeCSS(WebElement element) {
-        try {
-            // Use JavaScript to generate shortest unique CSS selector
-            JavascriptExecutor js = (JavascriptExecutor) driver;
-            String jsScript = """
-                function getUniqueCSSPath(el) {
-                    if (!(el instanceof Element)) return '';
-                    const path = [];
-                    while (el && el.nodeType === Node.ELEMENT_NODE) {
-                        let selector = el.nodeName.toLowerCase();
-                        if (el.id && document.getElementById(el.id)) {
-                            return '#' + el.id;
-                        }
-                        if (el.className && typeof el.className === 'string') {
-                            selector += '.' + el.className.trim().replace(/\\s+/g, '.');
-                        }
-                        let index = Array.from(el.parentNode.children).indexOf(el) + 1;
-                        if (el.parentNode.children.length > 1) {
-                            selector += ':nth-child(' + index + ')';
-                        }
-                        path.unshift(selector);
-                        el = el.parentNode;
-                        if (path.length > 5) break; // Limit depth
-                    }
-                    return path.join(' > ');
-                }
-                return getUniqueCSSPath(arguments[0]);
-                """;
-
-            Object result = js.executeScript(jsScript, element);
-            String cssPath = String.valueOf(result);
-
-            // Verify uniqueness
-            if (isUniqueSelector("cssSelector", cssPath)) {
-                return cssPath;
-            }
-        } catch (Exception e) {
-            // Fallback
-        }
-        return "CSS generation failed";
-    }
-
-    private String fallbackCSSOld(WebElement el) {
-        try {
-            return el.getTagName().toLowerCase() +
-                    "[@id='" + el.getAttribute("id") + "']";
-        } catch (Exception e) {
-            return el.getTagName().toLowerCase();
-        }
-    }
- */

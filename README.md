@@ -194,8 +194,8 @@ It helps automation engineers quickly identify reliable selectors without manual
 |-----------|
 | ![Create automation testcase](screenshots/AutomationToolCreateTestCase.png) |
 
-| Runnung Tasks |
-|-----------|
+| Running Tasks                                                             |
+|---------------------------------------------------------------------------|
 | ![View the list of test runs](screenshots/AutomationToolRunningTasks.png) |
 
 | Allure Report |
